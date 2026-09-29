@@ -1,0 +1,137 @@
+# Project Rules — Tomato Leaf Disease Detection with Attention Networks
+
+These rules apply to **every phase** of this project. Read them before making any change.
+If any rule conflicts with an instruction, **STOP and ask the user** instead of guessing.
+
+---
+
+## 1. Language and Runtime
+
+- Use Python 3.10+; this project currently uses Python 3.11.
+- Use the existing Conda environment at `.\venv` (Python 3.11.16).
+- Do not create another virtual environment.
+- Do not replace, recreate, or delete the existing `.\venv` environment, and do not
+  create `.venv/`, `env/`, `ENV/`, or similarly named alternatives.
+
+### 1.1 How to invoke Python (MANDATORY)
+
+- **When executing Python commands, always use `.\venv\python.exe` explicitly.**
+  Example: `.\venv\python.exe -m pytest tests -q`
+- **When installing Python packages, use `.\venv\python.exe -m pip`**
+  (never a bare `pip` / `pip3`), and only for dependencies already declared in
+  `requirements.txt`.
+- **Do not use the base Conda Python** — never call `python`, `python.exe` or `conda`'s
+  `(base)` interpreter for anything in this project.
+- **Do not use a system Python installation** — never call `py`, `python3`, `C:\Python*`,
+  the Microsoft Store Python, or any interpreter outside `.\venv`.
+- **Before Python-related verification, confirm that `.\venv\python.exe` reports Python
+  3.11.x**, for example:
+  `.\venv\python.exe -c "import sys; print(sys.executable); print(sys.version)"`
+  and record the reported interpreter path and version in the phase summary.
+- Jupyter notebooks must also run on a kernel registered from `.\venv` (see the README
+  "Environment Setup" section).
+- If `.\venv\python.exe` is missing, broken, or reports a version other than 3.11.x,
+  **STOP and ask the user** — do not silently substitute another interpreter.
+
+## 2. Libraries
+
+- Use **PyTorch** and **torchvision** for deep learning.
+- Use **scikit-learn** for splitting and evaluation-related utilities.
+- Use **PyYAML** for configuration.
+- Use **Streamlit** for the demo application.
+- This project is **PyTorch-only**: never install or import TensorFlow / Keras.
+- Prefer packages already declared in `requirements.txt`. If a new dependency is
+  genuinely required, declare it in `requirements.txt` first and tell the user.
+- Do not install packages with ad-hoc `pip install` commands that bypass
+  `requirements.txt`.
+- Do not pin CUDA-specific PyTorch builds in `requirements.txt`; the correct PyTorch
+  wheel depends on the user's hardware (CUDA vs CPU) and must be documented, not guessed.
+
+## 3. Configuration
+
+- Do not hardcode hyperparameters in Python source files.
+- All configurable hyperparameters must live in `configs/config.yaml`.
+- Load configuration through one shared config-loading path; do not scatter
+  `yaml.safe_load` calls across the codebase.
+- Keep YAML keys grouped by concern, keep the file valid, and add short comments for
+  new keys.
+
+## 4. Code Quality
+
+- Use type hints for functions and important class methods.
+- Add useful docstrings to modules, classes, and non-trivial functions.
+- Set and use reproducible random seeds (read from `configs/config.yaml`) for Python,
+  NumPy and PyTorch.
+- Prefer clear, maintainable, testable code over unnecessary complexity.
+
+## 5. Data Rules
+
+- Never download datasets automatically.
+- The PlantVillage dataset will be supplied manually by the user.
+- Never modify or delete the user's raw dataset; treat `data/raw/` as strictly read-only.
+- Do not generate, re-label, rewrite, or preprocess files inside `data/raw/`.
+- Keep `data/` out of Git.
+
+## 6. Training Rules
+
+- Never perform full model training automatically.
+- For smoke tests, use only a tiny subset and at most 1 epoch.
+- Before any long training run, stop and ask the user for explicit permission.
+- Never silently change the specified architecture.
+- Never silently change the specified dataset split requirements.
+
+## 7. Version Control
+
+- Keep `data/` out of Git.
+- Keep `checkpoints/` out of Git.
+- Keep `.venv/` and `venv/` out of Git.
+- Do not ignore source code, `configs/config.yaml`, `tests/`, `notebooks/`, `README.md`
+  or `requirements.txt`.
+
+## 8. Workflow and Phases
+
+- Build the project in small, isolated phases.
+- Explain what each file does after modifying it.
+- Do not start the next phase automatically.
+- Stop at the end of every phase, summarize, and wait for the user.
+- Stop and ask the user if a requirement is ambiguous or contradictory.
+- Do not modify files outside this project workspace.
+
+## 9. Locked Architecture (do not change without asking)
+
+```
+RGB tomato leaf image (224x224)
+  -> preprocessing / ImageNet normalization
+  -> pretrained CNN backbone (EfficientNet-B0 by default; configurable later to ResNet50 / MobileNetV3)
+  -> attention module (baseline / SE / CBAM, configurable later)
+  -> refined features
+  -> global average pooling
+  -> Dense(256) + ReLU
+  -> Dropout(0.4)
+  -> Dense(10)
+  -> prediction + confidence
+```
+
+## 10. Locked CBAM Specification
+
+- Channel attention **first**, spatial attention **second**.
+- Channel attention: global average pool + global max pool -> shared MLP with
+  reduction ratio **16** -> sum -> sigmoid -> multiply.
+- Spatial attention: channel-wise average/max pooling -> concatenate -> **7x7**
+  convolution -> sigmoid -> multiply.
+- CBAM is inserted **after the last backbone feature block**, with the insertion stage
+  configurable.
+
+## 11. Locked Dataset Split
+
+- PlantVillage tomato subset, **10 classes**.
+- Train / validation / test split = **0.70 / 0.15 / 0.15** (stratified).
+- Exact image duplicates must be detected (content hashing) **before** splitting so that
+  duplicate images never land in different splits.
+
+## 12. Phase Status
+
+- **Phase 1 (current, complete): project scaffolding only** — directories, `.clinerules`,
+  `.gitignore`, `requirements.txt`, `configs/config.yaml`, `README.md` skeleton.
+- Later phases (data pipeline, model, training, evaluation, Grad-CAM, Streamlit) are
+  **not implemented yet** and must not be started automatically.

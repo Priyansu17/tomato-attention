@@ -1,0 +1,250 @@
+# =============================================================================
+# Tomato Leaf Disease Detection with Attention Networks
+# configs/config.yaml — single source of truth for all hyperparameters.
+#
+# STATUS: Phase 1 — configuration SCHEMA + planned defaults only.
+#         The data pipeline, model, training loop, evaluation, Grad-CAM and the
+#         Streamlit app are NOT implemented yet, so nothing reads this file yet.
+#
+# RULES
+#   * Python sources must never hardcode hyperparameters — read them from here.
+#   * Keep values consistent with the locked architecture and split rules in
+#     `.clinerules`. Do not change the architecture here without asking.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# project — run identity / bookkeeping
+# -----------------------------------------------------------------------------
+project:
+  name: tomato-attention
+  description: >-
+    Tomato leaf disease detection using a pretrained CNN backbone followed by a
+    configurable attention module (baseline / SE / CBAM).
+  version: 0.1.0
+  phase: 1
+  tags: [plantvillage, tomato, attention, cbam, pytorch]
+
+# -----------------------------------------------------------------------------
+# seed — reproducibility
+# -----------------------------------------------------------------------------
+seed:
+  value: 42                # fixed, reproducible seed for python / numpy / torch
+  deterministic: true      # enable deterministic algorithms where supported
+  cudnn_benchmark: false   # keep false while deterministic is true
+
+# -----------------------------------------------------------------------------
+# data — dataset layout, splitting and DataLoader behaviour
+# -----------------------------------------------------------------------------
+data:
+  root: data/raw           # user-supplied PlantVillage tomato subset (READ-ONLY)
+  image_size: 224          # locked architecture input size
+  num_classes: 10
+  class_names:             # expected PlantVillage folder names (must match exactly)
+    - Tomato___Bacterial_spot
+    - Tomato___Early_blight
+    - Tomato___Late_blight
+    - Tomato___Leaf_Mold
+    - Tomato___Septoria_leaf_spot
+    - Tomato___Spider_mites Two-spotted_spider_mite
+    - Tomato___Target_Spot
+    - Tomato___Tomato_Yellow_Leaf_Curl_Virus
+    - Tomato___Tomato_mosaic_virus
+    - Tomato___healthy
+  # Stratified split ratios — MUST sum to 1.0 (locked: 0.70 / 0.15 / 0.15)
+  split:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+    stratify: true
+  # Groups exact duplicates before splitting so a duplicate image can never
+  # appear in more than one split. NOTE: exact hashing does not detect every
+  # possible near-duplicate (re-crops, re-compression, RESIZE...).
+  duplicate_check:
+    enabled: true
+    method: sha256
+  loader:
+    batch_size: 32
+    eval_batch_size: 64
+    num_workers: 4
+    pin_memory: true
+    drop_last: true
+    shuffle_train: true
+
+# -----------------------------------------------------------------------------
+# model — backbone and classification head (locked architecture)
+# -----------------------------------------------------------------------------
+model:
+  backbone: efficientnet_b0    # efficientnet_b0 | resnet50 | mobilenet_v3_large
+  pretrained: true             # ImageNet weights
+  num_classes: 10
+  global_pool: avg             # global average pooling before the head
+  head:
+    hidden_dim: 256            # Dense(256)
+    activation: relu           # ReLU
+    dropout: 0.4               # Dropout(0.4)
+  input:
+    channels: 3                # RGB
+    image_size: 224
+  normalization:               # ImageNet mean/std
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+# -----------------------------------------------------------------------------
+# attention — configurable attention module
+# -----------------------------------------------------------------------------
+attention:
+  type: cbam                   # baseline | se | cbam
+  insertion_stage: last        # last | stage4 | stage3 | stage2 (backbone block)
+  cbam:
+    channel_first: true        # locked: channel attention, then spatial attention
+    channel:
+      reduction_ratio: 16      # shared MLP reduction ratio
+      pooling: [avg, max]      # global average pool + global max pool
+    spatial:
+      kernel_size: 7           # 7x7 convolution on concatenated pooled maps
+      pooling: [avg, max]      # channel-wise average + max pooling
+  se:
+    reduction_ratio: 16
+
+# -----------------------------------------------------------------------------
+# training — loop, loss and checkpointing
+# -----------------------------------------------------------------------------
+training:
+  batch_size: 32               # mirrors data.loader.batch_size for convenience
+  max_epochs: 40
+  device: auto                 # auto | cpu | cuda | mps
+  mixed_precision: true        # torch.cuda.amp when running on CUDA
+  grad_clip_norm: 1.0
+  log_interval: 10             # steps between progress logs
+  loss:
+    name: cross_entropy
+    label_smoothing: 0.1
+  # Phase A: train the head only; Phase B: unfreeze and fine-tune the backbone
+  freeze_backbone:
+    enabled: true
+    epochs: 5                  # epochs with the backbone frozen
+  # Optional EMA of weights is not used in the planned baseline
+  early_stopping:
+    enabled: true
+    monitor: val_loss          # val_loss | val_f1_macro
+    mode: min                  # min | max
+    patience: 7
+    min_delta: 0.0005
+  checkpoint:
+    monitor: val_loss
+    mode: min
+    save_best_only: true
+    filename: best_model.pt
+    save_last: true
+
+# -----------------------------------------------------------------------------
+# optimizer — AdamW with a lower learning rate for the fine-tuned backbone
+# -----------------------------------------------------------------------------
+optimizer:
+  name: adamw
+  learning_rate: 1.0e-4          # head / new layers
+  backbone_learning_rate: 1.0e-5 # pretrained backbone (lower fine-tuning LR)
+  weight_decay: 1.0e-4
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+
+# -----------------------------------------------------------------------------
+# scheduler — learning-rate schedule
+# -----------------------------------------------------------------------------
+scheduler:
+  name: cosine_annealing          # none | cosine_annealing | step | plateau
+  eta_min: 1.0e-6                 # cosine_annealing floor
+  warmup_epochs: 3                # linear warmup before the main schedule
+  step_size: 10                   # used by the `step` scheduler
+  gamma: 0.1                      # used by the `step` scheduler
+  plateau:
+    factor: 0.5                   # used by the `plateau` scheduler
+    patience: 3
+
+# -----------------------------------------------------------------------------
+# augmentation — torchvision-style transforms (implemented in a later phase)
+# -----------------------------------------------------------------------------
+augmentation:
+  train:
+    random_resized_crop:
+      enabled: true
+      scale: [0.8, 1.0]
+      ratio: [0.9, 1.111]
+    horizontal_flip:
+      enabled: true
+      p: 0.5
+    vertical_flip:
+      enabled: false
+      p: 0.5
+    rotation:
+      enabled: true
+      degrees: 15
+    color_jitter:
+      enabled: true
+      brightness: 0.2
+      contrast: 0.2
+      saturation: 0.2
+      hue: 0.05
+    random_erasing:
+      enabled: false
+      p: 0.25
+  eval:                           # validation / test / inference
+    resize: 256
+    center_crop: 224
+
+# -----------------------------------------------------------------------------
+# evaluation — metrics and report artifacts
+# -----------------------------------------------------------------------------
+evaluation:
+  split: test                     # val | test
+  metrics:
+    - accuracy
+    - precision_macro
+    - recall_macro
+    - f1_macro
+    - roc_auc_ovr_macro
+  confusion_matrix:
+    enabled: true
+    normalize: true
+  classification_report:
+    enabled: true
+    digits: 4
+  save_predictions: true          # per-sample predictions for error analysis
+  figure_format: png
+  figure_dpi: 150
+
+# -----------------------------------------------------------------------------
+# gradcam — explainability (implemented in a later phase)
+# -----------------------------------------------------------------------------
+gradcam:
+  enabled: true
+  target_layer: auto              # auto -> last backbone feature block
+  colormap: jet
+  alpha: 0.5                      # overlay opacity
+  num_samples: 8                  # images per generated grid
+  methods: [gradcam, gradcam_plus_plus]  # only gradcam is used in the baseline
+
+# -----------------------------------------------------------------------------
+# paths — generated artifacts (all ignored by Git except the dataset root)
+# NOTE: the dataset root itself is declared once, under `data.root`.
+# -----------------------------------------------------------------------------
+paths:
+  checkpoints_dir: checkpoints
+  results_dir: results
+  logs_dir: results/logs
+  figures_dir: results/figures
+  gradcam_dir: results/gradcam
+  predictions_dir: results/predictions
+
+# -----------------------------------------------------------------------------
+# smoke_test — tiny, fast sanity run (never a real training run)
+# -----------------------------------------------------------------------------
+smoke_test:
+  enabled: true
+  max_epochs: 1                   # at most 1 epoch
+  subset_size: 48                 # very small number of images per split
+  batch_size: 8
+  num_workers: 0                  # avoids worker issues on Windows
+  log_interval: 5
+  shuffle: false
+

@@ -1,0 +1,50 @@
+# =============================================================================
+# requirements.txt — Tomato Leaf Disease Detection with Attention Networks
+# Phase 1. PyTorch-only (TensorFlow / Keras are intentionally NOT used).
+#
+# Target runtime: the existing Conda environment at .\venv (Python 3.11).
+# Python 3.11 is still supported by every package below, so these constraints
+# stay portable. Bounds are intentionally loose (no arbitrary exact pins) so pip
+# can pick a mutually compatible set.
+#
+# IMPORTANT — PyTorch installation depends on your hardware:
+#   The generic `torch`/`torchvision` entries below may install a CPU-only or a
+#   bundled-CUDA build depending on platform. For an explicit CUDA/CPU build,
+#   install PyTorch FIRST from the official index, then install the rest:
+#     CPU  : pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#     CUDA : pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+#   (Pick the CUDA tag matching your driver; see https://pytorch.org/get-started/locally/)
+#   After that, `pip install -r requirements.txt` will see the satisfied
+#   constraints and will not replace your chosen PyTorch build.
+# =============================================================================
+
+# --- Deep learning core ------------------------------------------------------
+torch>=2.2,<3.0
+torchvision>=0.17,<1.0
+
+# --- Scientific / data handling ---------------------------------------------
+numpy>=1.26,<3.0
+pandas>=2.1,<3.0
+scikit-learn>=1.4,<2.0
+Pillow>=10.2,<13.0
+
+# --- Configuration -----------------------------------------------------------
+PyYAML>=6.0,<7.0
+
+# --- Visualization (EDA, metrics, confusion matrices, Grad-CAM grids) --------
+matplotlib>=3.8,<4.0
+seaborn>=0.13,<1.0
+
+# --- Progress reporting ------------------------------------------------------
+tqdm>=4.66,<5.0
+
+# --- Demo application --------------------------------------------------------
+streamlit>=1.32,<2.0
+
+# --- Jupyter support for VS Code notebooks (same .\venv environment) --------
+jupyterlab>=4.1,<5.0
+ipykernel>=6.29,<8.0
+ipywidgets>=8.1,<9.0
+
+# --- Development / testing (not required to run the app or notebooks) --------
+pytest>=8.0,<9.0

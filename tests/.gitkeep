@@ -1,0 +1,3 @@
+# Placeholder so the tests/ directory exists in Git.
+# pytest test modules will be added in later phases. Planned smoke test:
+#   .\venv\python.exe -m pytest tests -q

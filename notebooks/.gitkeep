@@ -1,0 +1,4 @@
+# Placeholder so the notebooks/ directory exists in Git.
+# Jupyter notebooks for EDA / experiments will be added in later phases and will
+# run on the existing environment at .\venv (register the kernel once with:
+#   .\venv\python.exe -m ipykernel install --user --name tomato-attention).
