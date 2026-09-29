@@ -126,18 +126,21 @@ Implementation status: **not implemented yet** (Phase 3).
 - **PlantVillage tomato subset**, 10 classes.
 - Class folder names expected by default:
 
-| # | Class folder |
-|---|--------------|
-| 1 | `Tomato___Bacterial_spot` |
-| 2 | `Tomato___Early_blight` |
-| 3 | `Tomato___Late_blight` |
-| 4 | `Tomato___Leaf_Mold` |
-| 5 | `Tomato___Septoria_leaf_spot` |
-| 6 | `Tomato___Spider_mites Two-spotted_spider_mite` |
-| 7 | `Tomato___Target_Spot` |
-| 8 | `Tomato___Tomato_Yellow_Leaf_Curl_Virus` |
-| 9 | `Tomato___Tomato_mosaic_virus` |
-| 10 | `Tomato___healthy` |
+| label id | # | Class folder |
+|---|---|---|
+| 0 | 1 | `Tomato___Bacterial_spot` |
+| 1 | 2 | `Tomato___Early_blight` |
+| 2 | 3 | `Tomato___Late_blight` |
+| 3 | 4 | `Tomato___Leaf_Mold` |
+| 4 | 5 | `Tomato___Septoria_leaf_spot` |
+| 5 | 6 | `Tomato___Spider_mites Two-spotted_spider_mite` |
+| 6 | 7 | `Tomato___Target_Spot` |
+| 7 | 8 | `Tomato___Tomato_Yellow_Leaf_Curl_Virus` |
+| 8 | 9 | `Tomato___Tomato_mosaic_virus` |
+| 9 | 10 | `Tomato___healthy` |
+
+Label ids (used by the model, checkpoints and reports) come **only** from the row order of
+`data.class_names` above - never from filesystem, alphabetical or tool-specific sort order.
 
 - The dataset is supplied **manually by the user**. The code will never download it.
 - `data/raw/` is treated as **strictly read-only**: nothing is written, re-labelled or

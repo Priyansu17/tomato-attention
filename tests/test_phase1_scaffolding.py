@@ -174,7 +174,7 @@ def _is_ignored(relative_path: str) -> bool:
     parts = normalized.split("/")
     for pattern in _ignore_patterns():
         if pattern.endswith("/"):  # directory pattern
-            if pattern.rstrip("/") in parts:
+            if pattern.lstrip("/").rstrip("/") in parts:
                 return True
         elif (
             fnmatch.fnmatch(normalized, pattern)
@@ -297,7 +297,7 @@ def test_config_parses_with_pyyaml_and_has_sections(config: dict) -> None:
     [
         ("data.image_size", 224),
         ("data.num_classes", 10),
-        ("data.loader.batch_size", 32),
+        ("data.loader.batch_size", 16),
         ("training.max_epochs", 40),
         ("training.loss.label_smoothing", 0.1),
         ("optimizer.learning_rate", 1e-4),

@@ -62,8 +62,17 @@ data:
   duplicate_check:
     enabled: true
     method: sha256
+  # Case-insensitive image extensions discovered under each class folder.
+  extensions: [.jpg, .jpeg, .png]
+  # SHA-256 content hashing used by the duplicate check (implemented in Phase 2B).
+  hashing:
+    chunk_size: 1048576
+  # Deterministic stratified group split (implemented in Phase 2B).
+  splitting:
+    tolerance: 0.01
+    persist: true
   loader:
-    batch_size: 32
+    batch_size: 16
     eval_batch_size: 64
     num_workers: 4
     pin_memory: true
@@ -110,10 +119,14 @@ attention:
 # training — loop, loss and checkpointing
 # -----------------------------------------------------------------------------
 training:
-  batch_size: 32               # mirrors data.loader.batch_size for convenience
+  batch_size: 16               # mirrors data.loader.batch_size (D3: 4 GB VRAM)
   max_epochs: 40
   device: auto                 # auto | cpu | cuda | mps
   mixed_precision: true        # torch.cuda.amp when running on CUDA
+  # Gradient accumulation: effective batch = batch_size * grad_accum_steps.
+  grad_accum_steps: 2
+  # Loss class weighting: none | balanced (none, per decision D5).
+  class_weights: none
   grad_clip_norm: 1.0
   log_interval: 10             # steps between progress logs
   loss:
@@ -197,6 +210,7 @@ augmentation:
 # -----------------------------------------------------------------------------
 evaluation:
   split: test                     # val | test
+  top_k: 1                        # top-k accuracy reported alongside top-1
   metrics:
     - accuracy
     - precision_macro
@@ -219,6 +233,7 @@ evaluation:
 gradcam:
   enabled: true
   target_layer: auto              # auto -> last backbone feature block
+  target: post_attention           # post_attention | pre_attention (decision D10)
   colormap: jet
   alpha: 0.5                      # overlay opacity
   num_samples: 8                  # images per generated grid
@@ -235,6 +250,7 @@ paths:
   figures_dir: results/figures
   gradcam_dir: results/gradcam
   predictions_dir: results/predictions
+  manifests_dir: results/manifests   # dataset index / hashes / splits (git-ignored)
 
 # -----------------------------------------------------------------------------
 # smoke_test — tiny, fast sanity run (never a real training run)
