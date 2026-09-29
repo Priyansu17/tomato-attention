@@ -142,6 +142,8 @@ Implementation status: **not implemented yet** (Phase 3).
 - The dataset is supplied **manually by the user**. The code will never download it.
 - `data/raw/` is treated as **strictly read-only**: nothing is written, re-labelled or
   modified there.
+- **Local status:** all 10 class folders are present under `data/raw/` (verified against
+  `data.class_names`); the stratified split itself is created in memory in Phase 2.
 
 **Split:** stratified 0.70 / 0.15 / 0.15 (train / validation / test), drive purely by
 `data.split` in the config.
@@ -197,10 +199,12 @@ tomato-attention/
 ├── .gitignore                  # data/, checkpoints/, venv/, caches ignored
 ├── requirements.txt            # core dependencies (portable, PyTorch-only)
 ├── README.md                   # this file
+├── .vscode/
+│   └── settings.json           # pins the interpreter to .\venv\python.exe
 ├── configs/
 │   └── config.yaml             # single source of truth for hyperparameters
 ├── data/
-│   └── raw/                    # dataset root (empty until the user adds data)
+│   └── raw/                    # user-supplied PlantVillage dataset (READ-ONLY)
 ├── checkpoints/                # saved model weights (git-ignored)
 ├── notebooks/                  # Jupyter notebooks (same .\venv kernel)
 ├── src/
@@ -208,7 +212,9 @@ tomato-attention/
 │   └── models/
 │       └── __init__.py         # backbone / attention / net modules go here later
 ├── app/                        # Streamlit demo goes here later
-└── tests/                      # pytest tests go here later
+└── tests/
+    ├── .gitkeep
+    └── test_phase1_scaffolding.py   # Phase 1 acceptance checks (pytest)
 ```
 
 ---
@@ -431,16 +437,21 @@ Planned command:
 
 ## Testing
 
-Tests live in `tests/` (pytest). Planned coverage: config loading and schema validation,
-dataset discovery and duplicate hashing, split ratios/straddling, attention module shapes
-(channel/spatial attention tensors), and a forward-pass shape check for the full network.
+Tests live in `tests/` (pytest) and must always be run with the project environment.
+
+**Implemented now (Phase 1):** `tests/test_phase1_scaffolding.py` covers the directory layout,
+`.clinerules` contents, `requirements.txt` dependencies (PyTorch-only), `.gitignore` semantics,
+PyYAML parsing plus every important config default, the read-only `data/raw/` contract, the
+class-folder match against `data.class_names`, the absence of out-of-scope implementation
+files, and the must-run-on-venv rule.
+
+**Planned (later phases):** dataset discovery and duplicate hashing, split ratios /
+straddling, attention module tensor shapes (channel + spatial), and a forward-pass shape
+check for the full network.
 
 ```powershell
-# Planned, once tests exist (Phase 2+)
 .\venv\python.exe -m pytest tests -q
 ```
-
-Phase 1 verification instead consists of the scaffolding checks listed below.
 
 ---
 
@@ -458,7 +469,8 @@ Phase 1 acceptance checks and their verified outcomes are recorded here:
 | F. YAML contains all required sections and key defaults | ✅ |
 | G. `.\venv\python.exe` is Python 3.11.x | ✅ (3.11.16) |
 | H. No additional virtual environment created | ✅ |
-| I. No dataset downloaded | ✅ |
+| I. No dataset downloaded by the project; dataset supplied manually | ✅ (user placed the PlantVillage folders in `data/raw/`; nothing is written there) |
+| I2. Supplied class folders match `data.class_names` | ✅ 10/10 folders match exactly |
 | J. No full training performed | ✅ |
 | K. Dependency check was lightweight/import-oriented only | ✅ |
 | M. Tests run on `.\venv\python.exe` (project venv), never base/system Python | ✅ enforced by `test_running_on_project_venv_interpreter` |

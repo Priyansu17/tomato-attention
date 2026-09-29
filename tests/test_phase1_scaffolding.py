@@ -119,6 +119,41 @@ DEFERRED_IMPLEMENTATION_FILES = (
 )
 
 
+# Files the project pipeline must never create inside the read-only dataset directory.
+PIPELINE_ARTIFACT_PATTERNS = (
+    "splits*.json",
+    "splits*.csv",
+    "manifest*.csv",
+    "hashes*.json",
+    "*.npy",
+    "*.npz",
+    "*.pt",
+    "*.pth",
+    "*.ckpt",
+    "*.pkl",
+    "*.parquet",
+)
+SPLIT_DIR_NAMES = ("train", "val", "valid", "validation", "test")
+
+
+def _top_level_class_dirs() -> set[str]:
+    """Return the class folder names discovered under ``data/raw/`` (read-only).
+
+    Supports both the flat layout (``data/raw/<class>/``) and the split-aware
+    layout (``data/raw/<split>/<class>/``) described in the README.
+    """
+    data_raw = PROJECT_ROOT / "data" / "raw"
+    top_level = {path.name for path in data_raw.iterdir() if path.is_dir()}
+    if not top_level & set(SPLIT_DIR_NAMES):
+        return top_level
+    nested: set[str] = set()
+    for split_name in SPLIT_DIR_NAMES:
+        split_dir = data_raw / split_name
+        if split_dir.is_dir():
+            nested |= {path.name for path in split_dir.iterdir() if path.is_dir()}
+    return nested
+
+
 def _read_text(relative_path: str) -> str:
     """Return the UTF-8 contents of a project-relative file."""
     return (PROJECT_ROOT / relative_path).read_text(encoding="utf-8")
@@ -324,10 +359,47 @@ def test_deferred_implementation_files_do_not_exist() -> None:
     assert not present, f"out-of-scope implementation files present: {present}"
 
 
-def test_no_dataset_was_downloaded() -> None:
-    """Check I: ``data/raw/`` contains no dataset files."""
-    leftovers = sorted(path.name for path in (PROJECT_ROOT / "data" / "raw").iterdir())
-    assert not leftovers, f"unexpected dataset content: {leftovers}"
+def test_data_raw_is_read_only_no_pipeline_artifacts() -> None:
+    """Check I: the dataset is user-supplied and ``data/raw/`` is never written to.
+
+    The dataset is never downloaded by this project - it is placed in ``data/raw/``
+    manually. This test enforces the read-only contract instead of requiring an
+    empty directory: only class folders holding images may exist, and no split
+    files, hashes, caches or tensors may ever be produced inside the dataset root.
+    """
+    data_raw = PROJECT_ROOT / "data" / "raw"
+    assert data_raw.is_dir(), "data/raw/ is missing"
+
+    violations: list[str] = []
+    for path in data_raw.rglob("*"):
+        if path.is_dir():
+            continue
+        if path.parent == data_raw:
+            violations.append(f"{path.name} (stray file directly in data/raw/)")
+        elif any(fnmatch.fnmatch(path.name.lower(), p) for p in PIPELINE_ARTIFACT_PATTERNS):
+            violations.append(f"{path.name} (pipeline artifact)")
+    assert not violations, (
+        "data/raw/ must stay read-only; unexpected entries: " + str(violations[:10])
+    )
+
+
+def test_dataset_class_folders_match_config(config: dict) -> None:
+    """Check I: the supplied class folders match ``data.class_names`` exactly.
+
+    Skipped when the dataset has not been supplied yet, so the suite stays usable
+    before the user adds PlantVillage to ``data/raw/``.
+    """
+    found = _top_level_class_dirs()
+    if not found:
+        pytest.skip("dataset not supplied yet - place PlantVillage folders in data/raw/")
+
+    expected = set(config["data"]["class_names"])
+    assert found == expected, (
+        "class folder / config mismatch\n"
+        f"  missing folders:    {sorted(expected - found)}\n"
+        f"  unexpected folders: {sorted(found - expected)}"
+    )
+    assert len(found) == config["data"]["num_classes"] == 10
 
 
 def test_no_trained_checkpoints_exist() -> None:
