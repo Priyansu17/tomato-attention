@@ -33,19 +33,33 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "slow: comparatively slow test")
 
 
-def write_image(path: Path, size: tuple[int, int] = (8, 8), mode: str = "RGB") -> Path:
+def write_image(path: Path, size: tuple[int, int] = (8, 8), mode: str = "RGB",
+                color: int | tuple[int, int, int] | None = None) -> Path:
     """Write a tiny valid image file and return its path."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    Image.new(mode, size).save(path)
+    Image.new(mode, size, color if color is not None else 0).save(path)
     return path
 
 
+_IMAGE_COUNTER = [0]
+
+
 def make_dataset(root: Path, spec: dict[str, int], size: tuple[int, int] = (8, 8),
-                 extension: str = ".png") -> Path:
-    """Create ``root/<class>/`` folders with ``spec[class]`` synthetic images each."""
+                 extension: str = ".png", distinct: bool = True) -> Path:
+    """Create ``root/<class>/`` folders with ``spec[class]`` synthetic images each.
+
+    Images are byte-distinct by default so only deliberate copies ever form duplicate
+    groups; pass ``distinct=False`` for byte-identical fixtures.
+    """
     for class_name, count in spec.items():
         for index in range(count):
-            write_image(root / class_name / f"{class_name}_{index}{extension}", size=size)
+            color = None
+            if distinct:
+                _IMAGE_COUNTER[0] += 1
+                value = _IMAGE_COUNTER[0]
+                color = ((value * 37) % 256, (value * 53) % 256, (value * 91) % 256)
+            write_image(root / class_name / f"{class_name}_{index}{extension}",
+                        size=size, color=color)
     return root
 
 
@@ -101,3 +115,21 @@ def real_dataset_root(real_config) -> Path:
     if not root.is_dir() or not any(path.is_dir() for path in root.iterdir()):
         pytest.skip("user-supplied dataset not present in data/raw")
     return root
+
+
+@pytest.fixture(scope="session")
+def real_hashes(real_config, real_dataset_root):
+    """Hashes for the real dataset, loaded from ``results/manifests/hashes.csv``.
+
+    Falls back to hashing the dataset (slow) when the manifest has not been built yet,
+    so the suite always has real data to work with.
+    """
+    from src.data.discovery import build_index
+    from src.data.hashing import assign_group_ids, hash_records, load_hashes
+    from src.utils.paths import manifests_dir
+
+    manifest = manifests_dir(real_config) / "hashes.csv"
+    if manifest.is_file():
+        return load_hashes(manifest)
+    records = build_index(real_config)
+    return assign_group_ids(hash_records(records, real_config, real_dataset_root))
