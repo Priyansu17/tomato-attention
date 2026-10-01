@@ -21,7 +21,7 @@ project:
     Tomato leaf disease detection using a pretrained CNN backbone followed by a
     configurable attention module (baseline / SE / CBAM).
   version: 0.1.0
-  phase: 1
+  phase: 2
   tags: [plantvillage, tomato, attention, cbam, pytorch]
 
 # -----------------------------------------------------------------------------

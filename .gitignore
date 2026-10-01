@@ -34,6 +34,8 @@ __pycache__/
 
 # --- Testing / typing / linting caches ---------------------------------------
 .pytest_cache/
+# Local console logs (pytest/live-run captures; never contain dataset data).
+logs/
 .mypy_cache/
 .ruff_cache/
 .coverage

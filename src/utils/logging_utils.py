@@ -44,6 +44,7 @@ def log_config_summary(cfg: Mapping[str, Any], logger: logging.Logger) -> None:
     logger.info("config fingerprint: %s", config_fingerprint(cfg))
     for key in (
         "project.name",
+        "project.phase",
         "seed.value",
         "data.root",
         "data.image_size",
