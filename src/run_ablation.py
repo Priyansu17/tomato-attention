@@ -1,9 +1,9 @@
-"""Resumable ablation runner: trains baseline -> SE -> CBAM sequentially.
+﻿"""Resumable ablation runner: trains baseline -> SE -> CBAM sequentially.
 
-Usage (smoke test — safe to run any time):
+Usage (smoke test â€” safe to run any time):
     python -m src.run_ablation --smoke-test
 
-Usage (full training — only with explicit user approval):
+Usage (full training â€” only with explicit user approval):
     python -m src.run_ablation
 
 Resume behaviour:
@@ -11,8 +11,8 @@ Resume behaviour:
     skipped.  Delete the file to force a re-run.
 
 Log files:
-    outputs/logs/ablation_<variant>.log  — stdout + stderr for each variant
-    outputs/logs/ablation_summary.log    — one-liner per variant when done
+    outputs/logs/ablation_<variant>.log  â€” stdout + stderr for each variant
+    outputs/logs/ablation_summary.log    â€” one-liner per variant when done
 """
 
 from __future__ import annotations
@@ -57,6 +57,21 @@ def _ensure_dirs() -> None:
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+# Main log file for the runner's own output (set by main())
+_runner_log_fh = None
+
+
+def _log(msg: str) -> None:
+    """Write msg to stdout and to the runner's own log file."""
+    print(msg, flush=True)
+    if _runner_log_fh is not None:
+        try:
+            _runner_log_fh.write(msg + "\n")
+            _runner_log_fh.flush()
+        except Exception:
+            pass
+
+
 def _run_step(
     cmd: list[str],
     label: str,
@@ -65,61 +80,46 @@ def _run_step(
 ) -> int:
     """Run *cmd*, tee output to *log_file*, return exit code.
 
-    Uses raw byte I/O on stdout so Windows CP1252 consoles do not crash on
-    non-ASCII characters.  Sets PYTHONUTF8=1 in the child process environment
-    so the child itself emits clean UTF-8.
+    Uses PYTHONUTF8=1 in the child env and text mode with utf-8 + replace so
+    the runner is safe on Windows CP1252 consoles and in headless/detached mode.
     """
     import os
 
-    mode = "ab" if append else "wb"
-    header = (
-        f"\n{'='*70}\n{label}\ncmd: {' '.join(cmd)}\n{'='*70}\n"
-    ).encode("utf-8")
+    mode = "a" if append else "w"
+    header = f"\n{'='*70}\n{label}\ncmd: {' '.join(cmd)}\n{'='*70}\n"
 
-    _print_ascii(f"\n{'='*70}")
-    _print_ascii(f"[{datetime.now().strftime('%H:%M:%S')}] {label}")
-    _print_ascii(f"  cmd : {' '.join(cmd)}")
-    _print_ascii(f"  log : {log_file}")
-    _print_ascii(f"{'='*70}")
+    _log(f"\n{'='*70}")
+    _log(f"[{datetime.now().strftime('%H:%M:%S')}] {label}")
+    _log(f"  cmd : {' '.join(cmd)}")
+    _log(f"  log : {log_file}")
+    _log(f"{'='*70}")
 
     # Propagate UTF-8 mode to the child process
     child_env = os.environ.copy()
     child_env["PYTHONUTF8"] = "1"
 
-    with log_file.open(mode) as fh:
+    with log_file.open(mode, encoding="utf-8", errors="replace") as fh:
         fh.write(header)
         fh.flush()
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
             env=child_env,
         )
-        for raw_line in proc.stdout:
-            # Write raw bytes to log file
-            fh.write(raw_line)
+        for line in proc.stdout:
+            fh.write(line)
             fh.flush()
-            # Write safely to console (replace unencodable chars)
-            try:
-                sys.stdout.buffer.write(raw_line)
-                sys.stdout.buffer.flush()
-            except Exception:
-                sys.stdout.write(raw_line.decode("utf-8", errors="replace"))
-                sys.stdout.flush()
+            # Also mirror to our own log / stdout
+            _log(line.rstrip())
         proc.wait()
         rc = proc.returncode
-        fh.write(f"\n[exit code: {rc}]\n".encode("utf-8"))
+        fh.write(f"\n[exit code: {rc}]\n")
 
     return rc
-
-
-def _print_ascii(msg: str) -> None:
-    """Print ``msg`` safely to stdout, replacing non-ASCII chars."""
-    try:
-        sys.stdout.buffer.write((msg + "\n").encode("utf-8"))
-        sys.stdout.buffer.flush()
-    except Exception:
-        print(msg.encode("ascii", errors="replace").decode("ascii"))
 
 
 def _append_summary(line: str) -> None:
@@ -133,6 +133,8 @@ def _append_summary(line: str) -> None:
 # ---------------------------------------------------------------------------
 
 def main(argv: list[str] | None = None) -> int:
+    global _runner_log_fh
+
     parser = argparse.ArgumentParser(
         description=(
             "Resumable ablation runner: trains baseline, SE and CBAM with "
@@ -152,11 +154,26 @@ def main(argv: list[str] | None = None) -> int:
         choices=VARIANTS,
         help="Which variants to run (default: all three).",
     )
+    parser.add_argument(
+        "--log-file", default=None,
+        help=(
+            "Path for runner's own log (default: outputs/ablation_run.log). "
+            "Set to '-' to suppress."
+        ),
+    )
     args = parser.parse_args(argv)
 
     _ensure_dirs()
 
-    python = sys.executable  # always use the same interpreter as this script
+    # Open the runner's own log file (so it works in detached/headless mode)
+    log_file_path = args.log_file or str(OUTPUTS_DIR / "ablation_run.log")
+    if log_file_path != "-":
+        try:
+            _runner_log_fh = open(log_file_path, "a", encoding="utf-8", errors="replace")  # noqa: WPS515
+        except Exception as exc:
+            print(f"[WARN] Could not open runner log: {exc}")
+
+    python = sys.executable
     smoke_flag = ["--smoke-test"] if args.smoke_test else []
     summary_lines: list[str] = []
 
@@ -170,7 +187,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for variant in args.variants:
         metrics_file = _metrics_path(variant)
-        log_file = _log_path(variant)
+        variant_log = _log_path(variant)
 
         # ----------------------------------------------------------------
         # Resume check
@@ -186,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             except Exception:
                 msg = f"[SKIP] {variant}: metrics file exists (could not parse)"
-            print(f"\n{msg}", flush=True)
+            _log(f"\n{msg}")
             _append_summary(msg)
             summary_lines.append(msg)
             continue
@@ -203,15 +220,10 @@ def main(argv: list[str] | None = None) -> int:
             "--run-name", variant,
             *smoke_flag,
         ]
-        rc = _run_step(
-            train_cmd,
-            f"TRAIN  variant={variant}",
-            log_file,
-            append=False,
-        )
+        rc = _run_step(train_cmd, f"TRAIN  variant={variant}", variant_log, append=False)
         if rc != 0:
             msg = f"[FAIL]  {variant}: train exited with code {rc}"
-            print(msg, flush=True)
+            _log(msg)
             _append_summary(msg)
             failed.append(variant)
             continue
@@ -227,15 +239,10 @@ def main(argv: list[str] | None = None) -> int:
             "--split", "test",
             "--run-name", variant,
         ]
-        rc = _run_step(
-            eval_cmd,
-            f"EVAL   variant={variant}  split=test",
-            log_file,
-            append=True,
-        )
+        rc = _run_step(eval_cmd, f"EVAL   variant={variant}  split=test", variant_log, append=True)
         if rc != 0:
             msg = f"[FAIL]  {variant}: evaluate exited with code {rc}"
-            print(msg, flush=True)
+            _log(msg)
             _append_summary(msg)
             failed.append(variant)
             continue
@@ -250,16 +257,10 @@ def main(argv: list[str] | None = None) -> int:
             "--split", "val",
             "--run-name", variant,
         ]
-        rc = _run_step(
-            gradcam_cmd,
-            f"GRADCAM variant={variant}  split=val",
-            log_file,
-            append=True,
-        )
+        rc = _run_step(gradcam_cmd, f"GRADCAM variant={variant}  split=val", variant_log, append=True)
         if rc != 0:
-            # Grad-CAM failure is non-fatal; log and continue
             msg = f"[WARN]  {variant}: gradcam exited with code {rc} (non-fatal)"
-            print(msg, flush=True)
+            _log(msg)
             _append_summary(msg)
 
         # ----------------------------------------------------------------
@@ -274,10 +275,8 @@ def main(argv: list[str] | None = None) -> int:
         except Exception:
             metric_str = "metrics unavailable"
 
-        msg = (
-            f"[OK]    {variant}: {metric_str}  elapsed={elapsed/60:.1f} min"
-        )
-        print(f"\n{msg}", flush=True)
+        msg = f"[OK]    {variant}: {metric_str}  elapsed={elapsed/60:.1f} min"
+        _log(f"\n{msg}")
         _append_summary(msg)
         summary_lines.append(msg)
 
@@ -285,17 +284,21 @@ def main(argv: list[str] | None = None) -> int:
     # Final summary
     # ----------------------------------------------------------------
     total_elapsed = time.time() - overall_start
-    print(f"\n{'='*70}", flush=True)
-    print(f"Ablation run complete in {total_elapsed/60:.1f} min", flush=True)
+    _log(f"\n{'='*70}")
+    _log(f"Ablation run complete in {total_elapsed/60:.1f} min")
     for line in summary_lines:
-        print(f"  {line}", flush=True)
+        _log(f"  {line}")
     if failed:
-        print(f"\nFailed variants: {failed}", flush=True)
+        _log(f"\nFailed variants: {failed}")
+        if _runner_log_fh:
+            _runner_log_fh.close()
         return 1
     _append_summary(
         f"--- ablation run finished {datetime.now().isoformat()} "
         f"total={total_elapsed/60:.1f} min ---"
     )
+    if _runner_log_fh:
+        _runner_log_fh.close()
     return 0
 
 

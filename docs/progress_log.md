@@ -96,3 +96,30 @@ Intermediate bug found and fixed during smoke test: evaluate.py was building the
 7. After approval: train baseline / SE / CBAM variants, evaluate, ablation table, Grad-CAM, README update.
 
 ---
+
+## 2026-10-15 — Step 3: Runner cleanup, smoke artefact isolation, hardware assessment
+
+**Commit:** (this commit)
+
+### Smoke test result (from Step 2, task-280)
+All 3 variants completed train + eval + Grad-CAM in 6.1 min on 48 training images / 1 epoch.
+Results were 1-epoch random-weight baselines — **not real results**. Archived to `outputs/smoke/` and `checkpoints/smoke/`.
+
+### Fixes
+- Fixed `src/run_ablation.py` duplicate-body syntax error; import now clean.
+- Runner rewrites own log to `outputs/ablation_run.log` internally (works headless/detached).
+- All smoke checkpoints moved to `checkpoints/smoke/`; smoke metrics to `outputs/smoke/`.
+- `checkpoints/` is now empty, ready for full-training artefacts.
+
+### Hardware
+- GPU: NVIDIA GeForce RTX 3050 Laptop GPU — **4.29 GB VRAM**, CUDA 12.6 — CUDA available ✅
+- CPU: 8 cores
+
+### Full-training time estimate (GPU path, EfficientNet-B0 224×224)
+Smoke: ~27 s/epoch on 48 training images.  
+Real dataset: ~12,710 training images → ~268× more data → ~2.0 h/epoch (unscaled).  
+With AMP + grad_accum=2 (effective batch 32), real throughput is ~4–5× faster per image than the smoke cold-start overhead → estimated **~25–35 min/epoch**.  
+With early stopping (patience=7) and freeze-then-unfreeze (5 frozen epochs + up to 35 unfrozen), expect **15–25 real epochs** → **~7–12 h total per variant**, or **~21–36 h for all three**.  
+> **Plan: use GPU path as-is** (EfficientNet-B0, 40 epochs max, early stopping). Batch size stays at 16. If OOM, drop to 8 + double grad_accum.
+
+---
