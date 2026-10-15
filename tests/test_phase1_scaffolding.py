@@ -111,7 +111,6 @@ REQUIRED_CLINERULES_PHRASES = (
 DEFERRED_IMPLEMENTATION_FILES = (
     "src/dataset.py",
     "src/models/cbam.py",
-    "src/models/net.py",
     "src/train.py",
     "src/evaluate.py",
     "src/gradcam.py",

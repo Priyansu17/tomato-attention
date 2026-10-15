@@ -1,15 +1,18 @@
 # Tomato Leaf Disease Detection using an Attention Network
 
-**Phase 1 — project scaffolding only.**
-Implementation is completed **phase-by-phase**; nothing beyond project scaffolding exists yet.
+**Phase 2D — model package complete.** Implementation proceeds **phase-by-phase**:
+Phases 1, 2A, 2B, 2C (scaffolding + data pipeline) and 2D (model) are done; training
+has not started yet.
 
 > ⚠️ **Status warning**
-> - No model, data pipeline, training loop, evaluation, Grad-CAM or Streamlit app has been
->   implemented yet.
+> - Implemented: scaffolding, dataset discovery/validation, SHA-256 duplicate groups,
+>   deterministic stratified group split, PyTorch Dataset / transforms / DataLoaders, and
+>   the model package (backbone + baseline/SE/CBAM attention + classifier head).
+> - **Not implemented yet:** training loop, evaluation, Grad-CAM, Streamlit app.
 > - **No training has been performed.** Every "Results" value is a placeholder
 >   (`_to be filled in a later phase_`).
-> - The dataset is **not** included and is **never downloaded automatically** — the user
->   supplies the PlantVillage tomato subset manually.
+> - The dataset is **not included in the repository** and is **never downloaded
+>   automatically** — the user supplies the PlantVillage tomato subset manually.
 
 ---
 
@@ -33,8 +36,8 @@ Everything is driven from a single configuration file (`configs/config.yaml`).
 | Phase | Scope | Status |
 |-------|-------|--------|
 | 1 | Project scaffolding: directories, `.clinerules`, `.gitignore`, `requirements.txt`, `configs/config.yaml`, README skeleton | ✅ complete |
-| 2 | Data pipeline: hashing/dedup, stratified split, datasets, transforms, DataLoaders | ⬜ planned |
-| 3 | Models: backbone wrapper, attention modules (baseline / SE / CBAM), classifier head | ⬜ planned |
+| 2 | Data pipeline: hashing/dedup, stratified split, datasets, transforms, DataLoaders (gated sub-phases 2A/2B/2C) | ✅ complete |
+| 3 | Models: backbone wrapper, attention modules (baseline / SE / CBAM), classifier head (gated sub-phase 2D) | ✅ complete |
 | 4 | Training + validation loop, checkpointing, early stopping, smoke test | ⬜ planned |
 | 5 | Evaluation: metrics, confusion matrix, classification report | ⬜ planned |
 | 6 | Ablation study across attention variants | ⬜ planned |
@@ -117,7 +120,7 @@ Configuration keys: `attention.type`, `attention.insertion_stage`,
 `attention.cbam.channel.reduction_ratio` (16),
 `attention.cbam.spatial.kernel_size` (7).
 
-Implementation status: **not implemented yet** (Phase 3).
+Implementation status: **complete** (Phase 2D / 3).
 
 ---
 
@@ -322,7 +325,7 @@ Key planned defaults: `image_size: 224`, `num_classes: 10`, `batch_size: 32`,
 `backbone: efficientnet_b0`, `attention: cbam`, `seed: 42`,
 split `0.70 / 0.15 / 0.15`, smoke test `enabled: true`.
 
-Implementation status of the config loader: **not implemented yet** (Phase 2).
+Implementation status of the config loader: **complete** (Phase 1 / 2).
 
 ---
 
@@ -336,7 +339,7 @@ Implementation status of the config loader: **not implemented yet** (Phase 2).
    computed in memory.
 5. Nothing else is required — no manual resizing and no manual train/val/test folders.
 
-Implementation status of the data pipeline: **not implemented yet** (Phase 2).
+Implementation status of the data pipeline: **complete** (Phases 2A / 2B / 2C).
 
 ---
 

@@ -2,9 +2,9 @@
 # Tomato Leaf Disease Detection with Attention Networks
 # configs/config.yaml — single source of truth for all hyperparameters.
 #
-# STATUS: Phase 1 — configuration SCHEMA + planned defaults only.
-#         The data pipeline, model, training loop, evaluation, Grad-CAM and the
-#         Streamlit app are NOT implemented yet, so nothing reads this file yet.
+# STATUS: Phase 2D — data pipeline (2A-2C) and the model package are implemented
+#         and read this file. Training, evaluation, Grad-CAM and the Streamlit
+#         app are NOT implemented yet.
 #
 # RULES
 #   * Python sources must never hardcode hyperparameters — read them from here.

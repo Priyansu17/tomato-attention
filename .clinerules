@@ -131,7 +131,10 @@ RGB tomato leaf image (224x224)
 
 ## 12. Phase Status
 
-- **Phase 1 (current, complete): project scaffolding only** — directories, `.clinerules`,
-  `.gitignore`, `requirements.txt`, `configs/config.yaml`, `README.md` skeleton.
-- Later phases (data pipeline, model, training, evaluation, Grad-CAM, Streamlit) are
-  **not implemented yet** and must not be started automatically.
+- **Complete:** Phase 1 (scaffolding), Phase 2A (dataset discovery/validation), Phase 2B
+  (SHA-256 duplicate groups + deterministic stratified group split), Phase 2C (PyTorch
+  Dataset / transforms / DataLoaders) and Phase 2D (model: backbone + attention +
+  network).
+- **Not started:** training + checkpointing, evaluation, ablation study, Grad-CAM and
+  the Streamlit demo. They must not be started automatically, and full training always
+  requires ask the user for explicit permission.
