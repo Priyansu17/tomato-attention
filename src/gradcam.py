@@ -158,8 +158,19 @@ def generate_gradcam(
     checkpoint_path: str | Path,
     split: str = "val",
     num_samples: int | None = None,
+    run_name: str | None = None,
 ) -> list[Path]:
     """Generate and save Grad-CAM overlays for ``num_samples`` images.
+
+    Args:
+        cfg: configuration mapping.
+        checkpoint_path: path to the saved ``.pt`` checkpoint.
+        split: which data split to sample from (default: ``val``).
+        num_samples: override ``gradcam.num_samples`` from config.
+        run_name: optional variant label (e.g. ``'cbam'``).  When given,
+            images are saved to a subdirectory
+            ``paths.gradcam_dir/<run_name>/`` so variants do not overwrite
+            each other.
 
     Returns:
         List of saved figure paths.
@@ -175,12 +186,25 @@ def generate_gradcam(
         device = torch.device(device_cfg)
     logger.info("device: %s", device)
 
-    # Load model
-    model = build_model(cfg, pretrained=False).to(device)
+    # Load checkpoint first so we can read its saved config
     ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
+    logger.info("loaded checkpoint from epoch %d", ckpt.get("epoch", "?"))
+
+    # Merge checkpoint config so the model architecture (attention.type) matches
+    # what was trained, regardless of what configs/config.yaml currently says.
+    ckpt_config = ckpt.get("config", {})
+    if ckpt_config:
+        cfg = {**cfg, **ckpt_config}
+        logger.info(
+            "merged checkpoint config; attention.type=%s",
+            cfg_get(cfg, "attention.type", "?"),
+        )
+
+    # Build model and load weights
+    model = build_model(cfg, pretrained=False).to(device)
     model.load_state_dict(ckpt["model_state_dict"])
     model.eval()
-    logger.info("loaded checkpoint from epoch %d", ckpt.get("epoch", "?"))
+
 
     # Target layer
     target_layer = _get_target_layer(model, cfg)
@@ -200,7 +224,10 @@ def generate_gradcam(
     colormap = str(cfg_get(cfg, "gradcam.colormap", "jet"))
     fmt = str(cfg_get(cfg, "evaluation.figure_format", "png"))
     dpi = int(cfg_get(cfg, "evaluation.figure_dpi", 150))
-    gradcam_dir = Path(cfg_get(cfg, "paths.gradcam_dir", "results/gradcam"))
+
+    # Use a variant-specific subdirectory when run_name is given
+    base_gradcam_dir = Path(cfg_get(cfg, "paths.gradcam_dir", "results/gradcam"))
+    gradcam_dir = base_gradcam_dir / run_name if run_name else base_gradcam_dir
     ensure_dir(gradcam_dir, cfg)
 
     saved: list[Path] = []
@@ -223,7 +250,7 @@ def generate_gradcam(
         overlay = _overlay(image_np, cam, alpha, colormap)
         true_name = class_names[true_label].replace("Tomato___", "")
         pred_name = class_names[pred_label].replace("Tomato___", "")
-        correct = "✓" if pred_label == true_label else "✗"
+        correct = "[OK]" if pred_label == true_label else "[X]"
 
         fig, axes = plt.subplots(1, 2, figsize=(8, 4))
         axes[0].imshow(image_np)
@@ -234,14 +261,17 @@ def generate_gradcam(
             f"Grad-CAM {correct}\nPred: {pred_name} ({pred_conf:.2%})", fontsize=9
         )
         axes[1].axis("off")
-        fig.suptitle(f"Sample {idx} | {split}", fontsize=10, fontweight="bold")
+        title = f"Sample {idx} | {split}"
+        if run_name:
+            title += f" | {run_name}"
+        fig.suptitle(title, fontsize=10, fontweight="bold")
         fig.tight_layout()
 
         out_path = gradcam_dir / f"gradcam_{split}_{i:03d}.{fmt}"
         fig.savefig(out_path, dpi=dpi, bbox_inches="tight")
         plt.close(fig)
         saved.append(out_path)
-        logger.info("  [%d/%d] %s → %s", i + 1, len(indices), correct, out_path.name)
+        logger.info("  [%d/%d] %s -> %s", i + 1, len(indices), correct, out_path.name)
 
     gradcam.remove_hooks()
 
@@ -257,12 +287,15 @@ def generate_gradcam(
             img = plt.imread(path)
             ax.imshow(img)
             ax.axis("off")
-        fig.suptitle(f"Grad-CAM Grid — {split} split", fontsize=12, fontweight="bold")
+        grid_title = f"Grad-CAM Grid — {split} split"
+        if run_name:
+            grid_title += f" ({run_name})"
+        fig.suptitle(grid_title, fontsize=12, fontweight="bold")
         fig.tight_layout()
         grid_path = gradcam_dir / f"gradcam_{split}_grid.{fmt}"
         fig.savefig(grid_path, dpi=dpi, bbox_inches="tight")
         plt.close(fig)
-        logger.info("grid → %s", grid_path)
+        logger.info("grid -> %s", grid_path)
 
     logger.info("Grad-CAM complete: %d images saved to %s", len(saved), gradcam_dir)
     return saved
@@ -281,11 +314,18 @@ def main(argv: list[str] | None = None) -> int:
                         help="Dataset split to visualise (default: val).")
     parser.add_argument("--num-samples", type=int, default=None,
                         help="Number of images (default: gradcam.num_samples from config).")
+    parser.add_argument(
+        "--run-name", default=None,
+        help=(
+            "Variant label (e.g. 'cbam'). Images are saved to "
+            "paths.gradcam_dir/<run-name>/ so variants do not overwrite each other."
+        ),
+    )
     args = parser.parse_args(argv)
 
     cfg = load_config(args.config)
     generate_gradcam(cfg, args.checkpoint, split=args.split,
-                     num_samples=args.num_samples)
+                     num_samples=args.num_samples, run_name=args.run_name)
     return 0
 
 

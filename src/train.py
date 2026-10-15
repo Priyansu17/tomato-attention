@@ -296,7 +296,9 @@ def train(cfg: Mapping[str, Any], smoke: bool = False) -> dict[str, Any]:
 
     ckpt_dir = Path(cfg_get(cfg, "paths.checkpoints_dir", "checkpoints"))
     best_ckpt = ckpt_dir / str(cfg_get(cfg, "training.checkpoint.filename", "best_model.pt"))
-    last_ckpt = ckpt_dir / "last_model.pt"
+    # Derive last-checkpoint name from the best-checkpoint stem (e.g. last_model_cbam.pt)
+    _ckpt_stem = best_ckpt.stem.replace("best_model", "last_model")
+    last_ckpt = ckpt_dir / f"{_ckpt_stem}.pt"
     ckpt_mode = str(cfg_get(cfg, "training.checkpoint.mode", "min"))
 
     use_amp = bool(cfg_get(cfg, "training.mixed_precision", True)) and device.type == "cuda"
@@ -394,7 +396,9 @@ def train(cfg: Mapping[str, Any], smoke: bool = False) -> dict[str, Any]:
     # ------------------------------------------------------------------
     logs_dir = Path(cfg_get(cfg, "paths.logs_dir", "results/logs"))
     ensure_dir(logs_dir, cfg)
-    history_path = logs_dir / "training_history.json"
+    # Use the checkpoint stem (e.g. best_model_cbam) to avoid overwriting across variants
+    _hist_stem = best_ckpt.stem  # e.g. "best_model_cbam"
+    history_path = logs_dir / f"training_history_{_hist_stem}.json"
     history_path.write_text(json.dumps(history, indent=2), encoding="utf-8")
     logger.info("training history -> %s", history_path)
 
@@ -433,6 +437,13 @@ def main(argv: list[str] | None = None) -> int:
         "--backbone", default=None,
         help="Override model.backbone for ablation runs."
     )
+    parser.add_argument(
+        "--run-name", default=None,
+        help=(
+            "Label for this run (e.g. 'cbam'). Sets checkpoint filenames to "
+            "best_model_<run-name>.pt and last_model_<run-name>.pt."
+        ),
+    )
     args = parser.parse_args(argv)
 
     overrides: dict[str, Any] = {}
@@ -440,6 +451,8 @@ def main(argv: list[str] | None = None) -> int:
         overrides["attention.type"] = args.attention
     if args.backbone:
         overrides["model.backbone"] = args.backbone
+    if args.run_name:
+        overrides["training.checkpoint.filename"] = f"best_model_{args.run_name}.pt"
 
     cfg = load_config(args.config, overrides=overrides or None)
     train(cfg, smoke=args.smoke_test)

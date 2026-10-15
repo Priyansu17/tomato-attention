@@ -213,10 +213,20 @@ def evaluate(
     cfg: Mapping[str, Any],
     checkpoint_path: str | Path,
     split: str = "test",
+    run_name: str | None = None,
 ) -> dict[str, Any]:
     """Evaluate the model at ``checkpoint_path`` on ``split`` and write artifacts.
 
-    Returns the metrics dict.
+    Args:
+        cfg: configuration mapping.
+        checkpoint_path: path to the saved ``.pt`` checkpoint.
+        split: which data split to evaluate on (train / val / test).
+        run_name: optional variant label (e.g. ``'cbam'``).  When given, all
+            output filenames include this label so multiple variants can coexist
+            (e.g. ``metrics_test_cbam.json``, ``confusion_matrix_test_cbam.png``).
+
+    Returns:
+        the metrics dict.
     """
     logger = get_logger("tomato.evaluate")
     log_config_summary(cfg, logger)
@@ -233,6 +243,18 @@ def evaluate(
     # Load checkpoint
     ckpt = torch.load(checkpoint_path, map_location=device, weights_only=False)
     logger.info("loaded checkpoint from epoch %d", ckpt.get("epoch", "?"))
+
+    # Merge checkpoint's saved config into cfg so the model architecture
+    # (especially attention.type) matches what was trained, regardless of what
+    # configs/config.yaml currently says.
+    ckpt_config = ckpt.get("config", {})
+    if ckpt_config:
+        cfg = {**cfg, **ckpt_config}
+        # Re-log after merge so the attention type is visible in the log
+        logger.info(
+            "merged checkpoint config; attention.type=%s",
+            cfg_get(cfg, "attention.type", "?"),
+        )
 
     # Build model and load weights
     model = build_model(cfg, pretrained=False).to(device)
@@ -266,6 +288,9 @@ def evaluate(
     )
     print("\nClassification Report:\n" + report_text)
 
+    # Build a file suffix so all outputs are namespaced by variant
+    _suffix = f"_{run_name}" if run_name else ""
+
     # Output paths
     figs_dir = Path(cfg_get(cfg, "paths.figures_dir", "results/figures"))
     preds_dir = Path(cfg_get(cfg, "paths.predictions_dir", "results/predictions"))
@@ -274,23 +299,23 @@ def evaluate(
 
     # Confusion matrix
     if bool(cfg_get(cfg, "evaluation.confusion_matrix.enabled", True)):
-        cm_path = figs_dir / f"confusion_matrix_{split}.{fmt}"
+        cm_path = figs_dir / f"confusion_matrix_{split}{_suffix}.{fmt}"
         _save_confusion_matrix(labels, predictions, class_names, cm_path, cfg)
-        logger.info("confusion matrix → %s", cm_path)
+        logger.info("confusion matrix -> %s", cm_path)
 
     # Predictions CSV
     if bool(cfg_get(cfg, "evaluation.save_predictions", True)):
-        pred_path = preds_dir / f"predictions_{split}.csv"
+        pred_path = preds_dir / f"predictions_{split}{_suffix}.csv"
         _save_predictions_csv(
             labels, predictions, probabilities, class_names, pred_path, cfg
         )
-        logger.info("predictions → %s", pred_path)
+        logger.info("predictions -> %s", pred_path)
 
     # Metrics JSON
-    metrics_path = results_dir / f"metrics_{split}.json"
+    metrics_path = results_dir / f"metrics_{split}{_suffix}.json"
     ensure_dir(results_dir, cfg)
     metrics_path.write_text(json.dumps(metrics, indent=2, default=str), encoding="utf-8")
-    logger.info("metrics → %s", metrics_path)
+    logger.info("metrics -> %s", metrics_path)
 
     return metrics
 
@@ -306,10 +331,18 @@ def main(argv: list[str] | None = None) -> int:
                         help="Path to the .pt checkpoint file.")
     parser.add_argument("--split", default="test", choices=list(SPLIT_NAMES),
                         help="Which split to evaluate on (default: test).")
+    parser.add_argument(
+        "--run-name", default=None,
+        help=(
+            "Label for this run (e.g. 'cbam'). Appended to all output filenames "
+            "so variants do not overwrite each other "
+            "(e.g. metrics_test_cbam.json, confusion_matrix_test_cbam.png)."
+        ),
+    )
     args = parser.parse_args(argv)
 
     cfg = load_config(args.config)
-    evaluate(cfg, args.checkpoint, split=args.split)
+    evaluate(cfg, args.checkpoint, split=args.split, run_name=args.run_name)
     return 0
 
 
