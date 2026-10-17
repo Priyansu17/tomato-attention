@@ -327,30 +327,64 @@ section{padding:7rem 4rem;}
 #detect{background:var(--bg);}
 .detect-grid{
   display:grid;
-  grid-template-columns:minmax(260px,340px) 1fr;
+  grid-template-columns: minmax(260px,320px) 1fr;
   gap:2.5rem;
   align-items:start;
+  transition: grid-template-columns 0.5s ease;
 }
+/* After results load — collapse upload col, give full width to results */
+.detect-grid.results-active{
+  grid-template-columns: 0px 1fr;
+  gap:0;
+}
+/* The left col when collapsed: hide overflow, fade out */
+.detect-grid.results-active > div:first-child{
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity 0.35s ease;
+}
+
+/* Re-analyze strip shown when results are active */
+#reanalyze-strip{
+  display:none;
+  align-items:center;gap:1rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:0.9rem 1.4rem;margin-bottom:1.2rem;
+}
+#reanalyze-strip.show{display:flex;}
+.reanalyze-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border);}
+.reanalyze-info{flex:1;font-size:0.85rem;color:var(--text-muted);}
+.reanalyze-info strong{display:block;color:var(--text);font-size:0.9rem;margin-bottom:0.15rem;}
+#reanalyze-btn{
+  background:transparent;border:1.5px solid var(--green);color:var(--green);
+  padding:0.45rem 1.1rem;border-radius:20px;font-weight:700;font-size:0.82rem;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+#reanalyze-btn:hover{background:rgba(82,183,136,0.1);}
 
 
 /* Upload zone */
 .upload-zone{
-  border:2px dashed rgba(82,183,136,0.35);border-radius:var(--radius);
+  border:2px dashed rgba(82,183,136,0.40);border-radius:var(--radius);
   padding:3rem 2rem;text-align:center;cursor:pointer;
-  transition:all 0.3s;position:relative;overflow:hidden;
+  transition:border-color 0.3s, box-shadow 0.3s;
+  position:relative;
   background:var(--surface);
+  /* NO overflow:hidden — that clips the dashed border */
 }
-.upload-zone::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(circle at center,rgba(82,183,136,0.06),transparent 70%);
+.upload-glow{
+  /* inner glow element — doesn't affect border */
+  position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
+  background:radial-gradient(circle at center,rgba(82,183,136,0.07),transparent 70%);
   opacity:0;transition:opacity 0.3s;
 }
-.upload-zone:hover{border-color:var(--green);transform:scale(1.01);}
-.upload-zone:hover::before{opacity:1;}
+.upload-zone:hover .upload-glow{opacity:1;}
+.upload-zone:hover{border-color:var(--green);box-shadow:0 0 0 3px rgba(82,183,136,0.10);}
 .upload-zone.drag-over{border-color:var(--green);border-style:solid;background:rgba(82,183,136,0.06);}
-.upload-icon{font-size:3rem;margin-bottom:1rem;}
-.upload-title{font-weight:700;font-size:1rem;margin-bottom:0.4rem;}
-.upload-hint{font-size:0.8rem;color:var(--text-muted);}
+.upload-icon{font-size:3rem;margin-bottom:1rem;position:relative;z-index:1;}
+.upload-title{font-weight:700;font-size:1rem;margin-bottom:0.4rem;position:relative;z-index:1;}
+.upload-hint{font-size:0.8rem;color:var(--text-muted);position:relative;z-index:1;}
 .upload-input{position:absolute;inset:0;opacity:0;cursor:pointer;}
 
 /* Preview */
@@ -459,13 +493,13 @@ section{padding:7rem 4rem;}
 /* Side-by-side remedy + gradcam grid */
 .result-bottom-grid{
   display:none;
-  grid-template-columns:1fr 1fr;
-  gap:1.2rem;
-  margin-top:1.2rem;
+  grid-template-columns: 5fr 7fr;
+  gap:1.4rem;
+  margin-top:1.4rem;
   align-items:stretch;   /* both columns same height */
 }
 .result-bottom-grid.show{display:grid;animation:fadeSlideUp 0.5s 0.15s ease both;}
-@media(max-width:1100px){.result-bottom-grid{grid-template-columns:1fr;}}
+@media(max-width:900px){.result-bottom-grid{grid-template-columns:1fr;}}
 
 /* Gradcam card — flex column so it fills its grid cell fully */
 #gradcam-card{display:flex;flex-direction:column;}
@@ -637,6 +671,9 @@ footer{
 @media(max-width:900px){
   #hero{grid-template-columns:1fr;padding:6rem 2rem 3rem;}
   .detect-grid{grid-template-columns:1fr;}
+  /* On mobile, when results-active, just keep 1fr (already single col) */
+  .detect-grid.results-active{grid-template-columns:1fr;gap:0;}
+  .detect-grid.results-active > div:first-child{display:none;}
   .steps-grid{grid-template-columns:1fr 1fr;}
   .stats-row{grid-template-columns:1fr 1fr;}
   .variants-grid{grid-template-columns:1fr;}
@@ -797,6 +834,7 @@ footer{
     <!-- Left: Upload -->
     <div class="reveal from-bottom">
       <label class="upload-zone" id="uploadZone">
+        <div class="upload-glow"></div>
         <input type="file" class="upload-input" id="fileInput" accept="image/*"/>
         <div class="upload-icon">🍃</div>
         <div class="upload-title">Drop leaf image here</div>
@@ -837,6 +875,16 @@ footer{
         <div style="font-size:3.5rem;margin-bottom:1rem;">🌿</div>
         <p style="font-weight:700;color:var(--text);">Results will appear here</p>
         <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">Upload a leaf photo and click Analyse</p>
+      </div>
+
+      <!-- Re-analyze strip (shown when results are active) -->
+      <div id="reanalyze-strip">
+        <img class="reanalyze-thumb" id="reanalyze-thumb" src="" alt=""/>
+        <div class="reanalyze-info">
+          <strong id="reanalyze-filename">—</strong>
+          Analysed with <span id="reanalyze-variant">—</span>
+        </div>
+        <button id="reanalyze-btn">↩ New Image</button>
       </div>
 
       <div id="result-panel">
@@ -1235,6 +1283,7 @@ const previewZone=document.getElementById('preview-zone');
 const previewImg=document.getElementById('preview-img');
 const removeBtn=document.getElementById('removeBtn');
 const analyzeBtn=document.getElementById('analyze-btn');
+const detectGrid=document.querySelector('.detect-grid');
 
 let selectedFile=null;
 
@@ -1247,22 +1296,35 @@ function setFile(file){
   previewZone.style.display='block';
   analyzeBtn.disabled=false;
 }
-function clearFile(){
+
+function restoreUpload(){
+  // Expand left column back
+  detectGrid.classList.remove('results-active');
+  // Hide reanalyze strip
+  document.getElementById('reanalyze-strip').classList.remove('show');
+  // Reset file state
   selectedFile=null;
   previewImg.src='';
   previewZone.style.display='none';
   uploadZone.style.display='';
   fileInput.value='';
   analyzeBtn.disabled=true;
+  // Hide results
   document.getElementById('empty-state').style.display='block';
-  document.getElementById('result-panel').classList.remove('show');
-  document.getElementById('result-panel').style.display='none';
+  const panel=document.getElementById('result-panel');
+  panel.classList.remove('show');
+  panel.style.display='none';
   const grid=document.querySelector('.result-bottom-grid');
   if(grid) grid.classList.remove('show');
 }
 
+function clearFile(){
+  restoreUpload();
+}
+
 fileInput.addEventListener('change',()=>setFile(fileInput.files[0]));
 removeBtn.addEventListener('click',clearFile);
+document.getElementById('reanalyze-btn').addEventListener('click',restoreUpload);
 
 // Drag & drop
 ['dragenter','dragover'].forEach(ev=>uploadZone.addEventListener(ev,e=>{
@@ -1315,6 +1377,19 @@ function renderResults(data){
   const panel=document.getElementById('result-panel');
   panel.style.display='block';
   setTimeout(()=>panel.classList.add('show'),10);
+
+  // Collapse upload column — results take full width
+  detectGrid.classList.add('results-active');
+
+  // Populate re-analyze strip
+  const strip=document.getElementById('reanalyze-strip');
+  const thumb=document.getElementById('reanalyze-thumb');
+  if(previewImg.src) thumb.src=previewImg.src;
+  document.getElementById('reanalyze-filename').textContent=
+    selectedFile?selectedFile.name:'Image';
+  document.getElementById('reanalyze-variant').textContent=activeVariant.toUpperCase();
+  strip.classList.add('show');
+
 
   const healthy=data.class_name==='Tomato___healthy';
   const nameEl=document.getElementById('disease-name');
