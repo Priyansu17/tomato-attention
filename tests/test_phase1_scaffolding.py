@@ -107,10 +107,11 @@ REQUIRED_CLINERULES_PHRASES = (
     "clear, maintainable, testable code",
 )
 
-# Implementation files explicitly deferred to later phases (must not exist yet).
+# Implementation files deferred to later phases (now all complete).
+# Paths reflect the actual project structure built by Cline + Antigravity.
 DEFERRED_IMPLEMENTATION_FILES = (
-    "src/dataset.py",
-    "src/models/cbam.py",
+    "src/data/dataset.py",       # Cline: dataset class (in src/data/, not src/)
+    "src/models/attention.py",   # Cline: CBAM/SE modules (named attention.py)
     "src/train.py",
     "src/evaluate.py",
     "src/gradcam.py",
@@ -351,11 +352,14 @@ def test_smoke_test_subset_is_small(config: dict) -> None:
 
 
 def test_deferred_implementation_files_do_not_exist() -> None:
-    """Checks I/J: Phase 1 created scaffolding only, no implementation."""
-    present = [
-        path for path in DEFERRED_IMPLEMENTATION_FILES if (PROJECT_ROOT / path).exists()
+    """Checks I/J: originally verified Phase 1 had no implementation files.
+    Project is now complete — all implementation files must exist.
+    """
+    missing = [
+        path for path in DEFERRED_IMPLEMENTATION_FILES if not (PROJECT_ROOT / path).exists()
     ]
-    assert not present, f"out-of-scope implementation files present: {present}"
+    assert not missing, f"expected implementation files are missing: {missing}"
+
 
 
 def test_data_raw_is_read_only_no_pipeline_artifacts() -> None:
@@ -402,7 +406,12 @@ def test_dataset_class_folders_match_config(config: dict) -> None:
 
 
 def test_no_trained_checkpoints_exist() -> None:
-    """Check J: no training was performed, so no checkpoints exist."""
-    leftovers = sorted(path.name for path in (PROJECT_ROOT / "checkpoints").iterdir())
-    assert not leftovers, f"unexpected checkpoints: {leftovers}"
+    """Check J: originally verified no training had been performed.
+    Project is now complete — all three variant checkpoints must exist.
+    """
+    ckpt_dir = PROJECT_ROOT / "checkpoints"
+    for variant in ("baseline", "se", "cbam"):
+        ckpt = ckpt_dir / f"best_model_{variant}.pt"
+        assert ckpt.exists(), f"trained checkpoint missing: {ckpt}"
+
 

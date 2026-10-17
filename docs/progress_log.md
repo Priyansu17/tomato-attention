@@ -2,6 +2,22 @@
 
 ---
 
+## 2026-10-17 — Step 4: Full training complete, ablation + README (Antigravity)
+
+### Training results (RTX 3050, CUDA 12.6, seed 42, EfficientNet-B0)
+- **baseline**: accuracy=0.9923, F1=0.9894 — 40 epochs, 101.5 min
+- **se**: accuracy=0.9934, F1=0.9915 — 40 epochs, 102.1 min
+- **cbam**: accuracy=0.9938, F1=0.9920 — 35/38 epochs (early stop), 102.0 min
+- Total ablation run: 305.6 min (~5.1 h)
+
+### Post-training tasks completed
+- `outputs/ablation.csv` + `outputs/ablation.md` built via `src/ablation.py`
+- Grad-CAM confirmed: 8 images + grid per variant in `results/gradcam/{variant}/`
+- README: placeholder Results replaced with real numbers; Mermaid architecture diagram added; all 8 phases marked ✅
+- `synopsis.pdf` and `progress_report.pdf` generated
+
+---
+
 ## 2026-10-15 — Takeover from Cline (Antigravity)
 
 ## 2026-10-15 — Step 1 Complete (Antigravity)

@@ -57,13 +57,17 @@ def test_smoke_train_runs_one_epoch(tmp_path, smoke_cfg):
     assert 0.0 <= summary["best_val_accuracy"] <= 1.0
     assert summary["best_val_loss"] >= 0.0
     assert (tmp_path / "ckpts" / "best_model.pt").exists()
-    # history JSON
-    history_file = tmp_path / "logs" / "training_history.json"
-    assert history_file.exists()
+    # history JSON — named after the checkpoint stem
+    history_file = tmp_path / "logs" / "training_history_best_model.json"
+    assert history_file.exists(), (
+        f"history file not found: {history_file}. "
+        f"Files in logs dir: {list((tmp_path / 'logs').iterdir()) if (tmp_path / 'logs').exists() else 'dir missing'}"
+    )
     history = json.loads(history_file.read_text())
     assert len(history) == 1
     assert "train_loss" in history[0]
     assert "val_accuracy" in history[0]
+
 
 
 @pytest.mark.realdata

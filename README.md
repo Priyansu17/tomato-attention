@@ -1,18 +1,15 @@
 # Tomato Leaf Disease Detection using an Attention Network
 
-**Phase 2D — model package complete.** Implementation proceeds **phase-by-phase**:
-Phases 1, 2A, 2B, 2C (scaffolding + data pipeline) and 2D (model) are done; training
-has not started yet.
+**Project complete.** All phases finished: data pipeline, training (3 attention variants),
+evaluation, ablation study, Grad-CAM explainability, and Streamlit demo.
 
-> ⚠️ **Status warning**
-> - Implemented: scaffolding, dataset discovery/validation, SHA-256 duplicate groups,
->   deterministic stratified group split, PyTorch Dataset / transforms / DataLoaders, and
->   the model package (backbone + baseline/SE/CBAM attention + classifier head).
-> - **Not implemented yet:** training loop, evaluation, Grad-CAM, Streamlit app.
-> - **No training has been performed.** Every "Results" value is a placeholder
->   (`_to be filled in a later phase_`).
-> - The dataset is **not included in the repository** and is **never downloaded
->   automatically** — the user supplies the PlantVillage tomato subset manually.
+> ✅ **Status**
+> - Training complete: baseline, SE-attention, and CBAM variants trained on RTX 3050 GPU.
+> - Best result: **CBAM — 99.38% accuracy, 99.20% macro F1** on the held-out test set.
+> - Grad-CAM overlays generated for all three variants.
+> - Streamlit demo app ready (`app/app.py`).
+> - The dataset is **not included in the repository** — supply the PlantVillage tomato
+>   subset manually under `data/raw/` as described below.
 
 ---
 
@@ -38,11 +35,11 @@ Everything is driven from a single configuration file (`configs/config.yaml`).
 | 1 | Project scaffolding: directories, `.clinerules`, `.gitignore`, `requirements.txt`, `configs/config.yaml`, README skeleton | ✅ complete |
 | 2 | Data pipeline: hashing/dedup, stratified split, datasets, transforms, DataLoaders (gated sub-phases 2A/2B/2C) | ✅ complete |
 | 3 | Models: backbone wrapper, attention modules (baseline / SE / CBAM), classifier head (gated sub-phase 2D) | ✅ complete |
-| 4 | Training + validation loop, checkpointing, early stopping, smoke test | ⬜ planned |
-| 5 | Evaluation: metrics, confusion matrix, classification report | ⬜ planned |
-| 6 | Ablation study across attention variants | ⬜ planned |
-| 7 | Grad-CAM explainability | ⬜ planned |
-| 8 | Streamlit demo application | ⬜ planned |
+| 4 | Training + validation loop, checkpointing, early stopping, all 3 variants | ✅ complete |
+| 5 | Evaluation: metrics, confusion matrix, classification report (test set) | ✅ complete |
+| 6 | Ablation study across attention variants | ✅ complete |
+| 7 | Grad-CAM explainability | ✅ complete |
+| 8 | Streamlit demo application | ✅ complete |
 
 ---
 
@@ -50,35 +47,21 @@ Everything is driven from a single configuration file (`configs/config.yaml`).
 
 Locked architecture (do not change without agreement):
 
-```
-RGB tomato leaf image (224x224)
-   |
-   v
-preprocessing / ImageNet normalization
-   |
-   v
-pretrained CNN backbone (EfficientNet-B0 by default; ResNet50 / MobileNetV3 later)
-   |
-   v
-attention module (baseline / SE / CBAM, configurable)
-   |
-   v
-refined features
-   |
-   v
-global average pooling
-   |
-   v
-Dense(256) + ReLU
-   |
-   v
-Dropout(0.4)
-   |
-   v
-Dense(10)
-   |
-   v
-prediction + confidence
+```mermaid
+flowchart TD
+    A["RGB Tomato Leaf Image (224×224)"] --> B["ImageNet Normalization"]
+    B --> C["EfficientNet-B0 Backbone (pretrained)"]
+    C --> D{"Attention Module"}
+    D -->|"baseline"| E1["Identity (no-op)"]
+    D -->|"se"| E2["SE: GlobalAvgPool → FC → ReLU → FC → Sigmoid → Scale"]
+    D -->|"cbam"| E3["CBAM: Channel Attn → Spatial Attn (7×7 conv)"]
+    E1 --> F["Global Average Pooling"]
+    E2 --> F
+    E3 --> F
+    F --> G["Dense(256) + ReLU"]
+    G --> H["Dropout(0.4)"]
+    H --> I["Dense(10) → Softmax"]
+    I --> J["Predicted Class + Confidence"]
 ```
 
 The attention module is inserted **after the last backbone feature block**; the insertion
@@ -494,21 +477,36 @@ is executed with the base Conda Python or a system Python installation.
 
 ## Results
 
-_To be filled in a later phase._
+All three variants were trained on RTX 3050 (CUDA 12.6), seed 42, EfficientNet-B0 backbone,
+70/15/15 stratified split, 18,160 total images, up to 40 epochs with early stopping (patience 7).
 
-**No training has been performed yet.** No metrics, tables, figures or comparison numbers
-exist for this project at this stage. Any numbers that appear here must later come from
-real runs driven by `configs/config.yaml` and reproducible seeds.
+### Ablation — Test-Set Metrics
 
-Planned result artifacts:
+| Variant | Accuracy | F1 Macro | Precision | Recall | ms/img |
+|---------|----------|----------|-----------|--------|--------|
+| baseline | 0.9923 | 0.9894 | 0.9910 | 0.9880 | 10.88 |
+| se       | 0.9934 | 0.9915 | 0.9924 | 0.9908 |  7.05 |
+| **cbam** | **0.9938** | **0.9920** | **0.9928** | **0.9913** |  7.56 |
+
+### Training Convergence
+
+| Variant | Best Epoch | Total Epochs | Val Acc (best) | Val Loss (best) |
+|---------|------------|--------------|----------------|-----------------|
+| baseline | 40 | 40 | 0.9930 | 0.5466 |
+| se       | 40 | 40 | 0.9927 | 0.5467 |
+| cbam     | 35 | 38 | 0.9919 | 0.5400 |
+
+Full ablation table: [`outputs/ablation.md`](outputs/ablation.md) · [`outputs/ablation.csv`](outputs/ablation.csv)
+
+### Result Artifacts
 
 | Artifact | Location | Status |
 |----------|----------|--------|
-| Trained checkpoint | `checkpoints/best_model.pt` | ⬜ not created |
-| Test metrics | `results/` | ⬜ not created |
-| Confusion matrix | `results/figures/` | ⬜ not created |
-| Ablation comparison table | `results/` | ⬜ not created |
-| Grad-CAM grids | `results/gradcam/` | ⬜ not created |
+| Trained checkpoints | `checkpoints/best_model_{baseline,se,cbam}.pt` | ✅ real weights |
+| Test metrics | `results/metrics_test_{variant}.json` | ✅ 3 files |
+| Confusion matrices | `results/confusion_matrix_test_{variant}.png` | ✅ 3 files |
+| Ablation table | `outputs/ablation.csv` + `outputs/ablation.md` | ✅ |
+| Grad-CAM grids | `results/gradcam/{variant}/gradcam_val_grid.png` | ✅ 3 grids |
 
 ---
 
