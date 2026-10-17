@@ -450,13 +450,23 @@ section{padding:7rem 4rem;}
 .prob-bar-fill.top{background:linear-gradient(90deg,var(--red-dark),var(--red));}
 .prob-pct{width:38px;text-align:right;font-size:0.72rem;font-weight:600;color:var(--text-muted);}
 
-/* Gradcam */
-#gradcam-card{display:none;}
-#gradcam-img{width:100%;border-radius:var(--radius-sm,10px);border:1px solid var(--border);}
+/* Side-by-side remedy + gradcam grid */
+.result-bottom-grid{
+  display:none;
+  grid-template-columns:1fr 1fr;
+  gap:1.2rem;
+  margin-top:1.2rem;
+  align-items:start;
+}
+.result-bottom-grid.show{display:grid;animation:fadeSlideUp 0.5s 0.15s ease both;}
+@media(max-width:1100px){.result-bottom-grid{grid-template-columns:1fr;}}
 
-/* Disease info */
-#disease-info{display:none;margin-top:1.2rem;}
-#disease-info.show{display:block;animation:fadeSlideUp 0.5s 0.2s ease both;}
+/* Gradcam — always block inside the grid */
+#gradcam-card{display:block;}
+
+/* Disease info — always block inside the grid */
+#disease-info{display:block;}
+.disease-info-card{height:100%;}
 .disease-info-card{
   background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius);padding:2rem;
@@ -838,45 +848,53 @@ footer{
           <div class="prob-bars" id="prob-bars"></div>
         </div>
 
-        <!-- Grad-CAM -->
-        <div class="result-card" id="gradcam-card">
-          <div style="font-size:0.8rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.8rem;">
-            🔥 Grad-CAM Heatmap
-          </div>
-          <img id="gradcam-img" src="" alt="Grad-CAM"/>
-          <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">
-            Warmer colours = regions the model focused on most
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+        <!-- Remedy LEFT + Grad-CAM RIGHT -->
+        <div class="result-bottom-grid">
 
-  <!-- Disease Info Card (full width below) -->
-  <div id="disease-info">
-    <div class="disease-info-card">
-      <div id="severity-badge" class="severity-badge">—</div>
-      <div class="info-title" id="info-title">—</div>
-      <p class="info-desc" id="info-desc">—</p>
-      <div id="info-symptoms" class="info-section" style="display:none">
-        <div class="info-section-title">🔍 Symptoms</div>
-        <ul class="info-list" id="symptoms-list"></ul>
-      </div>
-      <div id="info-chemical" class="info-section" style="display:none">
-        <div class="info-section-title">🧪 Chemical Treatment</div>
-        <ul class="info-list" id="chemical-list"></ul>
-      </div>
-      <div id="info-organic" class="info-section" style="display:none">
-        <div class="info-section-title">🌿 Organic / Bio Treatment</div>
-        <ul class="info-list" id="organic-list"></ul>
-      </div>
-      <div id="info-prevention" class="info-section" style="display:none">
-        <div class="info-section-title">🛡️ Prevention</div>
-        <ul class="info-list" id="prevention-list"></ul>
-      </div>
-    </div>
-  </div>
+          <div id="disease-info">
+            <div class="disease-info-card">
+              <div id="severity-badge" class="severity-badge">—</div>
+              <div class="info-title" id="info-title">—</div>
+              <p class="info-desc" id="info-desc">—</p>
+              <div id="info-symptoms" class="info-section" style="display:none">
+                <div class="info-section-title">🔍 Symptoms</div>
+                <ul class="info-list" id="symptoms-list"></ul>
+              </div>
+              <div id="info-chemical" class="info-section" style="display:none">
+                <div class="info-section-title">🧪 Chemical Treatment</div>
+                <ul class="info-list" id="chemical-list"></ul>
+              </div>
+              <div id="info-organic" class="info-section" style="display:none">
+                <div class="info-section-title">🌿 Organic / Bio</div>
+                <ul class="info-list" id="organic-list"></ul>
+              </div>
+              <div id="info-prevention" class="info-section" style="display:none">
+                <div class="info-section-title">🛡️ Prevention</div>
+                <ul class="info-list" id="prevention-list"></ul>
+              </div>
+            </div>
+          </div>
+
+          <div id="gradcam-card">
+            <div class="result-card" style="height:100%;">
+              <div style="font-size:0.8rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.8rem;">
+                🔥 Grad-CAM Heatmap
+              </div>
+              <img id="gradcam-img" src="" alt="Grad-CAM" style="width:100%;border-radius:10px;border:1px solid var(--border);display:block;"/>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.6rem;">
+                Warmer colours = regions the model focused on most
+              </p>
+            </div>
+          </div>
+
+        </div><!-- end result-bottom-grid -->
+      </div><!-- end result-panel -->
+    </div><!-- end right reveal col -->
+  </div><!-- end detect-grid -->
 </section>
+
+
+
 
 <!-- ============================================================
      ABOUT
@@ -1190,6 +1208,7 @@ function setFile(file){
   selectedFile=file;
   const url=URL.createObjectURL(file);
   previewImg.src=url;
+  uploadZone.style.display='none';   // hide drop zone once image chosen
   previewZone.style.display='block';
   analyzeBtn.disabled=false;
 }
@@ -1197,13 +1216,14 @@ function clearFile(){
   selectedFile=null;
   previewImg.src='';
   previewZone.style.display='none';
+  uploadZone.style.display='';
+  fileInput.value='';
   analyzeBtn.disabled=true;
   document.getElementById('empty-state').style.display='block';
   document.getElementById('result-panel').classList.remove('show');
   document.getElementById('result-panel').style.display='none';
-  document.getElementById('disease-info').classList.remove('show');
-  document.getElementById('disease-info').style.display='none';
-  document.getElementById('gradcam-card').style.display='none';
+  const grid=document.querySelector('.result-bottom-grid');
+  if(grid) grid.classList.remove('show');
 }
 
 fileInput.addEventListener('change',()=>setFile(fileInput.files[0]));
@@ -1301,22 +1321,20 @@ function renderResults(data){
     setTimeout(()=>row.querySelector('.prob-bar-fill').style.width=pct2+'%',80);
   });
 
-  // Grad-CAM
+  // Show Grad-CAM image
   if(data.gradcam_b64){
-    document.getElementById('gradcam-card').style.display='block';
     document.getElementById('gradcam-img').src='data:image/png;base64,'+data.gradcam_b64;
   }
 
-  // Disease info card
+  // Populate disease info + show the bottom grid
   renderDiseaseInfo(data.class_name);
+  const grid=document.querySelector('.result-bottom-grid');
+  setTimeout(()=>grid.classList.add('show'),80);
 }
 
 function renderDiseaseInfo(className){
   const info=DISEASE_DB[className];
   if(!info)return;
-  const infoDiv=document.getElementById('disease-info');
-  infoDiv.style.display='block';
-  setTimeout(()=>infoDiv.classList.add('show'),20);
 
   const badge=document.getElementById('severity-badge');
   badge.textContent='Severity: '+info.severity;
@@ -1400,103 +1418,195 @@ function renderDiseaseInfo(className){
     // ---- PLANT GROUP ----
     const plant=new THREE.Group();
 
-    // --- POT ---
-    const potMat=new THREE.MeshPhongMaterial({color:0x9b4816,shininess:20});
-    const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.4,0.42,20),potMat);
-    pot.position.y=-1.2;pot.castShadow=true;plant.add(pot);
-    const rim=new THREE.Mesh(new THREE.TorusGeometry(0.56,0.045,8,20),new THREE.MeshPhongMaterial({color:0xb85c1a}));
-    rim.rotation.x=Math.PI/2;rim.position.y=-0.99;plant.add(rim);
-    const soil=new THREE.Mesh(new THREE.CylinderGeometry(0.53,0.53,0.05,20),new THREE.MeshPhongMaterial({color:0x3b1f0a}));
-    soil.position.y=-1.0;plant.add(soil);
-
-    // --- STEM ---
     const stemMat=new THREE.MeshPhongMaterial({color:0x2d6a4f,shininess:8});
-    const stem=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.08,2.4,10),stemMat);
-    stem.position.y=0;stem.castShadow=true;plant.add(stem);
+    const leafMatA=new THREE.MeshPhongMaterial({color:0x52b788,side:THREE.DoubleSide,shininess:14,specular:0x0a2a18});
+    const leafMatB=new THREE.MeshPhongMaterial({color:0x2d6a4f,side:THREE.DoubleSide,shininess:10,specular:0x071a10});
 
-    // Branch helper
-    function addBranch(x,y,z,len,rx,rz){
-      const b=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.032,len,8),stemMat);
-      b.position.set(x,y,z);
-      b.rotation.set(rx||0,0,rz||0);
-      b.castShadow=true;plant.add(b);
+    // --- POT ---
+    const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.52,0.40,0.44,24),new THREE.MeshPhongMaterial({color:0x9b4816,shininess:22}));
+    pot.position.y=-1.22;pot.castShadow=true;plant.add(pot);
+    const rim=new THREE.Mesh(new THREE.TorusGeometry(0.53,0.045,8,24),new THREE.MeshPhongMaterial({color:0xb85c1a}));
+    rim.rotation.x=Math.PI/2;rim.position.y=-1.00;plant.add(rim);
+    const soil=new THREE.Mesh(new THREE.CylinderGeometry(0.50,0.50,0.05,24),new THREE.MeshPhongMaterial({color:0x3b1f0a}));
+    soil.position.y=-1.01;plant.add(soil);
+
+    // --- MAIN STEM (center, from soil to top) ---
+    // Stem height 2.2, bottom at y=-1.0, top at y=1.2
+    const STEM_BOT=-1.0, STEM_TOP=1.2, STEM_H=STEM_TOP-STEM_BOT;
+    const mainStem=new THREE.Mesh(new THREE.CylinderGeometry(0.038,0.082,STEM_H,10),stemMat);
+    mainStem.position.y=(STEM_BOT+STEM_TOP)/2;
+    mainStem.castShadow=true;plant.add(mainStem);
+
+    // ---- LEAF SHAPE BUILDER ----
+    function makeLeafShape(L,W){
+      const sh=new THREE.Shape();
+      sh.moveTo(0, L*0.5);
+      sh.quadraticCurveTo( W*0.55, L*0.15,  W*0.48,-L*0.12);
+      sh.quadraticCurveTo( W*0.28,-L*0.40,  0,-L*0.5);
+      sh.quadraticCurveTo(-W*0.28,-L*0.40, -W*0.48,-L*0.12);
+      sh.quadraticCurveTo(-W*0.55, L*0.15,  0, L*0.5);
+      return sh;
     }
-    addBranch( 0.32, 0.38, 0.0, 0.5,  0, -Math.PI/5);
-    addBranch(-0.30, 0.15, 0.0, 0.45, 0,  Math.PI/5);
-    addBranch( 0.15, 0.8,  0.1, 0.42, 0, -Math.PI/7);
-    addBranch(-0.22, 0.65,-0.1, 0.38, 0,  Math.PI/6);
 
-    // --- TOMATOES ---
+    function buildLeafGeo(L,W,curl){
+      const geo=new THREE.ShapeGeometry(makeLeafShape(L,W),14);
+      const pos=geo.attributes.position;
+      const c=curl||0.18;
+      for(let i=0;i<pos.count;i++){
+        const xv=pos.getX(i);
+        pos.setZ(i,xv*xv*c);
+      }
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    // ---- BRANCH + LEAF NODE ----
+    // stemY    : height on main stem where branch originates
+    // angleY   : horizontal compass angle (radians) branch points toward
+    // tiltUp   : upward tilt angle of branch (radians, 0=horizontal, +ve=upward)
+    // branchLen: length of branch cylinder
+    // leaves   : array of {L,W,curl,offX,offY,rxExtra,rzExtra,mat}
+    function addNode(stemY, angleY, tiltUp, branchLen, leaves){
+      const node=new THREE.Group();
+      node.position.set(0, stemY, 0);
+      plant.add(node);
+
+      // Direction vector of branch
+      const dirX=Math.sin(angleY)*Math.cos(tiltUp);
+      const dirY=Math.sin(tiltUp);
+      const dirZ=Math.cos(angleY)*Math.cos(tiltUp);
+
+      // Branch cylinder — center is halfway along branch
+      const branchGeo=new THREE.CylinderGeometry(0.018,0.030,branchLen,8);
+      const branchMesh=new THREE.Mesh(branchGeo,stemMat);
+      branchMesh.position.set(dirX*branchLen/2, dirY*branchLen/2, dirZ*branchLen/2);
+      // Rotate cylinder from Y-axis to branch direction
+      const yAxis=new THREE.Vector3(0,1,0);
+      const branchDir=new THREE.Vector3(dirX,dirY,dirZ).normalize();
+      branchMesh.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(yAxis,branchDir));
+      branchMesh.castShadow=true;
+      node.add(branchMesh);
+
+      // Tip position (in node-local space)
+      const tipX=dirX*branchLen, tipY=dirY*branchLen, tipZ=dirZ*branchLen;
+
+      // Small connecting petiole sphere at tip for seamless join
+      const bud=new THREE.Mesh(new THREE.SphereGeometry(0.022,8,8),stemMat);
+      bud.position.set(tipX,tipY,tipZ);
+      node.add(bud);
+
+      // Attach leaves at tip
+      leaves.forEach(lf=>{
+        const leafGroup=new THREE.Group();
+        // Position at tip + small per-leaf offset
+        leafGroup.position.set(tipX+(lf.offX||0), tipY+(lf.offY||0), tipZ);
+        // Orient: face outward in branch direction with natural tilt
+        leafGroup.rotation.set(
+          -Math.PI/3 + (lf.rxExtra||0),  // tilt blade upward-ish
+          angleY + (lf.ryExtra||0),       // face out in branch direction
+          lf.rzExtra||0                   // slight roll
+        );
+        const leafMesh=new THREE.Mesh(buildLeafGeo(lf.L,lf.W,lf.curl),lf.mat||leafMatA);
+        leafMesh.castShadow=true;
+        leafGroup.add(leafMesh);
+        node.add(leafGroup);
+      });
+
+      return {tipX, tipY:stemY+tipY, tipZ};
+    }
+
+    // ---- TOMATO HELPER ----
     function addTomato(x,y,z,r,col){
       const mat=new THREE.MeshPhongMaterial({color:col,shininess:90,specular:0x441111});
       const s=new THREE.Mesh(new THREE.SphereGeometry(r,20,16),mat);
       s.position.set(x,y,z);s.castShadow=true;plant.add(s);
       // stem nub
-      const nub=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.1,6),stemMat);
+      const nub=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.10,6),stemMat);
       nub.position.set(x,y+r+0.04,z);plant.add(nub);
-      // calyx petals
+      // calyx
       for(let i=0;i<5;i++){
-        const angle=i/5*Math.PI*2;
+        const a=i/5*Math.PI*2;
         const cv=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.05,0.012),new THREE.MeshPhongMaterial({color:0x1f5c30}));
-        cv.position.set(x+Math.cos(angle)*0.03,y+r+0.01,z+Math.sin(angle)*0.03);
-        cv.rotation.set(Math.cos(angle)*0.4,0,Math.sin(angle)*0.4);
+        cv.position.set(x+Math.cos(a)*0.03,y+r+0.01,z+Math.sin(a)*0.03);
+        cv.rotation.set(Math.cos(a)*0.4,0,Math.sin(a)*0.4);
         plant.add(cv);
       }
     }
-    addTomato( 0.6,  0.32, 0.2, 0.18, 0xe63946);
-    addTomato(-0.52, 0.08, 0.15, 0.16, 0xe63946);
-    addTomato( 0.28, 0.7,  0.18, 0.14, 0xff8c42);
-    addTomato(-0.3,  0.58,-0.15, 0.12, 0xffd700);
-    addTomato( 0.05, 1.0,  0.05, 0.11, 0xff4500);
 
-    // --- LEAVES — proper teardrop shapes ---
-    const leafMat=new THREE.MeshPhongMaterial({color:0x52b788,side:THREE.DoubleSide,shininess:14,specular:0x0a2a18});
-    const darkLeafMat=new THREE.MeshPhongMaterial({color:0x2d6a4f,side:THREE.DoubleSide,shininess:10,specular:0x071a10});
+    // ================================================================
+    // BUILD THE PLANT — all leaves attached to branch tips via nodes
+    // ================================================================
+    const PI=Math.PI;
 
-    function makeLeafShape(length,width){
-      const sh=new THREE.Shape();
-      // Proper teardrop: tip → widest point → stem
-      sh.moveTo(0, length*0.5);
-      sh.quadraticCurveTo( width*0.55, length*0.15,  width*0.48,-length*0.1);
-      sh.quadraticCurveTo( width*0.28,-length*0.38,  0,-length*0.5);
-      sh.quadraticCurveTo(-width*0.28,-length*0.38, -width*0.48,-length*0.1);
-      sh.quadraticCurveTo(-width*0.55, length*0.15,  0, length*0.5);
-      return sh;
-    }
+    // Node 1 — low left branch, two leaves at tip + one side leaflet
+    addNode(-0.55, PI+PI/6, 0.30, 0.48, [
+      {L:0.38,W:0.22,curl:0.20,offX: 0.00,offY:0.04,rxExtra:-0.10,ryExtra: 0.10,rzExtra: 0.15,mat:leafMatA},
+      {L:0.28,W:0.17,curl:0.22,offX: 0.15,offY:0.02,rxExtra:-0.15,ryExtra: 0.40,rzExtra:-0.20,mat:leafMatB},
+      {L:0.26,W:0.16,curl:0.18,offX:-0.15,offY:0.02,rxExtra:-0.12,ryExtra:-0.35,rzExtra: 0.18,mat:leafMatA},
+    ]);
+    addTomato(-0.56,-0.22,0.18, 0.16, 0xe63946);
 
-    function addLeaf(x,y,z,rx,ry,rz,len,wid,mat,curl){
-      const sh=makeLeafShape(len,wid);
-      const geo=new THREE.ShapeGeometry(sh,14);
-      // Midrib curl: displace Z based on squared X distance from centre
-      const pos=geo.attributes.position;
-      const c=curl||0.15;
-      for(let i=0;i<pos.count;i++){
-        const xv=pos.getX(i);
-        pos.setZ(i, xv*xv*c);
-      }
-      geo.computeVertexNormals();
-      const leaf=new THREE.Mesh(geo,mat||leafMat);
-      leaf.position.set(x,y,z);
-      leaf.rotation.set(rx,ry,rz);
-      leaf.castShadow=true;
-      plant.add(leaf);
-      return leaf;
-    }
+    // Node 2 — low right branch
+    addNode(-0.25, PI/5, 0.25, 0.50, [
+      {L:0.40,W:0.24,curl:0.18,offX: 0.00,offY:0.04,rxExtra:-0.08,ryExtra:-0.10,rzExtra:-0.18,mat:leafMatA},
+      {L:0.30,W:0.18,curl:0.20,offX: 0.16,offY:0.02,rxExtra:-0.12,ryExtra: 0.40,rzExtra: 0.15,mat:leafMatB},
+      {L:0.28,W:0.17,curl:0.22,offX:-0.14,offY:0.02,rxExtra:-0.10,ryExtra:-0.38,rzExtra:-0.15,mat:leafMatA},
+    ]);
+    addTomato( 0.60,-0.00,0.20, 0.18, 0xe63946);
 
-    // Leaves placed naturally at branches
-    addLeaf( 0.65, 0.50, 0.14, -0.20,  0.38,  0.50, 0.40, 0.23, leafMat,     0.20);
-    addLeaf(-0.60, 0.28, 0.02, -0.15, -0.42, -0.48, 0.36, 0.21, darkLeafMat, 0.22);
-    addLeaf( 0.10, 0.85, 0.24, -0.42,  0.10,  0.20, 0.42, 0.25, leafMat,     0.13);
-    addLeaf(-0.35, 0.80,-0.18, -0.10, -0.26,  0.38, 0.38, 0.22, leafMat,     0.16);
-    addLeaf( 0.45,-0.25, 0.34,  0.28,  0.52, -0.28, 0.34, 0.20, darkLeafMat, 0.24);
-    addLeaf(-0.20,-0.10,-0.30,  0.20, -0.20, -0.58, 0.32, 0.19, leafMat,     0.18);
-    addLeaf( 0.14, 1.05, 0.02, -0.38,  0.02,  0.14, 0.38, 0.23, leafMat,     0.15);
-    addLeaf(-0.50, 1.00, 0.14, -0.19, -0.38,  0.24, 0.32, 0.19, darkLeafMat, 0.19);
-    // Tiny top pinnate leaflets
-    addLeaf( 0.16, 1.22, 0.06, -0.52,  0.12,  0.09, 0.24, 0.14, leafMat,     0.26);
-    addLeaf(-0.14, 1.20,-0.04, -0.48, -0.12, -0.09, 0.22, 0.13, darkLeafMat, 0.22);
+    // Node 3 — mid left branch
+    addNode(0.12, PI+PI/8, 0.35, 0.46, [
+      {L:0.42,W:0.25,curl:0.15,offX: 0.00,offY:0.04,rxExtra:-0.08,ryExtra: 0.08,rzExtra: 0.12,mat:leafMatA},
+      {L:0.32,W:0.19,curl:0.18,offX: 0.15,offY:0.02,rxExtra:-0.14,ryExtra: 0.42,rzExtra:-0.18,mat:leafMatB},
+      {L:0.30,W:0.18,curl:0.20,offX:-0.14,offY:0.02,rxExtra:-0.12,ryExtra:-0.40,rzExtra: 0.16,mat:leafMatA},
+    ]);
+    addTomato(-0.42, 0.38, 0.14, 0.14, 0xff8c42);
+
+    // Node 4 — mid right branch
+    addNode(0.38, PI*1.8, 0.28, 0.48, [
+      {L:0.44,W:0.26,curl:0.14,offX: 0.00,offY:0.04,rxExtra:-0.08,ryExtra:-0.08,rzExtra:-0.14,mat:leafMatA},
+      {L:0.34,W:0.20,curl:0.17,offX: 0.16,offY:0.02,rxExtra:-0.12,ryExtra: 0.38,rzExtra: 0.16,mat:leafMatB},
+      {L:0.30,W:0.18,curl:0.19,offX:-0.14,offY:0.02,rxExtra:-0.10,ryExtra:-0.36,rzExtra:-0.14,mat:leafMatA},
+    ]);
+    addTomato( 0.44, 0.60, 0.18, 0.13, 0xffd700);
+
+    // Node 5 — upper left branch
+    addNode(0.68, PI+PI/4, 0.40, 0.44, [
+      {L:0.40,W:0.23,curl:0.16,offX: 0.00,offY:0.04,rxExtra:-0.06,ryExtra: 0.06,rzExtra: 0.10,mat:leafMatA},
+      {L:0.30,W:0.18,curl:0.19,offX: 0.14,offY:0.02,rxExtra:-0.12,ryExtra: 0.40,rzExtra:-0.16,mat:leafMatB},
+      {L:0.28,W:0.17,curl:0.21,offX:-0.13,offY:0.02,rxExtra:-0.10,ryExtra:-0.38,rzExtra: 0.14,mat:leafMatA},
+    ]);
+    addTomato(-0.34, 0.98,-0.12, 0.12, 0xff4500);
+
+    // Node 6 — upper right branch
+    addNode(0.90, 0.20, 0.38, 0.42, [
+      {L:0.38,W:0.22,curl:0.16,offX: 0.00,offY:0.04,rxExtra:-0.08,ryExtra:-0.06,rzExtra:-0.12,mat:leafMatA},
+      {L:0.28,W:0.17,curl:0.18,offX: 0.13,offY:0.02,rxExtra:-0.12,ryExtra: 0.36,rzExtra: 0.14,mat:leafMatB},
+      {L:0.26,W:0.16,curl:0.20,offX:-0.12,offY:0.02,rxExtra:-0.10,ryExtra:-0.34,rzExtra:-0.12,mat:leafMatA},
+    ]);
+    addTomato( 0.30, 1.08, 0.06, 0.10, 0xe63946);
+
+    // Node 7 — apical top (upward-growing, 5 small leaflets like tomato crown)
+    addNode(1.10, 0, 0.80, 0.20, [
+      {L:0.26,W:0.14,curl:0.25,offX: 0.00,offY:0.02,rxExtra:-0.20,ryExtra: 0.00,rzExtra: 0.00,mat:leafMatA},
+    ]);
+    addNode(1.10, PI*0.4, 0.75, 0.18, [
+      {L:0.22,W:0.13,curl:0.25,offX: 0.00,offY:0.02,rxExtra:-0.18,ryExtra: 0.00,rzExtra: 0.10,mat:leafMatB},
+    ]);
+    addNode(1.10, PI*0.8, 0.78, 0.18, [
+      {L:0.22,W:0.13,curl:0.24,offX: 0.00,offY:0.02,rxExtra:-0.18,ryExtra: 0.00,rzExtra:-0.10,mat:leafMatA},
+    ]);
+    addNode(1.10, PI*1.2, 0.76, 0.18, [
+      {L:0.24,W:0.14,curl:0.24,offX: 0.00,offY:0.02,rxExtra:-0.18,ryExtra: 0.00,rzExtra: 0.10,mat:leafMatB},
+    ]);
+    addNode(1.10, PI*1.6, 0.74, 0.18, [
+      {L:0.22,W:0.13,curl:0.26,offX: 0.00,offY:0.02,rxExtra:-0.18,ryExtra: 0.00,rzExtra:-0.10,mat:leafMatA},
+    ]);
 
     scene.add(plant);
+
+
+
 
     // --- PARTICLES ---
     const N=80;
