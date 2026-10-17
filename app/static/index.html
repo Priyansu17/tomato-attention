@@ -324,8 +324,14 @@ section{padding:7rem 4rem;}
 /* ============================================================
    DETECT SECTION
    ============================================================ */
-#detect{background:var(--bg);overflow-x:clip;}
-.detect-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+#detect{background:var(--bg);}
+.detect-grid{
+  display:grid;
+  grid-template-columns:minmax(260px,340px) 1fr;
+  gap:2.5rem;
+  align-items:start;
+}
+
 
 /* Upload zone */
 .upload-zone{
@@ -789,7 +795,7 @@ footer{
 
   <div class="detect-grid">
     <!-- Left: Upload -->
-    <div class="reveal from-left">
+    <div class="reveal from-bottom">
       <label class="upload-zone" id="uploadZone">
         <input type="file" class="upload-input" id="fileInput" accept="image/*"/>
         <div class="upload-icon">🍃</div>
@@ -822,7 +828,7 @@ footer{
     </div>
 
     <!-- Right: Results -->
-    <div class="reveal from-right">
+    <div class="reveal from-bottom" style="transition-delay:0.08s">
       <!-- Placeholder / empty state -->
       <div id="empty-state" style="
         background:var(--surface);border:1px solid var(--border);
