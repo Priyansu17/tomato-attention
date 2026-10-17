@@ -366,22 +366,25 @@ section{padding:7rem 4rem;}
 
 /* Upload zone */
 .upload-zone{
-  border:2px dashed rgba(82,183,136,0.40);border-radius:var(--radius);
+  /* outline is NOT clipped by overflow:hidden — dashes always fully visible */
+  border:none;
+  outline:2px dashed rgba(82,183,136,0.45);
+  outline-offset:-2px;
+  border-radius:var(--radius);
   padding:3rem 2rem;text-align:center;cursor:pointer;
-  transition:border-color 0.3s, box-shadow 0.3s;
+  transition:outline-color 0.3s, box-shadow 0.3s, background 0.3s;
   position:relative;
+  overflow:hidden;  /* clips the file input to the label bounds */
   background:var(--surface);
-  /* NO overflow:hidden — that clips the dashed border */
 }
-.upload-glow{
-  /* inner glow element — doesn't affect border */
-  position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
+.upload-zone::before{
+  content:'';position:absolute;inset:0;
   background:radial-gradient(circle at center,rgba(82,183,136,0.07),transparent 70%);
-  opacity:0;transition:opacity 0.3s;
+  opacity:0;transition:opacity 0.3s;pointer-events:none;
 }
-.upload-zone:hover .upload-glow{opacity:1;}
-.upload-zone:hover{border-color:var(--green);box-shadow:0 0 0 3px rgba(82,183,136,0.10);}
-.upload-zone.drag-over{border-color:var(--green);border-style:solid;background:rgba(82,183,136,0.06);}
+.upload-zone:hover{outline-color:var(--green);box-shadow:0 0 0 3px rgba(82,183,136,0.10);}
+.upload-zone:hover::before{opacity:1;}
+.upload-zone.drag-over{outline-color:var(--green);outline-style:solid;background:rgba(82,183,136,0.06);}
 .upload-icon{font-size:3rem;margin-bottom:1rem;position:relative;z-index:1;}
 .upload-title{font-weight:700;font-size:1rem;margin-bottom:0.4rem;position:relative;z-index:1;}
 .upload-hint{font-size:0.8rem;color:var(--text-muted);position:relative;z-index:1;}
@@ -834,7 +837,6 @@ footer{
     <!-- Left: Upload -->
     <div class="reveal from-bottom">
       <label class="upload-zone" id="uploadZone">
-        <div class="upload-glow"></div>
         <input type="file" class="upload-input" id="fileInput" accept="image/*"/>
         <div class="upload-icon">🍃</div>
         <div class="upload-title">Drop leaf image here</div>
