@@ -324,7 +324,7 @@ section{padding:7rem 4rem;}
 /* ============================================================
    DETECT SECTION
    ============================================================ */
-#detect{background:var(--bg);}
+#detect{background:var(--bg);overflow-x:clip;}
 .detect-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
 
 /* Upload zone */
@@ -456,21 +456,31 @@ section{padding:7rem 4rem;}
   grid-template-columns:1fr 1fr;
   gap:1.2rem;
   margin-top:1.2rem;
-  align-items:start;
+  align-items:stretch;   /* both columns same height */
 }
 .result-bottom-grid.show{display:grid;animation:fadeSlideUp 0.5s 0.15s ease both;}
 @media(max-width:1100px){.result-bottom-grid{grid-template-columns:1fr;}}
 
-/* Gradcam — always block inside the grid */
-#gradcam-card{display:block;}
+/* Gradcam card — flex column so it fills its grid cell fully */
+#gradcam-card{display:flex;flex-direction:column;}
+#gradcam-card .result-card{
+  flex:1;display:flex;flex-direction:column;
+}
+#gradcam-card .result-card img{
+  flex:1;object-fit:contain;
+  border-radius:10px;border:1px solid var(--border);
+  display:block;width:100%;min-height:180px;
+}
 
-/* Disease info — always block inside the grid */
-#disease-info{display:block;}
-.disease-info-card{height:100%;}
+/* Disease info card fills its cell too */
+#disease-info{display:flex;flex-direction:column;flex:1;}
 .disease-info-card{
+  flex:1;
   background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius);padding:2rem;
+  display:flex;flex-direction:column;
 }
+
 .severity-badge{
   display:inline-block;padding:0.25rem 0.9rem;border-radius:14px;
   font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;
@@ -1145,21 +1155,33 @@ window.addEventListener('scroll',()=>{
 });
 
 /* ============================================================
-   SCROLL REVEAL
+   SCROLL REVEAL — bidirectional (reverses on scroll up)
    ============================================================ */
 (function(){
   const els=document.querySelectorAll('.reveal');
+  // Track per-element timers to cancel staggered delays
+  const timers=new WeakMap();
+
   const io=new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
+      // Clear any pending delayed show
+      if(timers.has(e.target)) clearTimeout(timers.get(e.target));
+
       if(e.isIntersecting){
-        setTimeout(()=>e.target.classList.add('visible'),
-          parseFloat(e.target.style.transitionDelay||0)*1000);
-        io.unobserve(e.target);
+        // Element entering viewport → animate in (with stagger delay)
+        const delay=parseFloat(e.target.style.transitionDelay||0)*1000;
+        const t=setTimeout(()=>e.target.classList.add('visible'), delay);
+        timers.set(e.target,t);
+      } else {
+        // Element leaving viewport → animate out immediately
+        e.target.classList.remove('visible');
       }
     });
   },{threshold:0.12});
+
   els.forEach(el=>io.observe(el));
 })();
+
 
 /* ============================================================
    COUNTER ANIMATION
@@ -1185,7 +1207,14 @@ function animateCounter(el){
   const counters=document.querySelectorAll('[data-target]');
   const io=new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
-      if(e.isIntersecting){animateCounter(e.target);io.unobserve(e.target);}
+      if(e.isIntersecting){
+        // Re-run counter animation every time it enters view
+        animateCounter(e.target);
+      } else {
+        // Reset to zero when it leaves so it re-animates next time
+        const suffix=e.target.dataset.suffix||'';
+        e.target.textContent='0'+suffix;
+      }
     });
   },{threshold:0.5});
   counters.forEach(c=>io.observe(c));
