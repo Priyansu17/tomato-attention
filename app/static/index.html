@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tomato Disease Intelligence — CBAM Attention Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  /* ========== CSS RESET & BASE ========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:          #0a1a0a;
+    --bg2:         #0d1f0d;
+    --bg3:         #111f11;
+    --surface:     rgba(18, 32, 18, 0.7);
+    --surface2:    rgba(20, 40, 20, 0.85);
+    --red:         #e63946;
+    --red-dark:    #b5202c;
+    --red-glow:    rgba(230, 57, 70, 0.25);
+    --green:       #52b788;
+    --green-dark:  #2d6a4f;
+    --green-glow:  rgba(82, 183, 136, 0.2);
+    --green-bright:#74c69d;
+    --text:        #e8f5e9;
+    --text-muted:  #8aab8a;
+    --border:      rgba(82, 183, 136, 0.18);
+    --border-red:  rgba(230, 57, 70, 0.25);
+    --glass:       rgba(10, 26, 10, 0.6);
+    --radius:      16px;
+    --radius-sm:   10px;
+    --shadow:      0 8px 32px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 30px rgba(82,183,136,0.15);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green-dark); border-radius: 3px; }
+
+  /* ========== NAVIGATION ========== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(10, 26, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-weight: 700; font-size: 1.1rem; color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); display: inline-block; animation: pulse 2s infinite; }
+  .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta {
+    background: var(--red); color: #fff; border: none; padding: 0.5rem 1.2rem;
+    border-radius: 20px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 15px var(--red-glow); }
+
+  /* ========== HERO SECTION ========== */
+  #hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 6rem 4rem 3rem;
+    gap: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  #hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 70% at 75% 50%, rgba(82,183,136,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 20% 80%, rgba(230,57,70,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(82,183,136,0.1); border: 1px solid rgba(82,183,136,0.3);
+    color: var(--green); font-size: 0.8rem; font-weight: 600; padding: 0.35rem 0.9rem;
+    border-radius: 20px; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .hero-badge .badge-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 900; line-height: 1.1;
+    background: linear-gradient(135deg, #e8f5e9 0%, #74c69d 40%, #52b788 70%, #e63946 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    animation: gradientShift 4s ease-in-out infinite alternate;
+    background-size: 200% 200%;
+  }
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+  .hero-sub {
+    font-size: 1.05rem; color: var(--green); font-weight: 600; margin-bottom: 0.8rem;
+  }
+  .hero-desc { font-size: 1rem; color: var(--text-muted); max-width: 480px; margin-bottom: 2rem; }
+  .hero-stats {
+    display: flex; gap: 2rem; margin-bottom: 2.5rem;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: 1.6rem; font-weight: 800; color: var(--green-bright); }
+  .hero-stat .lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    color: #fff; border: none; padding: 0.8rem 1.8rem; border-radius: 25px;
+    font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+    box-shadow: 0 4px 20px rgba(230,57,70,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(230,57,70,0.45); }
+  .btn-secondary {
+    background: transparent; color: var(--green); border: 1.5px solid var(--green);
+    padding: 0.8rem 1.8rem; border-radius: 25px; font-weight: 600; font-size: 0.95rem;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .btn-secondary:hover { background: rgba(82,183,136,0.1); transform: translateY(-2px); }
+
+  /* Three.js canvas container */
+  #threejs-container {
+    position: relative; width: 100%; height: 520px;
+    border-radius: 20px; overflow: hidden;
+  }
+  #threejs-container canvas { display: block; border-radius: 20px; }
+  .canvas-glow {
+    position: absolute; inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(82,183,136,0.12), rgba(230,57,70,0.08));
+    pointer-events: none;
+    border: 1px solid rgba(82,183,136,0.2);
+  }
+  .canvas-label {
+    position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+    background: rgba(10,26,10,0.8); border: 1px solid var(--border);
+    padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; color: var(--text-muted);
+    pointer-events: none; backdrop-filter: blur(8px);
+  }
+
+  /* scroll indicator */
+  .scroll-indicator {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+    color: var(--text-muted); font-size: 0.75rem; cursor: pointer;
+    animation: bounce 2s infinite;
+  }
+  .scroll-indicator svg { width: 20px; height: 20px; }
+  @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+  /* ========== SECTION COMMON ========== */
+  section { padding: 6rem 4rem; }
+  .section-label {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800;
+    color: var(--text); margin-bottom: 1rem; line-height: 1.2;
+  }
+  .section-title span { color: var(--green); }
+  .section-desc { color: var(--text-muted); max-width: 560px; font-size: 1rem; margin-bottom: 3rem; }
+
+  /* ========== HOW IT WORKS ========== */
+  #how-it-works { background: var(--bg2); }
+  .steps-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .step-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.8rem 1.4rem;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s;
+    opacity: 0; transform: translateY(30px);
+    position: relative; overflow: hidden;
+  }
+  .step-card.visible { opacity: 1; transform: translateY(0); }
+  .step-card:hover { transform: translateY(-6px); border-color: rgba(82,183,136,0.4); box-shadow: var(--shadow-glow); }
+  .step-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--green-dark), var(--green));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .step-card:hover::before { opacity: 1; }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    color: #fff; font-size: 0.75rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .step-icon { font-size: 2.4rem; margin-bottom: 1rem; display: block; }
+  .step-card h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+  .step-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ========== DETECTION SECTION ========== */
+  #detection { background: var(--bg); }
+  .detection-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 0 auto; }
+
+  /* Upload panel */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.8rem;
+  }
+  .panel h2 { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 1.4rem; }
+
+  #drop-zone {
+    border: 2px dashed rgba(82,183,136,0.35); border-radius: var(--radius-sm);
+    padding: 2.5rem 1.5rem; text-align: center; cursor: pointer;
+    transition: all 0.25s ease; position: relative; min-height: 200px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem;
+    background: rgba(82,183,136,0.03);
+  }
+  #drop-zone:hover, #drop-zone.drag-over {
+    border-color: var(--green); background: rgba(82,183,136,0.07);
+    box-shadow: inset 0 0 20px rgba(82,183,136,0.08), 0 0 20px rgba(82,183,136,0.1);
+  }
+  #drop-zone .upload-icon { font-size: 3rem; opacity: 0.6; transition: transform 0.2s; }
+  #drop-zone:hover .upload-icon { transform: translateY(-3px); }
+  #drop-zone p { color: var(--text-muted); font-size: 0.9rem; }
+  #drop-zone p b { color: var(--green); }
+  #drop-zone small { color: var(--text-muted); font-size: 0.78rem; opacity: 0.7; }
+  #file-input { display: none; }
+
+  /* Image preview */
+  #preview-area { margin-top: 1.2rem; display: none; }
+  #preview-area img { width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); max-height: 260px; object-fit: cover; }
+  .preview-name { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4rem; text-align: center; }
+
+  /* Variant selector */
+  .variant-label { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.6rem; margin-top: 1.2rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .variant-buttons { display: flex; gap: 0.6rem; }
+  .variant-btn {
+    flex: 1; padding: 0.55rem 0.5rem; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: transparent;
+    color: var(--text-muted); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-align: center;
+  }
+  .variant-btn.active {
+    border-color: var(--green); color: var(--green); background: rgba(82,183,136,0.1);
+    box-shadow: 0 0 12px rgba(82,183,136,0.15);
+  }
+  .variant-btn:hover:not(.active) { border-color: rgba(82,183,136,0.35); color: var(--green-bright); }
+  .variant-tag { display: block; font-size: 0.65rem; font-weight: 400; color: var(--text-muted); margin-top: 2px; }
+
+  /* Analyze button */
+  #analyze-btn {
+    width: 100%; margin-top: 1.4rem; padding: 0.9rem;
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    color: #fff; border: none; border-radius: var(--radius-sm);
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    box-shadow: 0 4px 20px rgba(230,57,70,0.2);
+  }
+  #analyze-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(230,57,70,0.35); }
+  #analyze-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .spinner {
+    width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Result panel */
+  #result-panel { display: none; }
+
+  /* Confidence ring */
+  .result-header { display: flex; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; }
+  .ring-container { flex-shrink: 0; position: relative; width: 100px; height: 100px; }
+  .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: rgba(82,183,136,0.15); stroke-width: 7; }
+  .ring-fill { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 1.2s ease; }
+  .ring-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem; line-height: 1;
+  }
+  .ring-text small { font-size: 0.65rem; font-weight: 500; color: var(--text-muted); }
+  .disease-name-block { flex: 1; }
+  .disease-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+  .disease-name { font-size: 1.6rem; font-weight: 800; line-height: 1.15; margin-bottom: 0.4rem; }
+  .disease-name.healthy { color: var(--green); }
+  .disease-name.diseased { color: var(--red); }
+  .severity-badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.7rem;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .severity-high   { background: rgba(230,57,70,0.15); color: #ff6b6b; border: 1px solid rgba(230,57,70,0.3); }
+  .severity-medium { background: rgba(255,165,0,0.12); color: #ffb347; border: 1px solid rgba(255,165,0,0.25); }
+  .severity-low    { background: rgba(82,183,136,0.15); color: var(--green); border: 1px solid rgba(82,183,136,0.3); }
+  .severity-none   { background: rgba(82,183,136,0.15); color: var(--green); border: 1px solid rgba(82,183,136,0.3); }
+
+  /* Probability bars */
+  .prob-title { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem; margin-top: 1.4rem; }
+  .prob-bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+  .prob-bar-label { font-size: 0.75rem; color: var(--text-muted); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prob-bar-track { flex: 1; height: 7px; background: rgba(82,183,136,0.1); border-radius: 4px; overflow: hidden; }
+  .prob-bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.9s ease; }
+  .prob-bar-fill.top { background: linear-gradient(90deg, var(--green-dark), var(--green)); }
+  .prob-bar-fill.other { background: rgba(82,183,136,0.35); }
+  .prob-bar-val { font-size: 0.73rem; color: var(--text-muted); width: 38px; text-align: right; flex-shrink: 0; }
+
+  /* GradCAM section */
+  .gradcam-section { margin-top: 1.5rem; }
+  .gradcam-title { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+  .gradcam-title .tip { font-size: 0.7rem; background: rgba(82,183,136,0.1); color: var(--green); padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+  #gradcam-img { width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); display: none; }
+
+  /* ========== DISEASE INFO CARD ========== */
+  #disease-info-section { max-width: 1200px; margin: 2rem auto 0; display: none; }
+  .disease-info-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    animation: fadeSlideUp 0.5s ease;
+  }
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .disease-info-card h3 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: 0.4rem; }
+  .disease-info-card .description { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.7; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .info-block h4 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem; }
+  .info-block ul { list-style: none; padding: 0; }
+  .info-block ul li { font-size: 0.88rem; color: var(--text-muted); padding: 0.25rem 0; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .info-block ul li::before { content: '›'; color: var(--green); font-size: 1rem; flex-shrink: 0; margin-top: -1px; }
+  .info-block ul li.red::before { color: var(--red); }
+  .source-credit { margin-top: 1.2rem; font-size: 0.75rem; color: var(--text-muted); opacity: 0.65; border-top: 1px solid var(--border); padding-top: 0.8rem; }
+
+  /* ========== ABOUT SECTION ========== */
+  #about { background: var(--bg2); }
+  .about-inner { max-width: 1200px; margin: 0 auto; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 4rem; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem; text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+    opacity: 0; transform: translateY(20px);
+  }
+  .stat-card.visible { opacity: 1; transform: translateY(0); }
+  .stat-card:hover { transform: translateY(-4px); border-color: rgba(82,183,136,0.35); }
+  .stat-card .stat-val { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.3rem; background: linear-gradient(135deg, var(--green-bright), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-card .stat-lbl { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; }
+
+  /* Architecture flowchart */
+  .arch-section { text-align: center; }
+  .arch-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 2rem; }
+  .arch-flow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0; }
+  .arch-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.9rem 1.2rem;
+    text-align: center; min-width: 120px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: fadeIn 0.5s ease both;
+  }
+  .arch-box:hover { transform: translateY(-3px); border-color: var(--green); box-shadow: 0 0 15px rgba(82,183,136,0.15); }
+  .arch-box .box-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+  .arch-box .box-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+  .arch-box .box-detail { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .arch-box.highlight { border-color: var(--green); background: rgba(82,183,136,0.07); }
+  .arch-arrow {
+    width: 40px; height: 2px; background: linear-gradient(90deg, var(--green-dark), var(--green));
+    position: relative; flex-shrink: 0;
+  }
+  .arch-arrow::after {
+    content: ''; position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    border: 5px solid transparent; border-left-color: var(--green); border-right: none;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Variant cards */
+  .variants-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 3rem; }
+  .variant-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.5rem;
+    transition: transform 0.2s, border-color 0.2s;
+    opacity: 0; transform: translateY(20px);
+  }
+  .variant-card.visible { opacity: 1; transform: translateY(0); }
+  .variant-card:hover { transform: translateY(-4px); border-color: rgba(82,183,136,0.35); }
+  .variant-card h4 { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .variant-card .vc-acc { font-size: 0.82rem; color: var(--green); font-weight: 600; margin-bottom: 0.6rem; }
+  .variant-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* ========== FOOTER ========== */
+  footer {
+    background: var(--bg2); border-top: 1px solid var(--border);
+    padding: 2.5rem 4rem; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-brand { font-weight: 700; color: var(--text); font-size: 1rem; }
+  .footer-brand small { display: block; color: var(--text-muted); font-size: 0.78rem; font-weight: 400; margin-top: 0.2rem; }
+  .footer-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.72rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 12px;
+    background: rgba(82,183,136,0.1); border: 1px solid rgba(82,183,136,0.2); color: var(--green);
+  }
+  .badge.red { background: rgba(230,57,70,0.1); border-color: rgba(230,57,70,0.2); color: #ff8080; }
+
+  /* ========== ANIMATIONS & UTILS ========== */
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .transition-card { transition: opacity 0.5s ease, transform 0.5s ease; }
+
+  /* ========== ERROR STATE ========== */
+  .error-box {
+    background: rgba(230,57,70,0.08); border: 1px solid rgba(230,57,70,0.2);
+    border-radius: var(--radius-sm); padding: 1rem 1.2rem;
+    color: #ff8080; font-size: 0.88rem; margin-top: 1rem; display: none;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 900px) {
+    #hero { grid-template-columns: 1fr; padding: 5rem 1.5rem 2rem; }
+    #threejs-container { height: 350px; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .detection-layout { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .arch-flow { gap: 0.5rem; }
+    .arch-arrow { display: none; }
+    .variants-grid { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    section { padding: 4rem 1.5rem; }
+    footer { padding: 2rem 1.5rem; }
+    nav { padding: 0.8rem 1.2rem; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 600px) {
+    .steps-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .hero-stats { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================== NAV ======================== -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="dot"></span> TomatoAI
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#detection">Detect</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <a href="#detection" class="nav-cta">Try It →</a>
+</nav>
+
+<!-- ======================== HERO ======================== -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge"><span class="badge-dot"></span> CBAM Attention Network · EfficientNet-B0</div>
+    <h1>Tomato Disease Intelligence</h1>
+    <p class="hero-sub">Precision Plant Pathology at Your Fingertips</p>
+    <p class="hero-desc">
+      Upload a tomato leaf photo and get an instant AI diagnosis powered by a
+      Convolutional Block Attention Module (CBAM) trained on 18,160 PlantVillage
+      images. Includes Grad-CAM visualizations showing exactly what the model sees.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">99.38%</div><div class="lbl">Accuracy</div></div>
+      <div class="hero-stat"><div class="num">10</div><div class="lbl">Classes</div></div>
+      <div class="hero-stat"><div class="num">18K+</div><div class="lbl">Images</div></div>
+      <div class="hero-stat"><div class="num">3</div><div class="lbl">Variants</div></div>
+    </div>
+    <div class="hero-buttons">
+      <a href="#detection" class="btn-primary">🔬 Analyze Leaf</a>
+      <a href="#about" class="btn-secondary">📊 View Architecture</a>
+    </div>
+  </div>
+
+  <div style="position:relative;">
+    <div id="threejs-container">
+      <div class="canvas-glow"></div>
+      <div class="canvas-label">🌱 EfficientNet-B0 + CBAM — Interactive 3D Model</div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+    <span>Scroll</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ======================== HOW IT WORKS ======================== -->
+<section id="how-it-works">
+  <div style="text-align:center; max-width:700px; margin:0 auto;">
+    <div class="section-label">Pipeline</div>
+    <h2 class="section-title">How <span>Disease Detection</span> Works</h2>
+    <p class="section-desc" style="margin:0 auto 3rem;">
+      Our four-stage pipeline takes a single leaf photo from your phone and returns
+      a clinical-grade diagnosis with explainable AI overlays.
+    </p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <span class="step-icon">📸</span>
+      <h3>Upload Leaf Photo</h3>
+      <p>Drag and drop any JPEG or PNG photo of a tomato leaf. Works with smartphone photos taken in the field.</p>
+    </div>
+    <div class="step-card" style="transition-delay:0.1s">
+      <div class="step-num">2</div>
+      <span class="step-icon">👁️</span>
+      <h3>CBAM Attention</h3>
+      <p>The Convolutional Block Attention Module highlights disease regions using both channel-wise and spatial attention mechanisms.</p>
+    </div>
+    <div class="step-card" style="transition-delay:0.2s">
+      <div class="step-num">3</div>
+      <span class="step-icon">🧠</span>
+      <h3>EfficientNet-B0</h3>
+      <p>Pre-trained backbone extracts rich visual features from the attention-weighted feature maps with fine-tuned classification head.</p>
+    </div>
+    <div class="step-card" style="transition-delay:0.3s">
+      <div class="step-num">4</div>
+      <span class="step-icon">✅</span>
+      <h3>Diagnosis + Grad-CAM</h3>
+      <p>Disease classified with confidence score. Grad-CAM overlay shows the exact leaf regions that drove the decision.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== DETECTION ======================== -->
+<section id="detection">
+  <div class="section-label">AI Detection</div>
+  <h2 class="section-title">Analyze Your <span>Tomato Leaf</span></h2>
+  <p class="section-desc">Upload a clear photo of a tomato leaf to receive an instant AI-powered diagnosis with Grad-CAM visualization.</p>
+
+  <div class="detection-layout">
+    <!-- LEFT: Upload Panel -->
+    <div class="panel">
+      <h2>🍃 Upload Image</h2>
+      <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <span class="upload-icon">🌿</span>
+        <p><b>Click to browse</b> or drag & drop here</p>
+        <small>JPEG · PNG · Max 10 MB · Best: clear single leaf</small>
+      </div>
+      <input type="file" id="file-input" accept="image/*" />
+
+      <div id="preview-area">
+        <img id="preview-img" src="" alt="Preview" />
+        <div class="preview-name" id="preview-name"></div>
+      </div>
+
+      <div class="variant-label">Model Variant</div>
+      <div class="variant-buttons">
+        <button class="variant-btn active" data-variant="cbam" onclick="selectVariant(this)">
+          CBAM
+          <span class="variant-tag">Best accuracy</span>
+        </button>
+        <button class="variant-btn" data-variant="se" onclick="selectVariant(this)">
+          SE
+          <span class="variant-tag">Squeeze-Excite</span>
+        </button>
+        <button class="variant-btn" data-variant="baseline" onclick="selectVariant(this)">
+          Baseline
+          <span class="variant-tag">No attention</span>
+        </button>
+      </div>
+
+      <button id="analyze-btn" onclick="runAnalysis()" disabled>
+        <div class="spinner" id="spinner"></div>
+        <span id="btn-text">Select an image first</span>
+      </button>
+      <div class="error-box" id="error-box"></div>
+    </div>
+
+    <!-- RIGHT: Result Panel -->
+    <div class="panel" id="result-panel">
+      <h2>🔬 Analysis Results</h2>
+
+      <div class="result-header">
+        <div class="ring-container">
+          <svg class="ring-svg" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="ring-fill" id="ring-fill" cx="50" cy="50" r="42"
+                    stroke-dasharray="263.9" stroke-dashoffset="263.9" stroke="var(--green)"/>
+          </svg>
+          <div class="ring-text">
+            <span id="ring-pct">0%</span>
+            <small>confidence</small>
+          </div>
+        </div>
+        <div class="disease-name-block">
+          <div class="disease-label">Detected Condition</div>
+          <div class="disease-name" id="disease-name">—</div>
+          <span class="severity-badge" id="severity-badge"></span>
+        </div>
+      </div>
+
+      <div class="prob-title">Class Probabilities</div>
+      <div id="prob-bars"></div>
+
+      <div class="gradcam-section">
+        <div class="gradcam-title">
+          Grad-CAM Overlay <span class="tip">Attention heatmap</span>
+        </div>
+        <img id="gradcam-img" src="" alt="Grad-CAM Visualization" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Disease Info Card -->
+  <div id="disease-info-section">
+    <div class="disease-info-card" id="disease-info-card">
+      <h3 id="info-title">Disease Information</h3>
+      <p class="description" id="info-description"></p>
+      <div class="info-grid">
+        <div class="info-block">
+          <h4>🔍 Symptoms</h4>
+          <ul id="info-symptoms"></ul>
+        </div>
+        <div class="info-block">
+          <h4>💊 Chemical Treatment</h4>
+          <ul id="info-chemical"></ul>
+        </div>
+        <div class="info-block">
+          <h4>🌿 Organic Treatment</h4>
+          <ul id="info-organic"></ul>
+        </div>
+        <div class="info-block">
+          <h4>🛡️ Prevention</h4>
+          <ul id="info-prevention"></ul>
+        </div>
+      </div>
+      <div class="source-credit">
+        📚 Disease data sourced from peer-reviewed plant pathology literature. Always consult a local agricultural extension officer for site-specific advice. Dataset: PlantVillage (Hughes & Salathé, 2015).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== ABOUT ======================== -->
+<section id="about">
+  <div class="about-inner">
+    <div class="section-label">Project Details</div>
+    <h2 class="section-title">About the <span>Research</span></h2>
+    <p class="section-desc">
+      An ablation study comparing three attention mechanisms on the PlantVillage
+      tomato disease detection task using EfficientNet-B0 as the backbone.
+    </p>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">99.38%</div><div class="stat-lbl">Top-1 Accuracy (CBAM)</div></div>
+      <div class="stat-card" style="transition-delay:0.1s"><div class="stat-val">18,160</div><div class="stat-lbl">Training Images</div></div>
+      <div class="stat-card" style="transition-delay:0.2s"><div class="stat-val">10</div><div class="stat-lbl">Disease Classes</div></div>
+      <div class="stat-card" style="transition-delay:0.3s"><div class="stat-val">3</div><div class="stat-lbl">Model Variants</div></div>
+    </div>
+
+    <!-- Architecture Flowchart -->
+    <div class="arch-section">
+      <div class="arch-title">Network Architecture — EfficientNet-B0 with Attention</div>
+      <div class="arch-flow">
+        <div class="arch-box" style="animation-delay:0s">
+          <div class="box-icon">📷</div>
+          <div class="box-name">Input</div>
+          <div class="box-detail">224 × 224 RGB</div>
+        </div>
+        <div class="arch-arrow"></div>
+        <div class="arch-box" style="animation-delay:0.1s">
+          <div class="box-icon">🏗️</div>
+          <div class="box-name">EfficientNet-B0</div>
+          <div class="box-detail">Backbone (frozen → fine-tuned)</div>
+        </div>
+        <div class="arch-arrow"></div>
+        <div class="arch-box highlight" style="animation-delay:0.2s">
+          <div class="box-icon">👁️</div>
+          <div class="box-name">Attention</div>
+          <div class="box-detail">CBAM / SE / Baseline</div>
+        </div>
+        <div class="arch-arrow"></div>
+        <div class="arch-box" style="animation-delay:0.3s">
+          <div class="box-icon">⬇️</div>
+          <div class="box-name">GAP</div>
+          <div class="box-detail">Global Avg Pool</div>
+        </div>
+        <div class="arch-arrow"></div>
+        <div class="arch-box" style="animation-delay:0.4s">
+          <div class="box-icon">🔗</div>
+          <div class="box-name">Dense(256)</div>
+          <div class="box-detail">ReLU + Dropout(0.4)</div>
+        </div>
+        <div class="arch-arrow"></div>
+        <div class="arch-box" style="animation-delay:0.5s">
+          <div class="box-icon">📊</div>
+          <div class="box-name">Output</div>
+          <div class="box-detail">10 Classes (Softmax)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variant cards -->
+    <div class="variants-grid">
+      <div class="variant-card">
+        <h4 style="color:var(--red)">🔴 CBAM</h4>
+        <div class="vc-acc">99.38% accuracy — Best performing</div>
+        <p>Convolutional Block Attention Module applies sequential channel-wise (Squeeze-Excitation with both avg+max pool) followed by spatial attention (7×7 conv on pooled maps). Captures both <em>what</em> and <em>where</em> to attend.</p>
+      </div>
+      <div class="variant-card" style="transition-delay:0.1s">
+        <h4 style="color:var(--green)">🟢 SE Block</h4>
+        <div class="vc-acc">~98.8% accuracy — Channel-only attention</div>
+        <p>Squeeze-Excitation recalibrates channel-wise feature responses. Global average pooling squeezes spatial dimensions, then two fully-connected layers learn per-channel weights. No spatial attention component.</p>
+      </div>
+      <div class="variant-card" style="transition-delay:0.2s">
+        <h4 style="color:var(--text-muted)">⚪ Baseline</h4>
+        <div class="vc-acc">~97.5% accuracy — No attention</div>
+        <p>Pure EfficientNet-B0 backbone with the classification head but no attention module. The identity block passes features through unchanged. Serves as the ablation control for quantifying attention benefits.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== FOOTER ======================== -->
+<footer>
+  <div class="footer-brand">
+    🍅 Tomato Disease Intelligence
+    <small>PlantVillage dataset · Hughes & Salathé (2015) · MIT License</small>
+  </div>
+  <div class="footer-badges">
+    <span class="badge">PyTorch</span>
+    <span class="badge">EfficientNet-B0</span>
+    <span class="badge">CBAM</span>
+    <span class="badge">Grad-CAM</span>
+    <span class="badge red">FastAPI</span>
+    <span class="badge red">Three.js</span>
+  </div>
+</footer>
+
+<!-- ======================== JAVASCRIPT ======================== -->
+<script>
+// ============================================================
+// DISEASE DATABASE
+// ============================================================
+const DISEASE_DB = {
+  'Tomato___Bacterial_spot': {
+    friendly: 'Bacterial Spot',
+    severity: 'High',
+    description: 'Bacterial spot is caused by Xanthomonas species and is one of the most common and destructive diseases of tomato. It thrives in warm, wet weather conditions.',
+    symptoms: ['Small, water-soaked spots on leaves', 'Spots turn brown with yellow halos', 'Severe defoliation in advanced stages', 'Dark, raised scabs on fruits'],
+    chemical: ['Apply copper-based bactericides (copper hydroxide)', 'Use streptomycin sulfate sprays', 'Apply mancozeb + copper combination'],
+    organic: ['Spray neem oil solution (2%) weekly', 'Use copper soap (potassium bicarbonate)', 'Apply compost tea to boost plant immunity'],
+    prevention: ['Use certified disease-free seeds', 'Avoid overhead irrigation', 'Rotate crops every 2-3 years', 'Remove and destroy infected plant debris']
+  },
+  'Tomato___Early_blight': {
+    friendly: 'Early Blight',
+    severity: 'Medium',
+    description: 'Early blight is caused by the fungus Alternaria solani and typically appears first on older, lower leaves. It can cause significant yield losses if not managed.',
+    symptoms: ['Dark brown spots with concentric rings (target pattern)', 'Yellow halo around spots', 'Lower leaves affected first', 'Stem lesions near soil line'],
+    chemical: ['Apply chlorothalonil fungicide', 'Use mancozeb or azoxystrobin', 'Copper-based fungicides every 7-10 days'],
+    organic: ['Baking soda spray (1 tbsp per liter)', 'Neem oil application bi-weekly', 'Trichoderma-based biocontrol agents'],
+    prevention: ['Mulch around plants to prevent soil splash', 'Space plants adequately for airflow', 'Remove infected lower leaves promptly', 'Water at base, avoid wetting foliage']
+  },
+  'Tomato___Late_blight': {
+    friendly: 'Late Blight',
+    severity: 'High',
+    description: 'Late blight, caused by Phytophthora infestans, is the devastating disease responsible for the Irish potato famine. It spreads rapidly in cool, moist conditions and can destroy entire crops.',
+    symptoms: ['Large, irregularly shaped water-soaked lesions', 'White fuzzy growth on leaf undersides', 'Brown to black lesions spreading rapidly', 'Infected fruits show firm brown rot'],
+    chemical: ['Apply metalaxyl or mefenoxam immediately', 'Use chlorothalonil as protective spray', 'Cymoxanil + mancozeb combination'],
+    organic: ['Copper hydroxide spray preventively', 'Remove and bag all infected material', 'Potassium bicarbonate solution'],
+    prevention: ['Plant resistant varieties', 'Avoid planting near potatoes', 'Monitor weather forecasts (cool+wet = high risk)', 'Destroy volunteer plants and crop debris']
+  },
+  'Tomato___Leaf_Mold': {
+    friendly: 'Leaf Mold',
+    severity: 'Medium',
+    description: 'Leaf mold is caused by the fungus Passalora fulva (formerly Cladosporium fulvum). It is most common in greenhouse and tunnel-grown tomatoes where humidity is high.',
+    symptoms: ['Pale greenish-yellow spots on upper leaf surface', 'Olive-green to brown velvety mold on leaf underside', 'Affected leaves curl and dry out', 'Rarely affects fruits directly'],
+    chemical: ['Apply chlorothalonil or mancozeb', 'Use myclobutanil or difenoconazole', 'Rotate fungicide classes to prevent resistance'],
+    organic: ['Improve greenhouse ventilation significantly', 'Apply sulfur-based fungicides', 'Use Bacillus subtilis biocontrol sprays'],
+    prevention: ['Maintain relative humidity below 85%', 'Increase plant spacing', 'Remove infected leaves immediately', 'Avoid wetting leaves during irrigation']
+  },
+  'Tomato___Septoria_leaf_spot': {
+    friendly: 'Septoria Leaf Spot',
+    severity: 'Medium',
+    description: 'Septoria leaf spot, caused by Septoria lycopersici, is a widespread fungal disease that primarily attacks foliage. It rarely affects fruits but can cause severe defoliation.',
+    symptoms: ['Circular spots with dark brown borders and light centers', 'Tiny black pycnidia (spore bodies) visible in spot centers', 'Lower leaves affected first, spreading upward', 'Heavy defoliation weakens plants'],
+    chemical: ['Chlorothalonil every 7-10 days', 'Mancozeb or maneb sprays', 'Copper-based fungicides'],
+    organic: ['Neem oil spray weekly', 'Bacillus subtilis (Serenade) application', 'Remove infected leaves and dispose properly'],
+    prevention: ['Mulch soil to reduce splash dispersal', 'Stake plants for better air circulation', 'Avoid working in wet plants', 'Use drip irrigation instead of overhead']
+  },
+  'Tomato___Spider_mites Two-spotted_spider_mite': {
+    friendly: 'Spider Mites',
+    severity: 'Medium',
+    description: 'Two-spotted spider mites (Tetranychus urticae) are tiny arachnids, not insects, that suck plant cell contents. They thrive in hot, dry conditions and can build pesticide resistance quickly.',
+    symptoms: ['Fine stippling/bronzing on upper leaf surface', 'Fine webbing on undersides of leaves', 'Leaves become yellow, bronze, then die', 'Tiny moving dots visible with hand lens'],
+    chemical: ['Apply abamectin or bifenazate miticide', 'Use spiromesifen or hexythiazox', 'Rotate miticide classes every application'],
+    organic: ['Spray insecticidal soap (potassium soap)', 'Apply neem oil (azadirachtin) weekly', 'Release predatory mites (Phytoseiulus persimilis)', 'Strong water sprays to dislodge mites'],
+    prevention: ['Maintain adequate irrigation (dry stress worsens mites)', 'Monitor undersides of leaves regularly', 'Control dusty conditions around plants', 'Avoid broad-spectrum pesticides that kill natural enemies']
+  },
+  'Tomato___Target_Spot': {
+    friendly: 'Target Spot',
+    severity: 'Medium',
+    description: 'Target spot is caused by the fungus Corynespora cassiicola. While less common than early blight, it can cause significant defoliation and fruit lesions in warm, humid environments.',
+    symptoms: ['Concentric ring lesions (target-like appearance)', 'Brown to tan spots up to 1 cm diameter', 'Affects leaves, stems, and fruits', 'Lesions on fruits appear sunken and dark'],
+    chemical: ['Apply azoxystrobin or pyraclostrobin', 'Use boscalid + pyraclostrobin combination', 'Chlorothalonil as protective spray'],
+    organic: ['Copper octanoate (copper soap) sprays', 'Trichoderma harzianum biocontrol', 'Improve air circulation around plants'],
+    prevention: ['Remove and destroy crop residues after harvest', 'Practice 2-year crop rotation', 'Choose resistant varieties when available', 'Apply mulch to reduce soil splash']
+  },
+  'Tomato___Tomato_Yellow_Leaf_Curl_Virus': {
+    friendly: 'Yellow Leaf Curl Virus',
+    severity: 'High',
+    description: 'Tomato Yellow Leaf Curl Virus (TYLCV) is transmitted by the silverleaf whitefly (Bemisia tabaci). There is no cure once infected — management focuses on preventing transmission.',
+    symptoms: ['Upward curling and yellowing of leaves', 'Stunted plant growth', 'Small, cupped leaves', 'Flower drop and severely reduced fruit set'],
+    chemical: ['Control whiteflies with imidacloprid soil drench at transplanting', 'Spray thiamethoxam or acetamiprid for adult whiteflies', 'Use mineral oil to reduce virus spread'],
+    organic: ['Reflective silver mulch to repel whiteflies', 'Yellow sticky traps for monitoring and mass trapping', 'Neem oil sprays targeting whitefly nymphs', 'Remove and destroy infected plants immediately'],
+    prevention: ['Plant TYLCV-resistant varieties (most important measure)', 'Use fine mesh insect screens in nurseries', 'Transplant only healthy seedlings', 'Control weeds that harbor whiteflies']
+  },
+  'Tomato___Tomato_mosaic_virus': {
+    friendly: 'Tomato Mosaic Virus',
+    severity: 'Medium',
+    description: 'Tomato Mosaic Virus (ToMV) is extremely stable and easily transmitted through mechanical contact, infected seeds, and contaminated tools. It can persist in dry plant debris for years.',
+    symptoms: ['Mosaic pattern of light and dark green on leaves', 'Leaves may be distorted, fern-like, or blistered', 'Fruits may show internal browning', 'Stunted growth in severe infections'],
+    chemical: ['No chemical cure exists for viral diseases', 'Control aphid vectors with imidacloprid or pyrethroids', 'Disinfect tools with 10% bleach solution'],
+    organic: ['Milk spray (whole milk diluted 1:10) as prophylactic', 'Remove and bag infected plants immediately', 'Wash hands thoroughly before handling plants', 'Use virus-free certified seeds'],
+    prevention: ['Plant ToMV-resistant varieties (Tm-2 gene)', 'Sanitize all tools between plants', 'Control aphid populations early', 'Do not use tobacco products near tomatoes (cross-contamination risk)']
+  },
+  'Tomato___healthy': {
+    friendly: 'Healthy',
+    severity: 'None',
+    description: 'Your tomato plant appears healthy! The leaves show no signs of disease, pest damage, or nutrient deficiency. Continue your current care routine.',
+    symptoms: ['Deep green, firm leaves', 'No spots, lesions, or discoloration', 'Vigorous growth', 'Good fruit set'],
+    chemical: [],
+    organic: ['Continue regular fertilization schedule', 'Maintain consistent watering'],
+    prevention: ['Continue monitoring weekly', 'Maintain good air circulation', 'Practice crop rotation annually', 'Keep area free of weeds and debris']
+  }
+};
+
+const CLASS_NAMES = [
+  'Tomato___Bacterial_spot',
+  'Tomato___Early_blight',
+  'Tomato___Late_blight',
+  'Tomato___Leaf_Mold',
+  'Tomato___Septoria_leaf_spot',
+  'Tomato___Spider_mites Two-spotted_spider_mite',
+  'Tomato___Target_Spot',
+  'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
+  'Tomato___Tomato_mosaic_virus',
+  'Tomato___healthy'
+];
+
+const CLASS_SHORT = [
+  'Bacterial Spot', 'Early Blight', 'Late Blight', 'Leaf Mold',
+  'Septoria Spot', 'Spider Mites', 'Target Spot', 'YLC Virus',
+  'Mosaic Virus', 'Healthy'
+];
+
+// ============================================================
+// THREE.JS SCENE
+// ============================================================
+(function initThreeJS() {
+  const container = document.getElementById('threejs-container');
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.insertBefore(renderer.domElement, container.firstChild);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
+  camera.position.set(0, 1.0, 5.5);
+  camera.lookAt(0, 0.5, 0);
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+  const dirLight = new THREE.DirectionalLight(0xffd700, 0.9);
+  dirLight.position.set(3, 5, 3);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
+
+  const redPoint = new THREE.PointLight(0xe63946, 0.8, 6);
+  redPoint.position.set(1, 0.5, 2);
+  scene.add(redPoint);
+
+  const greenPoint = new THREE.PointLight(0x52b788, 0.5, 5);
+  greenPoint.position.set(-2, 2, 1);
+  scene.add(greenPoint);
+
+  // Plant group
+  const plant = new THREE.Group();
+
+  // ---- Soil/pot ----
+  const potGeo = new THREE.CylinderGeometry(0.55, 0.45, 0.35, 16);
+  const potMat = new THREE.MeshPhongMaterial({ color: 0x8b4513, shininess: 20 });
+  const pot = new THREE.Mesh(potGeo, potMat);
+  pot.position.y = -1.15;
+  pot.castShadow = true;
+  plant.add(pot);
+
+  // Soil top
+  const soilGeo = new THREE.CylinderGeometry(0.54, 0.54, 0.05, 16);
+  const soilMat = new THREE.MeshPhongMaterial({ color: 0x4a2c0a });
+  const soil = new THREE.Mesh(soilGeo, soilMat);
+  soil.position.y = -0.95;
+  plant.add(soil);
+
+  // ---- Main stem ----
+  const stemMat = new THREE.MeshPhongMaterial({ color: 0x2d6a4f, shininess: 15 });
+  const mainStemGeo = new THREE.CylinderGeometry(0.045, 0.075, 2.2, 8);
+  const mainStem = new THREE.Mesh(mainStemGeo, stemMat);
+  mainStem.position.y = 0.15;
+  mainStem.castShadow = true;
+  plant.add(mainStem);
+
+  // ---- Branch stems ----
+  function addBranch(angle, height, length) {
+    const geo = new THREE.CylinderGeometry(0.025, 0.038, length, 6);
+    const branch = new THREE.Mesh(geo, stemMat);
+    branch.position.set(
+      Math.sin(angle) * 0.08,
+      height,
+      Math.cos(angle) * 0.08
+    );
+    branch.rotation.z = Math.sin(angle) * 0.55;
+    branch.rotation.x = Math.cos(angle) * 0.2;
+    branch.castShadow = true;
+    plant.add(branch);
+    return branch;
+  }
+  addBranch(0.8,  0.2, 0.9);
+  addBranch(3.9,  0.5, 0.8);
+  addBranch(2.1, -0.1, 0.7);
+  addBranch(5.2,  0.7, 0.85);
+
+  // ---- Tomatoes ----
+  const tomatoMat = new THREE.MeshPhongMaterial({ color: 0xe63946, shininess: 90 });
+  const tomatoOrangeMat = new THREE.MeshPhongMaterial({ color: 0xff8c00, shininess: 80 });
+  const tomatoGreenMat = new THREE.MeshPhongMaterial({ color: 0x3d8b3d, shininess: 60 });
+
+  function addTomato(x, y, z, radius, mat) {
+    const geo = new THREE.SphereGeometry(radius, 16, 12);
+    const t = new THREE.Mesh(geo, mat);
+    t.position.set(x, y, z);
+    t.castShadow = true;
+    plant.add(t);
+    // Small stem nub
+    const nubGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.08, 6);
+    const nub = new THREE.Mesh(nubGeo, stemMat);
+    nub.position.set(x, y + radius + 0.04, z);
+    plant.add(nub);
+    return t;
+  }
+
+  addTomato( 0.55,  0.3,  0.2, 0.21, tomatoMat);
+  addTomato(-0.5,   0.1, -0.1, 0.18, tomatoOrangeMat);
+  addTomato( 0.3,  -0.2,  0.4, 0.16, tomatoGreenMat);
+  addTomato(-0.25,  0.55, 0.3, 0.14, tomatoMat);
+  addTomato( 0.45,  0.7, -0.2, 0.12, tomatoOrangeMat);
+
+  // ---- Leaves ----
+  const leafMat = new THREE.MeshPhongMaterial({ color: 0x52b788, side: THREE.DoubleSide, shininess: 20 });
+  const darkLeafMat = new THREE.MeshPhongMaterial({ color: 0x2d6a4f, side: THREE.DoubleSide, shininess: 15 });
+
+  function addLeaf(x, y, z, rx, ry, rz, scaleX, scaleY, mat) {
+    const geo = new THREE.PlaneGeometry(scaleX, scaleY, 4, 4);
+    // Slightly curl the plane
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const xv = pos.getX(i);
+      pos.setZ(i, xv * xv * 0.15);
+    }
+    geo.computeVertexNormals();
+    const leaf = new THREE.Mesh(geo, mat || leafMat);
+    leaf.position.set(x, y, z);
+    leaf.rotation.set(rx, ry, rz);
+    leaf.castShadow = true;
+    plant.add(leaf);
+    return leaf;
+  }
+
+  addLeaf( 0.65,  0.55, 0.15, -0.3,  0.4, 0.5,  0.55, 0.35, leafMat);
+  addLeaf(-0.6,   0.35, 0.0,  -0.2, -0.5, -0.5, 0.5,  0.3,  darkLeafMat);
+  addLeaf( 0.1,   0.85, 0.25, -0.5,  0.1,  0.2, 0.6,  0.38, leafMat);
+  addLeaf(-0.35,  0.8, -0.2,  -0.1, -0.3,  0.4, 0.45, 0.28, leafMat);
+  addLeaf( 0.45, -0.3,  0.35,  0.3,  0.6, -0.3, 0.48, 0.3,  darkLeafMat);
+  addLeaf(-0.2,  -0.1, -0.3,   0.2, -0.2, -0.6, 0.4,  0.25, leafMat);
+  addLeaf( 0.15,  1.05, 0.0,  -0.4,  0.0,  0.15, 0.52, 0.32, leafMat);
+  addLeaf(-0.5,   1.0,  0.15, -0.2, -0.4,  0.25, 0.42, 0.26, darkLeafMat);
+
+  scene.add(plant);
+
+  // ---- Particle system ----
+  const particleCount = 70;
+  const particleGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  const particleData = [];
+
+  for (let i = 0; i < particleCount; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI;
+    const r = 1.8 + Math.random() * 1.2;
+    positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = (Math.random() - 0.3) * 2.5;
+    positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    particleData.push({ theta, phi, r, speed: 0.003 + Math.random() * 0.004, offset: Math.random() * Math.PI * 2 });
+  }
+
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const particleMat = new THREE.PointsMaterial({
+    color: 0x74c69d, size: 0.05, transparent: true, opacity: 0.75,
+    sizeAttenuation: true
+  });
+  const particles = new THREE.Points(particleGeo, particleMat);
+  scene.add(particles);
+
+  // Ground plane (shadow catcher)
+  const groundGeo = new THREE.PlaneGeometry(10, 10);
+  const groundMat = new THREE.ShadowMaterial({ opacity: 0.25 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -1.35;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Resize handler
+  function onResize() {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  // Animation
+  let frame = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    frame++;
+
+    // Gentle plant sway + rotation
+    plant.rotation.y += 0.004;
+    plant.rotation.z = Math.sin(frame * 0.012) * 0.018;
+
+    // Particle orbiting
+    const pos = particleGeo.attributes.position;
+    for (let i = 0; i < particleCount; i++) {
+      const d = particleData[i];
+      d.theta += d.speed;
+      const x = d.r * Math.sin(d.phi) * Math.cos(d.theta);
+      const z = d.r * Math.sin(d.phi) * Math.sin(d.theta);
+      const y = (Math.sin(frame * 0.01 + d.offset) * 0.3) + (Math.random() - 0.5) * 0.008;
+      pos.setXYZ(i,
+        x + (Math.random() - 0.5) * 0.01,
+        pos.getY(i) + y * 0.05,
+        z + (Math.random() - 0.5) * 0.01
+      );
+    }
+    pos.needsUpdate = true;
+
+    // Particle counter-rotation
+    particles.rotation.y -= 0.002;
+
+    // Red point light pulse near tomatoes
+    redPoint.intensity = 0.6 + Math.sin(frame * 0.05) * 0.2;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+
+// ============================================================
+// UPLOAD & INTERACTION LOGIC
+// ============================================================
+let selectedFile = null;
+let selectedVariant = 'cbam';
+
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const previewArea = document.getElementById('preview-area');
+const previewImg = document.getElementById('preview-img');
+const previewName = document.getElementById('preview-name');
+const analyzeBtn = document.getElementById('analyze-btn');
+const btnText = document.getElementById('btn-text');
+const spinner = document.getElementById('spinner');
+const errorBox = document.getElementById('error-box');
+
+// Drag & drop
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) handleFile(f);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+
+function handleFile(file) {
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    previewArea.style.display = 'block';
+    previewName.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    analyzeBtn.disabled = false;
+    btnText.textContent = 'Analyze with ' + selectedVariant.toUpperCase();
+    hideError();
+  };
+  reader.readAsDataURL(file);
+}
+
+function selectVariant(btn) {
+  document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedVariant = btn.dataset.variant;
+  if (selectedFile) btnText.textContent = 'Analyze with ' + selectedVariant.toUpperCase();
+}
+
+function showError(msg) {
+  errorBox.textContent = '⚠️ ' + msg;
+  errorBox.style.display = 'block';
+}
+function hideError() { errorBox.style.display = 'none'; }
+
+async function runAnalysis() {
+  if (!selectedFile) return;
+  hideError();
+
+  // Show loading state
+  analyzeBtn.disabled = true;
+  spinner.style.display = 'block';
+  btnText.textContent = 'Analyzing…';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('variant', selectedVariant);
+
+    const response = await fetch('/api/predict', { method: 'POST', body: formData });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: 'Server error ' + response.status }));
+      throw new Error(err.detail || 'Request failed');
+    }
+
+    const data = await response.json();
+    displayResults(data);
+  } catch (err) {
+    showError(err.message || 'Failed to connect to the server. Make sure the FastAPI server is running on port 8000.');
+  } finally {
+    analyzeBtn.disabled = false;
+    spinner.style.display = 'none';
+    btnText.textContent = 'Analyze Again';
+  }
+}
+
+function displayResults(data) {
+  const { class_idx, class_name, friendly_name, confidence, probs, gradcam_b64 } = data;
+  const isHealthy = class_name === 'Tomato___healthy';
+
+  // Show result panel
+  document.getElementById('result-panel').style.display = 'block';
+
+  // Disease name
+  const nameEl = document.getElementById('disease-name');
+  nameEl.textContent = friendly_name;
+  nameEl.className = 'disease-name ' + (isHealthy ? 'healthy' : 'diseased');
+
+  // Severity badge
+  const db = DISEASE_DB[class_name];
+  const sev = db ? db.severity : 'Unknown';
+  const sevBadge = document.getElementById('severity-badge');
+  sevBadge.textContent = '⬤ ' + sev + ' Risk';
+  sevBadge.className = 'severity-badge severity-' + sev.toLowerCase();
+
+  // Confidence ring
+  const ringCircumference = 263.9;
+  const offset = ringCircumference * (1 - confidence);
+  const ring = document.getElementById('ring-fill');
+  ring.setAttribute('stroke-dashoffset', ringCircumference); // reset
+  ring.setAttribute('stroke', isHealthy ? '#52b788' : '#e63946');
+  setTimeout(() => ring.setAttribute('stroke-dashoffset', offset), 50);
+
+  document.getElementById('ring-pct').textContent = (confidence * 100).toFixed(1) + '%';
+
+  // Probability bars
+  const barsEl = document.getElementById('prob-bars');
+  barsEl.innerHTML = '';
+  const sortedIdx = probs.map((p, i) => [i, p]).sort((a, b) => b[1] - a[1]);
+  sortedIdx.forEach(([i, p]) => {
+    const isTop = i === class_idx;
+    const row = document.createElement('div');
+    row.className = 'prob-bar-row';
+    row.innerHTML = `
+      <div class="prob-bar-label" title="${CLASS_NAMES[i]}">${CLASS_SHORT[i]}</div>
+      <div class="prob-bar-track">
+        <div class="prob-bar-fill ${isTop ? 'top' : 'other'}" data-width="${p * 100}"></div>
+      </div>
+      <div class="prob-bar-val">${(p * 100).toFixed(1)}%</div>`;
+    barsEl.appendChild(row);
+  });
+  // Animate bars
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.prob-bar-fill').forEach(el => {
+      el.style.width = el.dataset.width + '%';
+    });
+  });
+
+  // Grad-CAM
+  const gcImg = document.getElementById('gradcam-img');
+  if (gradcam_b64) {
+    gcImg.src = 'data:image/png;base64,' + gradcam_b64;
+    gcImg.style.display = 'block';
+  } else {
+    gcImg.style.display = 'none';
+  }
+
+  // Disease info card
+  if (db) {
+    document.getElementById('info-title').textContent = '🦠 ' + db.friendly + ' — Detailed Information';
+    document.getElementById('info-description').textContent = db.description;
+    populateList('info-symptoms', db.symptoms);
+    populateList('info-chemical', db.chemical, db.chemical.length === 0 ? ['No chemical treatment applicable'] : null);
+    populateList('info-organic', db.organic);
+    populateList('info-prevention', db.prevention);
+    const section = document.getElementById('disease-info-section');
+    section.style.display = 'block';
+    setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+  }
+}
+
+function populateList(id, items, fallback) {
+  const ul = document.getElementById(id);
+  ul.innerHTML = '';
+  const list = (items && items.length > 0) ? items : (fallback || []);
+  list.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    ul.appendChild(li);
+  });
+}
+
+// ============================================================
+// INTERSECTION OBSERVER — scroll animations
+// ============================================================
+const observerOpts = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOpts);
+
+document.querySelectorAll('.step-card, .stat-card, .variant-card').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
