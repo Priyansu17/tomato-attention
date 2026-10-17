@@ -585,7 +585,7 @@ section{padding:7rem 4rem;}
   border:1px solid var(--border);
   display:block;
   object-fit:cover;
-  max-height:350px;
+  max-height:240px;
 }
 
 /* Disease info card (LEFT) */
@@ -650,28 +650,28 @@ section{padding:7rem 4rem;}
 /* Architecture diagram */
 .arch-wrap{
   background:var(--surface);border:1px solid var(--border);
-  border-radius:20px;padding:2.5rem;margin-bottom:3rem;
+  border-radius:20px;padding:2.8rem 2rem;margin-bottom:3rem;
   overflow-x:auto;
 }
-.arch-title{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:2rem;text-align:center;}
+.arch-title{font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:var(--green);margin-bottom:2.2rem;text-align:center;}
 .arch-flow{
-  display:flex;align-items:center;justify-content:center;gap:0;
+  display:flex;align-items:center;justify-content:center;gap:0.2rem;
   flex-wrap:wrap;
 }
 .arch-box{
-  background:var(--bg3);border:1px solid var(--border);
-  border-radius:10px;padding:0.75rem 1.1rem;text-align:center;
-  min-width:110px;flex-shrink:0;
+  background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:14px;padding:1.2rem 1.4rem;text-align:center;
+  min-width:145px;flex-shrink:0;
   transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s;
   cursor:default;
 }
-.arch-box:hover{border-color:var(--green);box-shadow:0 0 20px rgba(82,183,136,0.15);transform:translateY(-3px);}
-.arch-box .box-icon{font-size:1.5rem;margin-bottom:0.35rem;}
-.arch-box .box-name{font-size:0.78rem;font-weight:700;color:var(--text);}
-.arch-box .box-sub{font-size:0.66rem;color:var(--text-muted);margin-top:0.15rem;}
-.arch-box.highlight{border-color:var(--green);background:rgba(82,183,136,0.06);}
+.arch-box:hover{border-color:var(--green);box-shadow:0 0 24px rgba(82,183,136,0.22);transform:translateY(-4px);}
+.arch-box .box-icon{font-size:2.2rem;margin-bottom:0.45rem;line-height:1;}
+.arch-box .box-name{font-size:0.92rem;font-weight:800;color:var(--text);}
+.arch-box .box-sub{font-size:0.74rem;color:var(--text-muted);margin-top:0.25rem;}
+.arch-box.highlight{border-color:var(--green);background:rgba(82,183,136,0.08);box-shadow:0 0 16px rgba(82,183,136,0.12);}
 .arch-arrow{
-  font-size:1.3rem;color:var(--green);margin:0 0.3rem;flex-shrink:0;
+  font-size:1.6rem;color:var(--green);margin:0 0.5rem;flex-shrink:0;
   animation:arrowPulse 2s ease-in-out infinite;
 }
 @keyframes arrowPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
