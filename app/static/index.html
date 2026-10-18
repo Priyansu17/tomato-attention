@@ -823,26 +823,26 @@ section{padding:7rem 4rem;}
   transform:scale(1.1);
 }
 
-/* Floating Hover Popup Card */
+/* Floating Hover Popup Card (Compact & Sleek) */
 .arch-popup-card{
   position:fixed;
   z-index:99999;
-  width:380px;
-  max-width:calc(100vw - 32px);
+  width:280px;
+  max-width:calc(100vw - 28px);
   background:var(--surface2);
   border:1.5px solid var(--green);
-  border-radius:18px;
-  padding:1.4rem 1.6rem;
-  box-shadow:0 22px 50px rgba(0,0,0,0.55), 0 0 26px rgba(82,183,136,0.25);
+  border-radius:14px;
+  padding:0.9rem 1.05rem;
+  box-shadow:0 18px 40px rgba(0,0,0,0.55), 0 0 20px rgba(82,183,136,0.22);
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transform:translateY(8px) scale(0.96);
-  transition:opacity 0.22s cubic-bezier(0.16,1,0.3,1),
-             transform 0.22s cubic-bezier(0.16,1,0.3,1),
-             visibility 0.22s;
+  transform:translateY(6px) scale(0.96);
+  transition:opacity 0.2s cubic-bezier(0.16,1,0.3,1),
+             transform 0.2s cubic-bezier(0.16,1,0.3,1),
+             visibility 0.2s;
 }
 .arch-popup-card.visible{
   opacity:1;
@@ -852,19 +852,19 @@ section{padding:7rem 4rem;}
 }
 .popup-arrow{
   position:absolute;
-  width:14px;
-  height:14px;
+  width:11px;
+  height:11px;
   background:var(--surface2);
   transform:translateX(-50%) rotate(45deg);
   pointer-events:none;
 }
 .popup-arrow.arrow-bottom{
-  bottom:-8px;
+  bottom:-6px;
   border-right:1.5px solid var(--green);
   border-bottom:1.5px solid var(--green);
 }
 .popup-arrow.arrow-top{
-  top:-8px;
+  top:-6px;
   border-left:1.5px solid var(--green);
   border-top:1.5px solid var(--green);
 }
@@ -872,68 +872,68 @@ section{padding:7rem 4rem;}
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:0.8rem;
+  gap:0.5rem;
   flex-wrap:wrap;
-  margin-bottom:0.7rem;
+  margin-bottom:0.45rem;
 }
 .exp-badge{
-  font-size:0.7rem;
+  font-size:0.65rem;
   font-weight:800;
   color:var(--green);
   background:rgba(82,183,136,0.12);
   border:1px solid rgba(82,183,136,0.25);
-  padding:0.25rem 0.75rem;
-  border-radius:20px;
+  padding:0.18rem 0.55rem;
+  border-radius:12px;
   text-transform:uppercase;
-  letter-spacing:0.07em;
+  letter-spacing:0.06em;
   display:inline-flex;
   align-items:center;
-  gap:0.35rem;
+  gap:0.25rem;
 }
 .exp-tensor{
   font-family:monospace;
-  font-size:0.78rem;
+  font-size:0.7rem;
   font-weight:600;
   color:var(--green-lite);
   background:var(--bg);
   border:1px solid var(--border);
-  padding:0.25rem 0.65rem;
-  border-radius:8px;
+  padding:0.18rem 0.5rem;
+  border-radius:6px;
 }
 .exp-title{
-  font-size:1.15rem;
-  font-weight:900;
+  font-size:0.95rem;
+  font-weight:800;
   color:var(--text);
-  margin-bottom:0.4rem;
+  margin-bottom:0.3rem;
   display:flex;
   align-items:center;
-  gap:0.45rem;
+  gap:0.35rem;
 }
 .exp-desc{
-  font-size:0.85rem;
+  font-size:0.76rem;
   color:var(--text-muted);
-  line-height:1.65;
-  margin-bottom:1rem;
+  line-height:1.5;
+  margin-bottom:0.65rem;
 }
 .exp-desc strong{
   color:var(--text);
 }
 .exp-tags{
   display:flex;
-  gap:0.5rem;
+  gap:0.35rem;
   flex-wrap:wrap;
 }
 .exp-tag{
-  font-size:0.72rem;
+  font-size:0.66rem;
   font-weight:600;
   color:var(--text);
   background:var(--bg3);
   border:1px solid var(--border);
-  padding:0.3rem 0.75rem;
-  border-radius:10px;
+  padding:0.2rem 0.55rem;
+  border-radius:8px;
   display:flex;
   align-items:center;
-  gap:0.35rem;
+  gap:0.25rem;
 }
 .exp-tag span{
   color:var(--green);
@@ -1168,14 +1168,14 @@ footer{
     Choose your model variant, upload a leaf image, and let the AI do the rest.
   </p>
 
-  <!-- Farmer Ramesh Assistant Banner -->
+  <!-- Farmer Sagar Assistant Banner -->
   <div class="farmer-banner reveal from-bottom" style="transition-delay:0.12s">
-    <div class="farmer-avatar animate-char-float" title="Farmer Ramesh is waving 'Namaste!'">
+    <div class="farmer-avatar animate-char-float" title="Farmer Sagar is waving 'Namaste!'">
       <svg width="110" height="130" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" class="overflow-visible filter drop-shadow-md">
         <!-- Ground Shadow -->
         <ellipse cx="100" cy="232" rx="65" ry="8" fill="#143D28" fill-opacity="0.25" />
         <g style="transform-origin: 100px 180px">
-          <!-- Ramesh: Overalls & Plaid Shirt -->
+          <!-- Sagar: Overalls & Plaid Shirt -->
           <path d="M70 145 C65 170 65 210 68 230 L132 230 C135 210 135 170 130 145 Z" fill="#235D23" />
           <path d="M62 135 C60 150 72 170 100 170 C128 170 140 150 138 135 Z" fill="#EBE2D5" />
           <path d="M75 140 L100 165 L125 140" stroke="#8C6D46" stroke-width="2.5" stroke-linecap="round" />
@@ -1250,7 +1250,7 @@ footer{
     </div>
     <div class="farmer-speech">
       <div class="farmer-role-tag">
-        <span>👨‍🌾</span> Farmer Ramesh · Lead Agronomist & Field Expert
+        <span>👨‍🌾</span> Farmer Sagar · Lead Agronomist & Field Expert
       </div>
       <div class="farmer-quote">
         "Namaste! Upload a clear photo of your tomato leaf below. Our <strong>CBAM Attention AI</strong> will diagnose fungal, bacterial, or viral infections in seconds and give you exact chemical and organic remedies to save your harvest!"
@@ -1418,14 +1418,14 @@ footer{
     </div>
   </div>
 
-  <!-- Dr. Priya AI Scientist Banner -->
+  <!-- Dr. Anushka AI Scientist Banner -->
   <div class="farmer-banner reveal from-bottom" style="margin-top:2.8rem;margin-bottom:2rem;transition-delay:0.12s">
-    <div class="farmer-avatar animate-char-float" title="Dr. Priya is waving 'Hello!'">
+    <div class="farmer-avatar animate-char-float" title="Dr. Anushka is waving 'Hello!'">
       <svg width="110" height="130" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" class="overflow-visible filter drop-shadow-md">
         <!-- Ground Shadow -->
         <ellipse cx="100" cy="232" rx="65" ry="8" fill="#143D28" fill-opacity="0.25" />
         <g style="transform-origin: 100px 180px">
-          <!-- Dr. Priya: Lab Coat / Teal Scientist Vest -->
+          <!-- Dr. Anushka: Lab Coat / Teal Scientist Vest -->
           <path d="M68 145 C64 170 64 210 68 230 L132 230 C136 210 136 170 132 145 Z" fill="#0D9488" />
           <path d="M62 135 C60 150 72 170 100 170 C128 170 140 150 138 135 Z" fill="#FFFFFF" />
           <path d="M80 145 L80 230 M120 145 L120 230" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" />
@@ -1495,7 +1495,7 @@ footer{
     </div>
     <div class="farmer-speech">
       <div class="farmer-role-tag">
-        <span>👩‍🔬</span> Dr. Priya · Agricultural AI Scientist & Neural Lead
+        <span>👩‍🔬</span> Dr. Anushka · Agricultural AI Scientist & Neural Lead
       </div>
       <div class="farmer-quote">
         "Hello! I architected the neural pipeline below. <strong>Hover over any card</strong>—from <em>Input Image</em> to <em>CBAM Block</em>—to see an instant pop-up detailing the live tensor dimensions, operations, and mathematical intuition!"
@@ -2106,19 +2106,19 @@ function showArchPopup(stageKey, targetBox) {
   popupCard.classList.add('visible');
 
   const rect = targetBox.getBoundingClientRect();
-  const popupW = popupCard.offsetWidth || 380;
-  const popupH = popupCard.offsetHeight || 260;
-  const margin = 14;
+  const popupW = popupCard.offsetWidth || 280;
+  const popupH = popupCard.offsetHeight || 180;
+  const margin = 10;
 
   // Horizontal position: center over targetBox
   let left = rect.left + (rect.width / 2) - (popupW / 2);
-  left = Math.max(16, Math.min(left, window.innerWidth - popupW - 16));
+  left = Math.max(14, Math.min(left, window.innerWidth - popupW - 14));
 
   // Vertical position: prefer above targetBox, fallback to below if near screen top
   let top = rect.top - popupH - margin;
   let isBelow = false;
 
-  if (top < 16) {
+  if (top < 14) {
     top = rect.bottom + margin;
     isBelow = true;
   }
@@ -2128,7 +2128,7 @@ function showArchPopup(stageKey, targetBox) {
 
   // Arrow alignment centered on the hovered box
   if (popupArrow) {
-    const arrowX = Math.max(22, Math.min(rect.left + (rect.width / 2) - left, popupW - 22));
+    const arrowX = Math.max(16, Math.min(rect.left + (rect.width / 2) - left, popupW - 16));
     popupArrow.style.left = `${Math.round(arrowX)}px`;
     popupArrow.className = 'popup-arrow ' + (isBelow ? 'arrow-top' : 'arrow-bottom');
   }
