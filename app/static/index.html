@@ -791,7 +791,7 @@ section{padding:7rem 4rem;}
 }
 
 /* ============================================================
-   ARCHITECTURE PIPELINE EXPLANATION CARD
+   ARCHITECTURE PIPELINE FLOATING HOVER POPUP CARD
    ============================================================ */
 .arch-box{
   cursor:pointer;
@@ -823,94 +823,117 @@ section{padding:7rem 4rem;}
   transform:scale(1.1);
 }
 
-/* Dynamic Explanation Card */
-.arch-explanation-card{
-  margin-top:2.2rem;
+/* Floating Hover Popup Card */
+.arch-popup-card{
+  position:fixed;
+  z-index:99999;
+  width:380px;
+  max-width:calc(100vw - 32px);
   background:var(--surface2);
-  border:1.5px solid var(--border);
+  border:1.5px solid var(--green);
   border-radius:18px;
-  padding:1.8rem 2.2rem;
-  position:relative;
-  overflow:hidden;
-  transition:all 0.3s ease;
-  box-shadow:var(--shadow);
+  padding:1.4rem 1.6rem;
+  box-shadow:0 22px 50px rgba(0,0,0,0.55), 0 0 26px rgba(82,183,136,0.25);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateY(8px) scale(0.96);
+  transition:opacity 0.22s cubic-bezier(0.16,1,0.3,1),
+             transform 0.22s cubic-bezier(0.16,1,0.3,1),
+             visibility 0.22s;
 }
-.arch-explanation-card::before{
-  content:'';
+.arch-popup-card.visible{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translateY(0) scale(1);
+}
+.popup-arrow{
   position:absolute;
-  top:0;
-  left:0;
-  width:4px;
-  height:100%;
-  background:linear-gradient(180deg, var(--green-lite), var(--green));
-  border-radius:4px 0 0 4px;
+  width:14px;
+  height:14px;
+  background:var(--surface2);
+  transform:translateX(-50%) rotate(45deg);
+  pointer-events:none;
+}
+.popup-arrow.arrow-bottom{
+  bottom:-8px;
+  border-right:1.5px solid var(--green);
+  border-bottom:1.5px solid var(--green);
+}
+.popup-arrow.arrow-top{
+  top:-8px;
+  border-left:1.5px solid var(--green);
+  border-top:1.5px solid var(--green);
 }
 .exp-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:1rem;
+  gap:0.8rem;
   flex-wrap:wrap;
-  margin-bottom:0.8rem;
+  margin-bottom:0.7rem;
 }
 .exp-badge{
-  font-size:0.72rem;
+  font-size:0.7rem;
   font-weight:800;
   color:var(--green);
   background:rgba(82,183,136,0.12);
   border:1px solid rgba(82,183,136,0.25);
-  padding:0.3rem 0.85rem;
+  padding:0.25rem 0.75rem;
   border-radius:20px;
   text-transform:uppercase;
-  letter-spacing:0.08em;
+  letter-spacing:0.07em;
   display:inline-flex;
   align-items:center;
-  gap:0.4rem;
+  gap:0.35rem;
 }
 .exp-tensor{
   font-family:monospace;
-  font-size:0.82rem;
+  font-size:0.78rem;
   font-weight:600;
   color:var(--green-lite);
   background:var(--bg);
   border:1px solid var(--border);
-  padding:0.3rem 0.8rem;
+  padding:0.25rem 0.65rem;
   border-radius:8px;
 }
 .exp-title{
-  font-size:1.35rem;
+  font-size:1.15rem;
   font-weight:900;
   color:var(--text);
-  margin-bottom:0.5rem;
+  margin-bottom:0.4rem;
   display:flex;
   align-items:center;
-  gap:0.55rem;
+  gap:0.45rem;
 }
 .exp-desc{
-  font-size:0.95rem;
+  font-size:0.85rem;
   color:var(--text-muted);
-  line-height:1.8;
-  margin-bottom:1.4rem;
+  line-height:1.65;
+  margin-bottom:1rem;
 }
 .exp-desc strong{
   color:var(--text);
 }
 .exp-tags{
   display:flex;
-  gap:0.75rem;
+  gap:0.5rem;
   flex-wrap:wrap;
 }
 .exp-tag{
-  font-size:0.76rem;
+  font-size:0.72rem;
   font-weight:600;
   color:var(--text);
   background:var(--bg3);
   border:1px solid var(--border);
-  padding:0.4rem 0.9rem;
-  border-radius:12px;
+  padding:0.3rem 0.75rem;
+  border-radius:10px;
   display:flex;
   align-items:center;
-  gap:0.4rem;
+  gap:0.35rem;
 }
 .exp-tag span{
   color:var(--green);
@@ -1475,7 +1498,7 @@ footer{
         <span>👩‍🔬</span> Dr. Priya · Agricultural AI Scientist & Neural Lead
       </div>
       <div class="farmer-quote">
-        "Hello! I architected the neural pipeline below. Hover or click any block—from <strong>Input Image</strong> to <strong>CBAM Dual Attention</strong>—to inspect live tensor shapes, channel operations, and mathematical intuition!"
+        "Hello! I architected the neural pipeline below. <strong>Hover over any card</strong>—from <em>Input Image</em> to <em>CBAM Block</em>—to see an instant pop-up detailing the live tensor dimensions, operations, and mathematical intuition!"
       </div>
     </div>
   </div>
@@ -1505,7 +1528,7 @@ footer{
         <div class="box-sub">Backbone Features</div>
       </div>
       <div class="arch-arrow">→</div>
-      <div class="arch-box highlight active-stage" data-stage="cbam">
+      <div class="arch-box highlight" data-stage="cbam">
         <div class="hover-hint">Inspect</div>
         <div class="box-icon">🧠</div>
         <div class="box-name">CBAM Block</div>
@@ -1526,25 +1549,26 @@ footer{
         <div class="box-sub">10 Disease Classes</div>
       </div>
     </div>
+  </div>
 
-    <!-- Dynamic Stage Explanation Card -->
-    <div class="arch-explanation-card" id="archExpCard">
-      <div class="exp-header">
-        <div class="exp-badge" id="expBadge">✨ Step 04 · Dual Attention Gate (Ours)</div>
-        <div class="exp-tensor" id="expTensor">Tensor: [B, 1280, 7, 7]</div>
-      </div>
-      <div class="exp-title" id="expTitle">
-        <span>🧠</span> Convolutional Block Attention Module (CBAM)
-      </div>
-      <p class="exp-desc" id="expDesc">
-        Sequential dual-attention mechanism: First, the <strong>Channel Attention Module (CAM)</strong> computes average and max pooled descriptors across spatial dimensions to learn <em>WHAT</em> features to emphasize. Then, the <strong>Spatial Attention Module (SAM)</strong> computes channel-wise pooled maps with a 7×7 conv to learn <em>WHERE</em> the lesion is located.
-      </p>
-      <div class="exp-tags" id="expTags">
-        <div class="exp-tag"><span>Type:</span> Channel + Spatial Attention</div>
-        <div class="exp-tag"><span>Parameters:</span> ~16.4K added</div>
-        <div class="exp-tag"><span>Impact:</span> 99.38% Acc · Peak F1-Score</div>
-        <div class="exp-tag"><span>Grad-CAM:</span> Tightest focus on lesions</div>
-      </div>
+  <!-- Floating Hover Popup Card for Architecture Stages -->
+  <div class="arch-popup-card" id="archPopupCard" role="tooltip">
+    <div class="popup-arrow arrow-bottom" id="popupArrow"></div>
+    <div class="exp-header">
+      <div class="exp-badge" id="popupBadge">✨ Step 04 · Dual Attention Gate</div>
+      <div class="exp-tensor" id="popupTensor">Tensor: [B, 1280, 7, 7]</div>
+    </div>
+    <div class="exp-title" id="popupTitle">
+      <span>🧠</span> Convolutional Block Attention Module (CBAM)
+    </div>
+    <p class="exp-desc" id="popupDesc">
+      Sequential dual-attention mechanism: First, the <strong>Channel Attention Module (CAM)</strong> computes average and max pooled descriptors across spatial dimensions to learn <em>WHAT</em> features to emphasize. Then, the <strong>Spatial Attention Module (SAM)</strong> computes channel-wise pooled maps with a 7×7 conv to learn <em>WHERE</em> the lesion is located.
+    </p>
+    <div class="exp-tags" id="popupTags">
+      <div class="exp-tag"><span>Type:</span> Channel + Spatial Attention</div>
+      <div class="exp-tag"><span>Parameters:</span> ~16.4K added</div>
+      <div class="exp-tag"><span>Impact:</span> 99.38% Acc · Peak F1-Score</div>
+      <div class="exp-tag"><span>Grad-CAM:</span> Tightest focus on lesions</div>
     </div>
   </div>
 
@@ -2045,36 +2069,112 @@ const PIPELINE_STAGES = {
   }
 };
 
-function activatePipelineStage(stageKey){
+/* ============================================================
+   MODEL PIPELINE HOVER POPUP INTERACTION
+   ============================================================ */
+let popupHideTimer = null;
+const popupCard = document.getElementById('archPopupCard');
+const popupArrow = document.getElementById('popupArrow');
+
+function showArchPopup(stageKey, targetBox) {
   const stage = PIPELINE_STAGES[stageKey];
-  if(!stage) return;
+  if (!stage || !popupCard) return;
 
-  document.querySelectorAll('.arch-box').forEach(b=>{
-    b.classList.toggle('active-stage', b.dataset.stage === stageKey);
-  });
+  // Populate data
+  document.getElementById('popupBadge').innerHTML = '✨ ' + stage.badge;
+  document.getElementById('popupTensor').textContent = stage.tensor;
+  document.getElementById('popupTitle').innerHTML = `<span>${stage.icon}</span> ${stage.title}`;
+  document.getElementById('popupDesc').innerHTML = stage.desc;
 
-  const card = document.getElementById('archExpCard');
-  if(!card) return;
-
-  document.getElementById('expBadge').innerHTML = '✨ ' + stage.badge;
-  document.getElementById('expTensor').textContent = stage.tensor;
-  document.getElementById('expTitle').innerHTML = `<span>${stage.icon}</span> ${stage.title}`;
-  document.getElementById('expDesc').innerHTML = stage.desc;
-
-  const tagsWrap = document.getElementById('expTags');
+  const tagsWrap = document.getElementById('popupTags');
   tagsWrap.innerHTML = '';
-  stage.tags.forEach(t=>{
+  stage.tags.forEach(t => {
     const tagEl = document.createElement('div');
     tagEl.className = 'exp-tag';
     tagEl.innerHTML = `<span>${t.label}:</span> ${t.val}`;
     tagsWrap.appendChild(tagEl);
   });
+
+  // Highlight active box
+  document.querySelectorAll('.arch-box').forEach(b => {
+    b.classList.toggle('active-stage', b === targetBox);
+  });
+
+  // Temporarily make visible for measurement
+  popupCard.style.visibility = 'hidden';
+  popupCard.style.display = 'block';
+  popupCard.classList.add('visible');
+
+  const rect = targetBox.getBoundingClientRect();
+  const popupW = popupCard.offsetWidth || 380;
+  const popupH = popupCard.offsetHeight || 260;
+  const margin = 14;
+
+  // Horizontal position: center over targetBox
+  let left = rect.left + (rect.width / 2) - (popupW / 2);
+  left = Math.max(16, Math.min(left, window.innerWidth - popupW - 16));
+
+  // Vertical position: prefer above targetBox, fallback to below if near screen top
+  let top = rect.top - popupH - margin;
+  let isBelow = false;
+
+  if (top < 16) {
+    top = rect.bottom + margin;
+    isBelow = true;
+  }
+
+  popupCard.style.left = `${Math.round(left)}px`;
+  popupCard.style.top = `${Math.round(top)}px`;
+
+  // Arrow alignment centered on the hovered box
+  if (popupArrow) {
+    const arrowX = Math.max(22, Math.min(rect.left + (rect.width / 2) - left, popupW - 22));
+    popupArrow.style.left = `${Math.round(arrowX)}px`;
+    popupArrow.className = 'popup-arrow ' + (isBelow ? 'arrow-top' : 'arrow-bottom');
+  }
+
+  popupCard.style.visibility = 'visible';
 }
 
-document.querySelectorAll('.arch-box').forEach(box=>{
-  box.addEventListener('mouseenter', ()=>activatePipelineStage(box.dataset.stage));
-  box.addEventListener('click', ()=>activatePipelineStage(box.dataset.stage));
+function hideArchPopup() {
+  if (popupCard) {
+    popupCard.classList.remove('visible');
+  }
+  document.querySelectorAll('.arch-box').forEach(b => b.classList.remove('active-stage'));
+}
+
+document.querySelectorAll('.arch-box').forEach(box => {
+  box.addEventListener('mouseenter', () => {
+    if (popupHideTimer) clearTimeout(popupHideTimer);
+    showArchPopup(box.dataset.stage, box);
+  });
+  box.addEventListener('mouseleave', () => {
+    popupHideTimer = setTimeout(hideArchPopup, 100);
+  });
+  box.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (popupHideTimer) clearTimeout(popupHideTimer);
+    showArchPopup(box.dataset.stage, box);
+  });
 });
+
+if (popupCard) {
+  popupCard.addEventListener('mouseenter', () => {
+    if (popupHideTimer) clearTimeout(popupHideTimer);
+  });
+  popupCard.addEventListener('mouseleave', () => {
+    popupHideTimer = setTimeout(hideArchPopup, 100);
+  });
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.arch-box') && !e.target.closest('.arch-popup-card')) {
+    hideArchPopup();
+  }
+});
+
+window.addEventListener('scroll', hideArchPopup, { passive: true });
+window.addEventListener('resize', hideArchPopup, { passive: true });
 
 /* ============================================================
    THREE.JS — 3D TOMATO PLANT
