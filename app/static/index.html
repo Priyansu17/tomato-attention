@@ -2330,36 +2330,81 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
       return {tipX, tipY:stemY+tipY, tipZ};
     }
 
-    // ---- TOMATO HELPER ----
-    function addTomato(x,y,z,r,col){
-      const mat=new THREE.MeshPhongMaterial({color:col,shininess:90,specular:0x441111});
-      const s=new THREE.Mesh(new THREE.SphereGeometry(r,20,16),mat);
-      s.position.set(x,y,z);s.castShadow=true;plant.add(s);
-      // stem nub
-      const nub=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.10,6),stemMat);
-      nub.position.set(x,y+r+0.04,z);plant.add(nub);
-      // calyx
-      for(let i=0;i<5;i++){
-        const a=i/5*Math.PI*2;
-        const cv=new THREE.Mesh(new THREE.BoxGeometry(0.012,0.05,0.012),new THREE.MeshPhongMaterial({color:0x1f5c30}));
-        cv.position.set(x+Math.cos(a)*0.03,y+r+0.01,z+Math.sin(a)*0.03);
-        cv.rotation.set(Math.cos(a)*0.4,0,Math.sin(a)*0.4);
-        plant.add(cv);
+    // ---- ATTACHED TOMATO BUILDER ----
+    // Physically connects a branch node to the tomato fruit with a pedicel stalk and calyx
+    function attachTomato(stemY, angleY, tiltUp, branchLen, frac, r, col, droopX, droopZ, hangDrop){
+      const dirX = Math.sin(angleY) * Math.cos(tiltUp);
+      const dirY = Math.sin(tiltUp);
+      const dirZ = Math.cos(angleY) * Math.cos(tiltUp);
+
+      const attachDist = branchLen * (frac || 0.68);
+      // Branch attachment point in plant coordinate space
+      const bx = dirX * attachDist;
+      const by = stemY + dirY * attachDist;
+      const bz = dirZ * attachDist;
+
+      // Drop distance below branch
+      const drop = hangDrop || (0.12 + r * 0.45);
+      // Tomato fruit center position
+      const tx = bx + (droopX || 0);
+      const tz = bz + (droopZ || 0);
+      const ty = by - drop - r;
+
+      // 1. Tomato fruit mesh
+      const mat = new THREE.MeshPhongMaterial({color: col, shininess: 95, specular: 0x441111});
+      const s = new THREE.Mesh(new THREE.SphereGeometry(r, 22, 18), mat);
+      s.position.set(tx, ty, tz);
+      s.castShadow = true;
+      plant.add(s);
+
+      // 2. Calyx (sepals resting right against top crown of the fruit)
+      const calyxMat = new THREE.MeshPhongMaterial({color: 0x1f5c30, side: THREE.DoubleSide});
+      const calyxGroup = new THREE.Group();
+      calyxGroup.position.set(tx, ty + r * 0.94, tz);
+      for(let i = 0; i < 5; i++){
+        const a = (i / 5) * Math.PI * 2;
+        const sepal = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.055, 0.010), calyxMat);
+        sepal.position.set(Math.cos(a) * 0.028, 0.01, Math.sin(a) * 0.028);
+        sepal.rotation.set(Math.sin(a) * 0.45, a, Math.cos(a) * 0.45);
+        calyxGroup.add(sepal);
       }
+      plant.add(calyxGroup);
+
+      // 3. Stalk / Pedicel physically bridging branch (bx, by, bz) to fruit crown (tx, ty + r, tz)
+      const startPt = new THREE.Vector3(bx, by, bz);
+      const endPt = new THREE.Vector3(tx, ty + r, tz);
+      const stalkVec = new THREE.Vector3().subVectors(endPt, startPt);
+      const stalkLen = stalkVec.length();
+
+      const stalkGeo = new THREE.CylinderGeometry(0.012, 0.014, stalkLen, 8);
+      const stalkMesh = new THREE.Mesh(stalkGeo, stemMat);
+      stalkMesh.position.copy(startPt).addScaledVector(stalkVec, 0.5);
+
+      const up = new THREE.Vector3(0, 1, 0);
+      stalkMesh.setRotationFromQuaternion(
+        new THREE.Quaternion().setFromUnitVectors(up, stalkVec.clone().normalize())
+      );
+      stalkMesh.castShadow = true;
+      plant.add(stalkMesh);
+
+      // 4. Branch attachment knuckle/joint
+      const knuckle = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), stemMat);
+      knuckle.position.set(bx, by, bz);
+      plant.add(knuckle);
     }
 
     // ================================================================
-    // BUILD THE PLANT — all leaves attached to branch tips via nodes
+    // BUILD THE PLANT — all leaves and tomatoes attached to branches
     // ================================================================
     const PI=Math.PI;
 
-    // Node 1 — low left branch, two leaves at tip + one side leaflet
+    // Node 1 — low left branch
     addNode(-0.55, PI+PI/6, 0.30, 0.48, [
       {L:0.38,W:0.22,curl:0.20,offX: 0.00,offY:0.04,rxExtra:-0.10,ryExtra: 0.10,rzExtra: 0.15,mat:leafMatA},
       {L:0.28,W:0.17,curl:0.22,offX: 0.15,offY:0.02,rxExtra:-0.15,ryExtra: 0.40,rzExtra:-0.20,mat:leafMatB},
       {L:0.26,W:0.16,curl:0.18,offX:-0.15,offY:0.02,rxExtra:-0.12,ryExtra:-0.35,rzExtra: 0.18,mat:leafMatA},
     ]);
-    addTomato(-0.56,-0.22,0.18, 0.16, 0xe63946);
+    attachTomato(-0.55, PI+PI/6, 0.30, 0.48, 0.70, 0.16, 0xe63946, -0.04, 0.03, 0.14);
 
     // Node 2 — low right branch
     addNode(-0.25, PI/5, 0.25, 0.50, [
@@ -2367,7 +2412,7 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
       {L:0.30,W:0.18,curl:0.20,offX: 0.16,offY:0.02,rxExtra:-0.12,ryExtra: 0.40,rzExtra: 0.15,mat:leafMatB},
       {L:0.28,W:0.17,curl:0.22,offX:-0.14,offY:0.02,rxExtra:-0.10,ryExtra:-0.38,rzExtra:-0.15,mat:leafMatA},
     ]);
-    addTomato( 0.60,-0.00,0.20, 0.18, 0xe63946);
+    attachTomato(-0.25, PI/5, 0.25, 0.50, 0.72, 0.18, 0xe63946, 0.04, 0.03, 0.15);
 
     // Node 3 — mid left branch
     addNode(0.12, PI+PI/8, 0.35, 0.46, [
@@ -2375,7 +2420,7 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
       {L:0.32,W:0.19,curl:0.18,offX: 0.15,offY:0.02,rxExtra:-0.14,ryExtra: 0.42,rzExtra:-0.18,mat:leafMatB},
       {L:0.30,W:0.18,curl:0.20,offX:-0.14,offY:0.02,rxExtra:-0.12,ryExtra:-0.40,rzExtra: 0.16,mat:leafMatA},
     ]);
-    addTomato(-0.42, 0.38, 0.14, 0.14, 0xff8c42);
+    attachTomato(0.12, PI+PI/8, 0.35, 0.46, 0.68, 0.14, 0xff8c42, -0.03, 0.02, 0.13);
 
     // Node 4 — mid right branch
     addNode(0.38, PI*1.8, 0.28, 0.48, [
@@ -2383,7 +2428,7 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
       {L:0.34,W:0.20,curl:0.17,offX: 0.16,offY:0.02,rxExtra:-0.12,ryExtra: 0.38,rzExtra: 0.16,mat:leafMatB},
       {L:0.30,W:0.18,curl:0.19,offX:-0.14,offY:0.02,rxExtra:-0.10,ryExtra:-0.36,rzExtra:-0.14,mat:leafMatA},
     ]);
-    addTomato( 0.44, 0.60, 0.18, 0.13, 0xffd700);
+    attachTomato(0.38, PI*1.8, 0.28, 0.48, 0.70, 0.13, 0xffd700, 0.03, -0.02, 0.13);
 
     // Node 5 — upper left branch
     addNode(0.68, PI+PI/4, 0.40, 0.44, [
@@ -2391,7 +2436,7 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
       {L:0.30,W:0.18,curl:0.19,offX: 0.14,offY:0.02,rxExtra:-0.12,ryExtra: 0.40,rzExtra:-0.16,mat:leafMatB},
       {L:0.28,W:0.17,curl:0.21,offX:-0.13,offY:0.02,rxExtra:-0.10,ryExtra:-0.38,rzExtra: 0.14,mat:leafMatA},
     ]);
-    addTomato(-0.34, 0.98,-0.12, 0.12, 0xff4500);
+    attachTomato(0.68, PI+PI/4, 0.40, 0.44, 0.66, 0.12, 0xff4500, -0.02, 0.02, 0.12);
 
     // Node 6 — upper right branch
     addNode(0.90, 0.20, 0.38, 0.42, [
@@ -2399,7 +2444,7 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
       {L:0.28,W:0.17,curl:0.18,offX: 0.13,offY:0.02,rxExtra:-0.12,ryExtra: 0.36,rzExtra: 0.14,mat:leafMatB},
       {L:0.26,W:0.16,curl:0.20,offX:-0.12,offY:0.02,rxExtra:-0.10,ryExtra:-0.34,rzExtra:-0.12,mat:leafMatA},
     ]);
-    addTomato( 0.30, 1.08, 0.06, 0.10, 0xe63946);
+    attachTomato(0.90, 0.20, 0.38, 0.42, 0.65, 0.10, 0xe63946, 0.02, 0.02, 0.11);
 
     // Node 7 — apical top (upward-growing, 5 small leaflets like tomato crown)
     addNode(1.10, 0, 0.80, 0.20, [
