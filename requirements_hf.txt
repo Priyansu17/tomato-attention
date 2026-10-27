@@ -1,0 +1,33 @@
+# =============================================================================
+# requirements_hf.txt — Hugging Face Spaces deployment dependencies
+#
+# CPU-only PyTorch build is used (no CUDA needed on HF free tier).
+# Gradio is the HF Spaces native app framework.
+#
+# Install order on HF:
+#   1. torch + torchvision (CPU build via --index-url below; handled in packages.txt)
+#   2. pip install -r requirements_hf.txt
+# =============================================================================
+
+# --- HF Spaces app framework -------------------------------------------------
+gradio>=4.0,<5.0
+
+# --- Deep learning (CPU build — HF installs via torch index) -----------------
+torch>=2.2,<3.0
+torchvision>=0.17,<1.0
+
+# --- Scientific / data handling ----------------------------------------------
+numpy>=1.26,<3.0
+pandas>=2.1,<3.0
+scikit-learn>=1.4,<2.0
+Pillow>=10.2,<13.0
+
+# --- Configuration -----------------------------------------------------------
+PyYAML>=6.0,<7.0
+
+# --- Visualization -----------------------------------------------------------
+matplotlib>=3.8,<4.0
+seaborn>=0.13,<1.0
+
+# --- Progress reporting ------------------------------------------------------
+tqdm>=4.66,<5.0
