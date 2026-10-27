@@ -271,10 +271,7 @@ Upload a tomato leaf image and select an attention variant to get an instant dia
 
 EXAMPLES = []
 
-with gr.Blocks(
-    title="Tomato Disease Intelligence",
-    theme=gr.themes.Soft(primary_hue="green", secondary_hue="red"),
-) as demo:
+with gr.Blocks(title="Tomato Disease Intelligence") as demo:
     gr.Markdown(DESCRIPTION)
 
     with gr.Row():
@@ -317,4 +314,4 @@ This application demonstrates tomato leaf disease classification using three att
 """)
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(theme=gr.themes.Soft(primary_hue="green", secondary_hue="red"))

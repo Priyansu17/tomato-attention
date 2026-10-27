@@ -4,7 +4,7 @@ emoji: 🍅
 colorFrom: green
 colorTo: red
 sdk: gradio
-sdk_version: "4.44.0"
+sdk_version: "6.30.0"
 app_file: app_hf.py
 pinned: false
 license: mit
