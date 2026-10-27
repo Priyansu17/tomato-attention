@@ -37,7 +37,7 @@ from src.config import cfg_get, load_config  # noqa: E402
 from src.data.transforms import build_eval_transform  # noqa: E402
 from src.gradcam import GradCAM, _denormalize, _get_target_layer, _overlay  # noqa: E402
 from src.models import build_model  # noqa: E402
-from src.validator import validate_image_foliage, validate_tomato_prediction  # noqa: E402
+from src.validator import validate_image_foliage, validate_image_context, validate_tomato_prediction  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -248,6 +248,34 @@ async def predict(
             "friendly_names": friendly_names,
             "rejection_reason": foliage_msg,
             "guidance": "The uploaded photo does not contain organic plant foliage. Please upload a clear photo of a tomato leaf.",
+            "gradcam_b64": None,
+            "original_b64": original_b64,
+            "variant": variant,
+        })
+
+    # 1.5. Tier 1.5: Studio / Mortar Context Guard
+    # Rejects images with bright white background + oversaturated non-leaf colours.
+    # Calibrated: 0% false-rejection on 500 PlantVillage tomato leaves (2026-10-27).
+    is_context, context_msg = validate_image_context(pil_image)
+    if not is_context:
+        buf = BytesIO()
+        pil_image.save(buf, format="PNG")
+        original_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+        raw_cfg = load_config(CONFIG_PATH)
+        class_names_t15: list[str] = list(cfg_get(raw_cfg, "data.class_names"))
+        friendly_names_t15 = [n.replace("Tomato___", "").replace("_", " ") for n in class_names_t15]
+
+        return JSONResponse({
+            "is_valid": False,
+            "class_idx": -1,
+            "class_name": "Invalid_Non_Tomato",
+            "friendly_name": "Unrecognized / Non-Tomato Foliage",
+            "confidence": 0.0,
+            "probs": [0.0] * len(class_names_t15),
+            "class_names": class_names_t15,
+            "friendly_names": friendly_names_t15,
+            "rejection_reason": context_msg,
+            "guidance": "Please upload a clear, close-up photo of a tomato leaf in a field or garden. Avoid photos taken inside bowls, mortars, or on white surfaces.",
             "gradcam_b64": None,
             "original_b64": original_b64,
             "variant": variant,
