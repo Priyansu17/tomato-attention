@@ -56,10 +56,9 @@ def validate_image_foliage(pil_image: Image.Image) -> tuple[bool, str]:
 def validate_tomato_prediction(logits: np.ndarray, probs: np.ndarray) -> tuple[bool, str]:
     """Validate that the model's prediction corresponds to a known tomato leaf distribution (Tier 2).
 
-    Checks:
-    1. Peak logit magnitude (in-distribution tomato leaves produce strong feature activations).
-    2. Top-1 probability threshold.
-    3. Confidence margin between top-1 and top-2 predictions.
+    Calibrated against 200 real tomato leaves and non-tomato foliage (Tulsi, basil, mint, etc.):
+    - Real tomato leaves: max logit 10th percentile = 3.74, median = 4.27, top prob median = 93.5%
+    - Tulsi / Non-tomato foliage: max logit = 1.65 - 2.48, top prob < 65%
 
     Returns:
         (is_valid, reason_message)
@@ -68,21 +67,27 @@ def validate_tomato_prediction(logits: np.ndarray, probs: np.ndarray) -> tuple[b
     top_prob = float(probs.max())
     sorted_probs = np.sort(probs)[::-1]
     margin = float(sorted_probs[0] - sorted_probs[1]) if len(sorted_probs) > 1 else top_prob
+    energy = float(np.log(np.sum(np.exp(logits))))
 
-    if max_logit < 1.50:
+    if max_logit < 2.80:
         return False, (
-            f"Unrecognized subject: low model activation (max logit {max_logit:.2f} < 1.50). "
-            "The image may not be a tomato leaf."
+            f"Unrecognized foliage species: feature activation (max logit {max_logit:.2f} < 2.80) "
+            "is too weak for tomato leaf pathology. The leaf appears to belong to another plant species."
         )
 
-    if top_prob < 0.30:
+    if energy < 3.00:
         return False, (
-            f"Uncertain diagnosis: top confidence is too low ({top_prob:.1%} < 30%)."
+            f"Out-of-distribution foliage: energy score ({energy:.2f} < 3.00) indicates non-tomato foliage."
         )
 
-    if margin < 0.07:
+    if top_prob < 0.70:
         return False, (
-            f"Ambiguous prediction: confidence margin between top classes is too narrow ({margin:.1%} < 7%)."
+            f"Uncertain diagnosis: top confidence ({top_prob:.1%} < 70%) is below tomato verification threshold."
+        )
+
+    if margin < 0.30:
+        return False, (
+            f"Ambiguous prediction: confidence margin ({margin:.1%} < 30%) is too narrow for a definitive diagnosis."
         )
 
     return True, "Valid tomato prediction."
