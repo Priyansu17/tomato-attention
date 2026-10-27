@@ -37,6 +37,7 @@ from src.config import cfg_get, load_config  # noqa: E402
 from src.data.transforms import build_eval_transform  # noqa: E402
 from src.gradcam import GradCAM, _denormalize, _get_target_layer, _overlay  # noqa: E402
 from src.models import build_model  # noqa: E402
+from src.validator import validate_image_foliage, validate_tomato_prediction  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -121,16 +122,17 @@ def _run_inference(
     pil_image: Image.Image,
     model: Any,
     cfg: dict,
-) -> tuple[int, float, list[float]]:
-    """Return (class_idx, confidence, all_probs)."""
+) -> tuple[int, float, list[float], np.ndarray]:
+    """Return (class_idx, confidence, all_probs, raw_logits_np)."""
     device = next(model.parameters()).device
     transform = build_eval_transform(cfg)
     tensor = transform(pil_image).unsqueeze(0).to(device)
     with torch.no_grad():
         logits = model(tensor)
+    logits_np = logits[0].cpu().numpy()
     probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
     pred = int(probs.argmax())
-    return pred, float(probs[pred]), probs.tolist()
+    return pred, float(probs[pred]), probs.tolist(), logits_np
 
 
 def _make_gradcam_b64(
@@ -225,6 +227,32 @@ async def predict(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not read image: {e}")
 
+    # 1. Tier 1: Foliage & Chlorophyll Optical Guard
+    is_foliage, foliage_msg = validate_image_foliage(pil_image)
+    if not is_foliage:
+        buf = BytesIO()
+        pil_image.save(buf, format="PNG")
+        original_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+        raw_cfg = load_config(CONFIG_PATH)
+        class_names: list[str] = list(cfg_get(raw_cfg, "data.class_names"))
+        friendly_names = [n.replace("Tomato___", "").replace("_", " ") for n in class_names]
+
+        return JSONResponse({
+            "is_valid": False,
+            "class_idx": -1,
+            "class_name": "Invalid_Non_Plant",
+            "friendly_name": "Non-Plant Object Detected",
+            "confidence": 0.0,
+            "probs": [0.0] * len(class_names),
+            "class_names": class_names,
+            "friendly_names": friendly_names,
+            "rejection_reason": foliage_msg,
+            "guidance": "The uploaded photo does not contain organic plant foliage. Please upload a clear photo of a tomato leaf.",
+            "gradcam_b64": None,
+            "original_b64": original_b64,
+            "variant": variant,
+        })
+
     # Load model
     try:
         model, cfg = _load_model(variant)
@@ -238,13 +266,37 @@ async def predict(
 
     # Inference
     try:
-        pred_idx, confidence, probs = _run_inference(pil_image, model, cfg)
+        pred_idx, confidence, probs, logits_np = _run_inference(pil_image, model, cfg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference failed: {e}")
 
     # Class names
     class_names: list[str] = list(cfg_get(cfg, "data.class_names"))
     friendly_names = [n.replace("Tomato___", "").replace("_", " ") for n in class_names]
+
+    # 2. Tier 2: Tomato In-Distribution & Feature Activation Guard
+    is_tomato, ood_msg = validate_tomato_prediction(logits_np, np.array(probs))
+    if not is_tomato:
+        buf = BytesIO()
+        pil_image.save(buf, format="PNG")
+        original_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+        return JSONResponse({
+            "is_valid": False,
+            "class_idx": -1,
+            "class_name": "Invalid_Non_Tomato",
+            "friendly_name": "Unrecognized / Non-Tomato Foliage",
+            "confidence": round(confidence, 6),
+            "probs": [round(p, 6) for p in probs],
+            "class_names": class_names,
+            "friendly_names": friendly_names,
+            "rejection_reason": ood_msg,
+            "guidance": "The foliage in this photo does not match known tomato leaf patterns. Please ensure the leaf is from a tomato plant.",
+            "gradcam_b64": None,
+            "original_b64": original_b64,
+            "variant": variant,
+        })
+
     pred_class = class_names[pred_idx]
     pred_friendly = friendly_names[pred_idx]
 
@@ -262,6 +314,7 @@ async def predict(
     original_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
     return JSONResponse({
+        "is_valid": True,
         "class_idx": pred_idx,
         "class_name": pred_class,
         "friendly_name": pred_friendly,

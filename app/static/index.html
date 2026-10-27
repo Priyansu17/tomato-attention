@@ -525,6 +525,7 @@ section{padding:7rem 4rem;}
 }
 .result-disease-name.disease{color:var(--red);}
 .result-disease-name.healthy{color:var(--green);}
+.result-disease-name.invalid{color:#f59e0b;}
 .result-class-raw{font-size:0.75rem;color:var(--text-muted);margin-bottom:1.4rem;font-family:monospace;}
 
 /* Confidence ring */
@@ -540,6 +541,7 @@ section{padding:7rem 4rem;}
   transition:stroke-dashoffset 1.2s ease;
 }
 .conf-ring circle.fill.disease{stroke:var(--red);}
+.conf-ring circle.fill.invalid{stroke:#f59e0b;}
 .conf-ring-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.1rem;font-weight:800;}
 .ring-container{position:relative;width:88px;height:88px;}
 .conf-info .label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;}
@@ -605,6 +607,7 @@ section{padding:7rem 4rem;}
 .severity-badge.High{background:rgba(230,57,70,0.15);color:var(--red);}
 .severity-badge.Medium{background:rgba(255,165,0,0.12);color:#f4a261;}
 .severity-badge.Low,.severity-badge.None{background:rgba(82,183,136,0.12);color:var(--green);}
+.severity-badge.Rejected,.severity-badge.Uncertain{background:rgba(245,158,11,0.18);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);}
 .info-title{font-size:1.25rem;font-weight:800;margin-bottom:0.6rem;}
 .info-desc{font-size:0.9rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.75;}
 .info-section{margin-bottom:1.3rem;}
@@ -1714,6 +1717,22 @@ const DISEASE_DB = {
     chemical:[],
     organic:['Continue regular fertilisation schedule','Maintain consistent watering'],
     prevention:['Monitor weekly for early signs','Maintain good air circulation','Practice crop rotation annually','Keep area free of weeds and debris']
+  },
+  'Invalid_Non_Plant': {
+    friendly:'Non-Plant Object Detected',severity:'Rejected',
+    description:'The uploaded photo does not contain organic plant foliage. Our deep learning model is specialized for plant pathology and requires an image containing leaf tissue.',
+    symptoms:['Surface appears flat, artificial, synthetic, or non-vegetative','No chlorophyll absorption pigments or cellular leaf tissue detected'],
+    chemical:[],
+    organic:[],
+    prevention:['Upload a clear, focused photograph of an actual plant leaf','Position the leaf against a natural or neutral background','Ensure adequate lighting without heavy glare or deep shadows']
+  },
+  'Invalid_Non_Tomato': {
+    friendly:'Unrecognized / Non-Tomato Foliage',severity:'Uncertain',
+    description:'The foliage in this photograph does not match recognized tomato (Solanum lycopersicum) leaf pathology patterns. Model feature activations are below reliable diagnosis thresholds.',
+    symptoms:['The leaf likely belongs to another plant species (e.g. potato, pepper, corn, apple)','Or the photograph is blurred, shadowed, or cropped too closely to reveal tomato leaf characteristics'],
+    chemical:[],
+    organic:[],
+    prevention:['Verify that the photographed leaf is from a tomato plant','Capture the complete leaf blade showing vein structures and margins','Ensure good natural daylight for accurate attention network feature extraction']
   }
 };
 
@@ -1905,22 +1924,23 @@ function renderResults(data){
   panel.style.display='flex';
   setTimeout(()=>panel.classList.add('show'),10);
 
+  const isInvalid=data.is_valid===false;
   const healthy=data.class_name==='Tomato___healthy';
   const nameEl=document.getElementById('disease-name');
-  nameEl.textContent=data.friendly_name||data.class_name.replace('Tomato___','').replace(/_/g,' ');
-  nameEl.className='result-disease-name '+(healthy?'healthy':'disease');
-  document.getElementById('class-raw').textContent=data.class_name+' · via '+activeVariant.toUpperCase();
+  nameEl.textContent=(isInvalid?'⚠️ ':'')+(data.friendly_name||data.class_name.replace('Tomato___','').replace(/_/g,' '));
+  nameEl.className='result-disease-name '+(isInvalid?'invalid':(healthy?'healthy':'disease'));
+  document.getElementById('class-raw').textContent=(data.rejection_reason||data.class_name)+' · via '+activeVariant.toUpperCase();
 
   // Confidence ring
-  const pct=Math.round(data.confidence*100);
-  document.getElementById('conf-pct').textContent=pct+'%';
-  document.getElementById('ring-val').textContent=pct+'%';
+  const pct=Math.round((data.confidence||0)*100);
+  document.getElementById('conf-pct').textContent=isInvalid?(pct>0?pct+'% (Uncertain)':'Rejected'):pct+'%';
+  document.getElementById('ring-val').textContent=isInvalid?(pct>0?pct+'%':'0%'):pct+'%';
   document.getElementById('conf-model').textContent='Model: '+activeVariant.toUpperCase();
   const ringFill=document.getElementById('ring-fill');
-  ringFill.className='fill'+(healthy?'':' disease');
+  ringFill.className='fill'+(isInvalid?' invalid':(healthy?'':' disease'));
   // circumference = 2π×40 ≈ 251.3
   setTimeout(()=>{
-    ringFill.style.strokeDashoffset=251-(251*data.confidence);
+    ringFill.style.strokeDashoffset=isInvalid&&pct===0?251:251-(251*(data.confidence||0));
   },50);
 
   // Probability bars
@@ -1932,7 +1952,7 @@ function renderResults(data){
     const name=CLASS_NAMES[i]||'Class '+i;
     const fname=DISEASE_DB[name]?DISEASE_DB[name].friendly:name.replace('Tomato___','').replace(/_/g,' ');
     const pct2=Math.round(p*100);
-    const isTop=i===data.class_idx;
+    const isTop=i===data.class_idx && !isInvalid;
     const row=document.createElement('div');
     row.className='prob-row';
     row.innerHTML=`
@@ -1945,9 +1965,12 @@ function renderResults(data){
     setTimeout(()=>row.querySelector('.prob-bar-fill').style.width=pct2+'%',80);
   });
 
-  // Show Grad-CAM image
+  // Show Grad-CAM image or original image if rejected
+  const gradCamImg=document.getElementById('gradcam-img');
   if(data.gradcam_b64){
-    document.getElementById('gradcam-img').src='data:image/png;base64,'+data.gradcam_b64;
+    gradCamImg.src='data:image/png;base64,'+data.gradcam_b64;
+  } else if(data.original_b64){
+    gradCamImg.src='data:image/png;base64,'+data.original_b64;
   }
 
   // Populate disease info + show the bottom grid

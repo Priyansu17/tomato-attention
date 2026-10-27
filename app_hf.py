@@ -28,6 +28,7 @@ from src.config import cfg_get, load_config  # noqa: E402
 from src.data.transforms import build_eval_transform  # noqa: E402
 from src.gradcam import GradCAM, _denormalize, _get_target_layer, _overlay  # noqa: E402
 from src.models import build_model  # noqa: E402
+from src.validator import validate_image_foliage, validate_tomato_prediction  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -144,15 +145,16 @@ def _load_model(variant: str) -> tuple[Any, dict]:
 # Inference + Grad-CAM
 # ---------------------------------------------------------------------------
 
-def _run_inference(pil_image: Image.Image, model: Any, cfg: dict) -> tuple[int, float, list[float]]:
+def _run_inference(pil_image: Image.Image, model: Any, cfg: dict) -> tuple[int, float, list[float], np.ndarray]:
     device = next(model.parameters()).device
     transform = build_eval_transform(cfg)
     tensor = transform(pil_image).unsqueeze(0).to(device)
     with torch.no_grad():
         logits = model(tensor)
+    logits_np = logits[0].cpu().numpy()
     probs = torch.softmax(logits, dim=1)[0].cpu().numpy()
     pred = int(probs.argmax())
-    return pred, float(probs[pred]), probs.tolist()
+    return pred, float(probs[pred]), probs.tolist(), logits_np
 
 
 def _make_gradcam(pil_image: Image.Image, model: Any, cfg: dict) -> Image.Image | None:
@@ -190,6 +192,15 @@ def predict(image: Image.Image, variant: str) -> tuple:
     if image is None:
         return None, "⚠️ Please upload a tomato leaf image."
 
+    # Tier 1: Foliage Check
+    is_foliage, foliage_msg = validate_image_foliage(image)
+    if not is_foliage:
+        return None, (
+            "### ⚠️ Non-Plant Object Detected\n\n"
+            f"**Validation Notice**: {foliage_msg}\n\n"
+            "Please upload a clear photograph of an actual tomato (*Solanum lycopersicum*) leaf."
+        )
+
     variant = variant.lower()
     if variant not in ATTENTION_VARIANTS:
         variant = "cbam"
@@ -200,9 +211,19 @@ def predict(image: Image.Image, variant: str) -> tuple:
         return None, f"❌ Model load failed: {e}"
 
     try:
-        pred_idx, confidence, probs = _run_inference(image, model, cfg)
+        pred_idx, confidence, probs, logits_np = _run_inference(image, model, cfg)
     except Exception as e:
         return None, f"❌ Inference failed: {e}"
+
+    # Tier 2: Tomato In-Distribution Check
+    is_tomato, ood_msg = validate_tomato_prediction(logits_np, np.array(probs))
+    if not is_tomato:
+        return None, (
+            "### ⚠️ Unrecognized / Non-Tomato Foliage\n\n"
+            f"**Diagnostic Notice**: {ood_msg}\n\n"
+            "The leaf in this photograph does not match recognized tomato leaf pathology patterns. "
+            "Please verify that the leaf is from a tomato plant."
+        )
 
     class_name = CLASS_NAMES[pred_idx]
     friendly = class_name.replace("Tomato___", "").replace("_", " ")
