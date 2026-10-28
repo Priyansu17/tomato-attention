@@ -589,13 +589,27 @@ section{padding:7rem 4rem;}
   gap:2rem;
   margin-top:2rem;
   align-items:stretch;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
 }
 .detect-bottom-grid.show{display:grid;animation:fadeSlideUp 0.5s 0.15s ease both;}
 
 /* Gradcam card (RIGHT) */
-#gradcam-card{display:flex;flex-direction:column;}
+#gradcam-card{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
 #gradcam-card .result-card{
-  flex:1;display:flex;flex-direction:column;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
 }
 #gradcam-card img{
   width:100%;
@@ -604,15 +618,28 @@ section{padding:7rem 4rem;}
   display:block;
   object-fit:cover;
   max-height:600px;
+  box-sizing:border-box;
 }
 
 /* Disease info card (LEFT) */
-#disease-info{display:flex;flex-direction:column;}
+#disease-info{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
 .disease-info-card{
   flex:1;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:2rem;
-  display:flex;flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:2rem;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
 }
 
 .severity-badge{
@@ -859,6 +886,10 @@ section{padding:7rem 4rem;}
   border: 1px solid rgba(82, 183, 136, 0.2);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .clinical-actions {
   display: flex;
@@ -1721,12 +1752,16 @@ footer{
     height: 380px;
   }
   .detect-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
   }
   .detect-bottom-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
   }
   .steps-grid {
     grid-template-columns: 1fr 1fr;
@@ -2019,71 +2054,179 @@ footer{
     font-size: 0.7rem;
   }
 
+  /* Detection Grid & Row 2 Bottom Grid on Mobile - Zero Blowout */
+  .detect-grid,
+  .detect-bottom-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 1.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .detect-grid > *,
+  .detect-bottom-grid > *,
+  #disease-info,
+  #gradcam-card,
+  #result-col,
+  .detect-card,
+  .result-card,
+  .disease-info-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   /* Attention Saliency Map */
   .saliency-controls {
-    display: flex;
-    gap: 0.4rem;
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
-  .saliency-toggle-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 0.48rem 0.35rem;
-    font-size: 0.73rem;
+  .saliency-controls > div:first-child {
+    font-size: 0.82rem !important;
   }
-  .gradcam-view-wrap img {
-    max-height: 270px;
-    border-radius: 10px;
+  .view-toggles {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .view-toggle-btn {
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 0.48rem 0.35rem !important;
+    font-size: 0.74rem !important;
+  }
+  #gradcam-img {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 280px !important;
+    object-fit: contain !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
   }
 
   /* Clinical Agronomy Dossier */
   .disease-info-card {
-    padding: 1.25rem 1rem;
-    border-radius: 16px;
+    padding: 1.25rem 1rem !important;
+    border-radius: 16px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
-  .dossier-header-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+  .clinical-card-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
-  .dossier-actions {
-    display: flex;
-    width: 100%;
-    gap: 0.5rem;
+  .clinical-tags {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
-  .btn-action-ghost {
-    flex: 1;
-    justify-content: center;
-    padding: 0.5rem 0.4rem;
-    font-size: 0.74rem;
-    min-height: 38px;
+  .severity-badge {
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
+    font-size: 0.7rem !important;
+    padding: 0.26rem 0.7rem !important;
+  }
+  .taxonomy-badge {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    font-size: 0.7rem !important;
+    padding: 0.26rem 0.7rem !important;
+    line-height: 1.35 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .clinical-actions {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 0.5rem !important;
+    box-sizing: border-box !important;
+  }
+  .clinical-actions .btn-action-ghost {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 0.5rem 0.4rem !important;
+    font-size: 0.74rem !important;
+    min-height: 38px !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
   }
 
-  /* Dossier Tabs (Horizontal swipe) */
+  /* Dossier Tabs (Horizontal swipe container with min-width: 0) */
   .dossier-tabs {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    gap: 0.35rem;
-    padding-bottom: 0.4rem;
-    width: 100%;
-    margin-bottom: 1.1rem;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 0.35rem !important;
+    padding-bottom: 0.4rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-bottom: 1.1rem !important;
   }
   .dossier-tabs::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
   .dossier-tab-btn {
-    flex-shrink: 0;
-    padding: 0.48rem 0.75rem;
-    font-size: 0.75rem;
-    white-space: nowrap;
+    flex-shrink: 0 !important;
+    padding: 0.48rem 0.75rem !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+  }
+  .dossier-panel {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  .info-title {
+    font-size: 1.2rem !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+  .info-desc {
+    font-size: 0.86rem !important;
+    line-height: 1.6 !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .info-section-title {
+    font-size: 0.72rem !important;
+    word-break: break-word !important;
   }
   .info-section ul {
-    padding-left: 1.1rem;
-    font-size: 0.85rem;
-    line-height: 1.55;
+    padding-left: 1.1rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1.55 !important;
+  }
+  .info-list li {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
   }
 
   /* Video Guide Card on Mobile */
@@ -2194,11 +2337,11 @@ footer{
     box-shadow: 0 10px 40px rgba(0,0,0,0.85);
   }
 
-    /* Floating Farmer Sagar Assistant (Framed circular badge, perfectly positioned) */
+    /* Floating Farmer Sagar Assistant (Framed circular badge, perfectly positioned with safe-area) */
   #sagar-widget {
-    bottom: 18px;
-    right: 18px;
-    z-index: 9999;
+    bottom: max(20px, calc(16px + env(safe-area-inset-bottom, 0px))) !important;
+    right: max(16px, calc(14px + env(safe-area-inset-right, 0px))) !important;
+    z-index: 9999 !important;
   }
   #sagar-avatar-btn {
     width: 58px;
