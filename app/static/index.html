@@ -1465,8 +1465,7 @@ footer{
 #sagar-svg.worry  .sg-face-normal { opacity:0; } #sagar-svg.worry  .sg-face-worry { opacity:1; }
 #sagar-svg.thinking .sg-face-normal { opacity:0; } #sagar-svg.thinking .sg-face-think { opacity:1; }
 
-@media(max-width:768px){
-  #sagar-widget{bottom:14px;right:14px;}
+
   #sagar-avatar-btn{width:62px;height:62px;}
   #sagar-hero-cameo{display:none;}
   #sagar-bubble{max-width:190px;font-size:0.78rem;}
@@ -1634,6 +1633,558 @@ footer{
   border-radius: 50%;
   background: var(--green);
   animation: pulse 1.8s infinite;
+}
+
+
+/* ============================================================
+   ADVANCED MOBILE & RESPONSIVE REFINEMENTS (<900px, <600px, <400px)
+   ============================================================ */
+
+/* Small adjustments for Tablets (<900px) */
+@media (max-width: 900px) {
+  #hero {
+    grid-template-columns: 1fr;
+    padding: 6rem 1.8rem 3rem;
+    gap: 2rem;
+  }
+  #canvas-wrap {
+    height: 380px;
+  }
+  .detect-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .detect-bottom-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .steps-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Comprehensive Phone Layout (<600px) */
+@media (max-width: 600px) {
+  /* Global Spacing */
+  section {
+    padding: 3rem 1.1rem;
+  }
+
+  /* Navigation */
+  nav {
+    padding: 0.8rem 1.1rem;
+  }
+  nav.scrolled {
+    padding: 0.6rem 1.1rem;
+  }
+  .nav-logo {
+    font-size: 1.05rem;
+  }
+  .nav-detect-btn {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem;
+    border-radius: 14px;
+  }
+  nav .nav-links {
+    display: none;
+  }
+
+  /* Hero Section */
+  #hero {
+    padding: 5.2rem 1.1rem 2.2rem;
+    min-height: auto;
+    gap: 1.8rem;
+  }
+  .hero-badge {
+    font-size: 0.68rem;
+    padding: 0.32rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 7.5vw, 2.7rem);
+    line-height: 1.12;
+    margin-bottom: 0.8rem;
+  }
+  .hero-sub {
+    font-size: 0.94rem;
+    margin-bottom: 0.6rem;
+  }
+  .hero-desc {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 1.6rem;
+  }
+  
+  /* Hero Stats Grid (3 compact cards) */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.8rem;
+  }
+  .hero-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.6rem 0.3rem;
+    text-align: center;
+  }
+  .hero-stat .stat-val {
+    font-size: 1.35rem;
+    font-weight: 900;
+  }
+  .hero-stat .stat-lbl {
+    font-size: 0.62rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* Hero Call-to-action Buttons */
+  .hero-btns {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  .hero-btns button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.2rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+
+  /* 3D Canvas on Phones */
+  #canvas-wrap {
+    height: 290px;
+    border-radius: 18px;
+  }
+  .canvas-tag {
+    bottom: 0.8rem;
+    font-size: 0.7rem;
+    padding: 0.28rem 0.75rem;
+  }
+  .scroll-arrow {
+    display: none;
+  }
+
+  /* Farmer Sagar Hero Cameo on Phones (Keep it visible & sleek) */
+  #sagar-hero-cameo {
+    display: flex !important;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 12px 5px 7px;
+    gap: 8px;
+    border-radius: 999px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  }
+  .sagar-cameo-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .sagar-cameo-avatar svg {
+    width: 32px;
+    height: 32px;
+  }
+  .sagar-cameo-title {
+    font-size: 0.74rem;
+  }
+  .sagar-cameo-subtitle {
+    font-size: 0.6rem;
+  }
+
+  /* Telemetry Bar */
+  .telemetry-bar {
+    padding: 1rem 0.9rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+  }
+  .telemetry-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
+  }
+  .telemetry-status {
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+  .status-title {
+    font-size: 0.84rem;
+    width: 100%;
+    margin-bottom: 0.2rem;
+  }
+  .telemetry-badge {
+    font-size: 0.62rem;
+    padding: 0.18rem 0.5rem;
+  }
+  .telemetry-meta {
+    font-size: 0.66rem;
+  }
+
+  /* Sample Specimens (Horizontal swipe row) */
+  .sample-specimens-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .sample-label {
+    font-size: 0.72rem;
+  }
+  .sample-pills {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    gap: 0.45rem;
+    padding-bottom: 0.4rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sample-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .sample-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 0.42rem 0.75rem;
+    min-height: 36px;
+    border-radius: 18px;
+  }
+
+  /* Detection Form */
+  .upload-zone {
+    min-height: 200px;
+    padding: 1.8rem 1rem;
+    border-radius: 14px;
+  }
+  .upload-icon {
+    font-size: 2.2rem;
+  }
+  .upload-title {
+    font-size: 1rem;
+  }
+  .upload-sub {
+    font-size: 0.76rem;
+  }
+  .variants {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+    width: 100%;
+  }
+  .variant-btn {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.74rem;
+    border-radius: 10px;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .variant-badge {
+    font-size: 0.62rem;
+  }
+  #analyze-btn {
+    min-height: 50px;
+    font-size: 1rem;
+    border-radius: 12px;
+    margin-top: 1.2rem;
+  }
+
+  /* Results Card */
+  .result-card {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .result-disease-name {
+    font-size: 1.4rem;
+    line-height: 1.25;
+  }
+  .result-class-raw {
+    font-size: 0.7rem;
+    margin-bottom: 1.1rem;
+  }
+  .conf-ring-wrap {
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .conf-ring, .ring-container {
+    width: 76px;
+    height: 76px;
+  }
+  .conf-ring svg {
+    width: 76px;
+    height: 76px;
+  }
+  .conf-ring-val {
+    font-size: 0.95rem;
+  }
+  .conf-info .val {
+    font-size: 1.65rem;
+  }
+  .conf-info .label {
+    font-size: 0.68rem;
+  }
+
+  /* Prob bars */
+  .prob-row {
+    gap: 0.45rem;
+  }
+  .prob-name {
+    width: 105px;
+    font-size: 0.7rem;
+  }
+  .prob-pct {
+    width: 32px;
+    font-size: 0.7rem;
+  }
+
+  /* Attention Saliency Map */
+  .saliency-controls {
+    display: flex;
+    gap: 0.4rem;
+    width: 100%;
+  }
+  .saliency-toggle-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.48rem 0.35rem;
+    font-size: 0.73rem;
+  }
+  .gradcam-view-wrap img {
+    max-height: 270px;
+    border-radius: 10px;
+  }
+
+  /* Clinical Agronomy Dossier */
+  .disease-info-card {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .dossier-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .dossier-actions {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .btn-action-ghost {
+    flex: 1;
+    justify-content: center;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.74rem;
+    min-height: 38px;
+  }
+
+  /* Dossier Tabs (Horizontal swipe) */
+  .dossier-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.35rem;
+    padding-bottom: 0.4rem;
+    width: 100%;
+    margin-bottom: 1.1rem;
+  }
+  .dossier-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .dossier-tab-btn {
+    flex-shrink: 0;
+    padding: 0.48rem 0.75rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  .info-section ul {
+    padding-left: 1.1rem;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  /* Video Guide Card on Mobile */
+  .video-meta-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.75rem 0.9rem;
+  }
+  .video-meta-title {
+    font-size: 0.82rem;
+  }
+  .video-footer-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+  }
+  .video-external-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* How It Works Steps */
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .step-card {
+    padding: 1.25rem 1.1rem;
+    border-radius: 14px;
+  }
+  .step-title {
+    font-size: 1.05rem;
+  }
+  .step-desc {
+    font-size: 0.85rem;
+  }
+
+  /* About Section & Stats */
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .stat-card {
+    padding: 1.25rem 0.9rem;
+    border-radius: 14px;
+  }
+  .stat-card .num {
+    font-size: 1.8rem;
+  }
+  .stat-card .lbl {
+    font-size: 0.72rem;
+  }
+
+  /* Dr. Anushka Scientist Banner */
+  .farmer-banner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.3rem 1.1rem;
+    gap: 0.9rem;
+  }
+  .farmer-avatar {
+    width: 85px;
+    height: 105px;
+  }
+  .farmer-role-tag {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.65rem;
+  }
+  .farmer-quote {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  /* Architecture Flow */
+  .arch-wrap {
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+  }
+  .arch-title {
+    font-size: 0.78rem;
+    margin-bottom: 1.5rem;
+  }
+  .arch-flow {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .arch-arrow {
+    transform: rotate(90deg);
+    margin: 0.3rem 0;
+  }
+  .arch-box {
+    width: 100%;
+    max-width: 270px;
+    padding: 0.95rem 1.1rem;
+  }
+
+  /* Architecture Popup Card on Phones */
+  .arch-popup-card {
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.85);
+  }
+
+  /* Floating Farmer Sagar Assistant */
+  #sagar-widget {
+    bottom: 14px;
+    right: 14px;
+  }
+  #sagar-avatar-btn {
+    width: 60px;
+    height: 60px;
+  }
+  #sagar-bubble {
+    max-width: min(280px, calc(100vw - 36px));
+    font-size: 0.8rem;
+    padding: 10px 14px;
+    border-radius: 15px 15px 4px 15px;
+  }
+
+  /* Footer */
+  footer {
+    padding: 2.2rem 1.2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.3rem;
+  }
+  .badges {
+    gap: 0.4rem;
+  }
+  .badge {
+    font-size: 0.68rem;
+    padding: 0.22rem 0.65rem;
+  }
+
+  /* Toast notification */
+  #toast {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) translateY(20px) !important;
+    max-width: calc(100vw - 32px);
+    font-size: 0.8rem;
+    padding: 0.6rem 1.1rem;
+  }
+  #toast.show {
+    transform: translateX(-50%) translateY(0) !important;
+  }
+}
+
+/* Extra small phones (<380px, e.g. iPhone SE, Galaxy Fold outer screen) */
+@media (max-width: 380px) {
+  h1 {
+    font-size: 1.85rem;
+  }
+  #canvas-wrap {
+    height: 250px;
+  }
+  .hero-stat .stat-val {
+    font-size: 1.15rem;
+  }
+  .stat-card .num {
+    font-size: 1.55rem;
+  }
+  .conf-info .val {
+    font-size: 1.45rem;
+  }
+  .prob-name {
+    width: 85px;
+  }
 }
 
 </style>
@@ -3520,7 +4071,7 @@ window.addEventListener('load', () => {
      ============================================================ -->
 <div id="sagar-widget">
   <div id="sagar-bubble">
-    <div class="bubble-name">🧑‍🌾 Farmer Sagar</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div class="bubble-name" style="margin-bottom:0;">🧑‍🌾 Farmer Sagar</div><span onclick="event.stopPropagation();sagarToggleBubble();" style="cursor:pointer;opacity:0.6;font-size:14px;padding:0 4px;" title="Dismiss">&times;</span></div>
     <span id="sagar-msg">Namaste! I'm Sagar, your field advisor. Upload a tomato leaf and I'll guide you through the diagnosis! 🌿</span>
   </div>
   <div id="sagar-avatar-btn" onclick="sagarToggleBubble()" title="Farmer Sagar — Click to toggle advice">
