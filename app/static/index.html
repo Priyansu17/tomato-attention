@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
@@ -1328,6 +1328,314 @@ footer{
   .arch-arrow{transform:rotate(90deg);}
   nav .nav-links{display:none;}
 }
+
+/* ============================================================
+   FARMER SAGAR — Floating AI Field Assistant
+   ============================================================ */
+#sagar-widget {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+#sagar-bubble {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 18px 18px 4px 18px;
+  padding: 12px 16px;
+  max-width: 230px;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.55;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(82,183,136,0.1);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  transition: opacity 0.38s cubic-bezier(.4,0,.2,1), transform 0.38s cubic-bezier(.4,0,.2,1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+}
+#sagar-bubble.visible { opacity:1; transform:translateY(0) scale(1); }
+#sagar-bubble::after {
+  content:'';
+  position:absolute;
+  bottom:-9px; right:24px;
+  width:0; height:0;
+  border-left:9px solid transparent;
+  border-right:2px solid transparent;
+  border-top:9px solid var(--surface2);
+}
+#sagar-bubble .bubble-name {
+  font-weight:700; font-size:0.75rem;
+  color:var(--green); letter-spacing:0.06em;
+  text-transform:uppercase; margin-bottom:5px;
+  display:flex; align-items:center; gap:5px;
+}
+#sagar-bubble .bubble-name::before {
+  content:''; width:6px; height:6px;
+  border-radius:50%; background:var(--green);
+  animation:pulse 2s infinite; flex-shrink:0;
+}
+#sagar-avatar-btn {
+  width:76px; height:76px;
+  cursor:pointer; pointer-events:auto;
+  position:relative;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,0.6));
+  transition:transform 0.22s ease; flex-shrink:0;
+}
+#sagar-avatar-btn:hover { transform:scale(1.1) rotate(-3deg); }
+#sagar-avatar-btn:active { transform:scale(0.96); }
+#sagar-notify-dot {
+  position:absolute; top:2px; right:2px;
+  width:14px; height:14px;
+  background:var(--red); border-radius:50%;
+  border:2px solid var(--bg);
+  animation:pulse 1.8s infinite;
+  opacity:0; transition:opacity 0.3s;
+}
+#sagar-notify-dot.show { opacity:1; }
+
+/* Hero cameo */
+#sagar-hero-cameo {
+  position:absolute; bottom:-8px; right:-22px;
+  z-index:3; pointer-events:none;
+  animation:sagarFloat 4.2s ease-in-out infinite;
+}
+.sagar-hero-label {
+  text-align:center; font-size:0.58rem;
+  color:var(--text-muted); font-weight:700;
+  letter-spacing:0.08em; text-transform:uppercase;
+  margin-top:3px;
+}
+
+/* Animations */
+@keyframes sagarFloat {
+  0%,100% { transform:translateY(0px) rotate(-1deg); }
+  50%     { transform:translateY(-14px) rotate(1.5deg); }
+}
+@keyframes sagarBlink {
+  0%,90%,100% { transform:scaleY(1); }
+  93%,97%     { transform:scaleY(0.06); }
+}
+@keyframes sagarWave {
+  0%,100% { transform:rotate(0deg); }
+  15%     { transform:rotate(-38deg); }
+  35%     { transform:rotate(10deg); }
+  55%     { transform:rotate(-30deg); }
+  80%     { transform:rotate(4deg); }
+}
+@keyframes sagarBreath {
+  0%,100% { transform:scaleY(1) scaleX(1); }
+  50%     { transform:scaleY(1.03) scaleX(1.012); }
+}
+@keyframes sagarTurban {
+  0%,100% { transform:rotate(0deg); }
+  40%     { transform:rotate(1.8deg); }
+  70%     { transform:rotate(-1.2deg); }
+}
+@keyframes sagarLeg {
+  0%,100% { transform:translateX(0); }
+  50%     { transform:translateX(2px); }
+}
+@keyframes sagarHold {
+  0%,100% { transform:rotate(0deg); }
+  50%     { transform:rotate(-7deg); }
+}
+.sg-blink-l { transform-origin:44px 64px; animation:sagarBlink 4.5s infinite; }
+.sg-blink-r { transform-origin:56px 64px; animation:sagarBlink 4.5s 0.22s infinite; }
+.sg-wave    { transform-origin:30px 90px; animation:sagarWave 2.8s ease-in-out infinite; }
+.sg-body    { transform-origin:60px 130px; animation:sagarBreath 3.8s ease-in-out infinite; }
+.sg-turban  { transform-origin:60px 22px; animation:sagarTurban 4s ease-in-out infinite; }
+.sg-legs    { animation:sagarLeg 3.8s ease-in-out infinite; }
+.sg-hold    { transform-origin:84px 108px; animation:sagarHold 4s ease-in-out 0.5s infinite; }
+
+/* Expression states */
+.sg-face-normal,.sg-face-happy,.sg-face-worry,.sg-face-think { transition:opacity 0.4s; }
+#sagar-svg .sg-face-happy,
+#sagar-svg .sg-face-worry,
+#sagar-svg .sg-face-think { opacity:0; }
+#sagar-svg .sg-face-normal { opacity:1; }
+#sagar-svg.happy  .sg-face-normal { opacity:0; } #sagar-svg.happy  .sg-face-happy { opacity:1; }
+#sagar-svg.worry  .sg-face-normal { opacity:0; } #sagar-svg.worry  .sg-face-worry { opacity:1; }
+#sagar-svg.thinking .sg-face-normal { opacity:0; } #sagar-svg.thinking .sg-face-think { opacity:1; }
+
+@media(max-width:768px){
+  #sagar-widget{bottom:14px;right:14px;}
+  #sagar-avatar-btn{width:62px;height:62px;}
+  #sagar-hero-cameo{display:none;}
+  #sagar-bubble{max-width:190px;font-size:0.78rem;}
+}
+
+/* ============================================================
+   DR. ANUSHKA & CHARACTERS ANIMATION SUITE
+   ============================================================ */
+.farmer-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.8rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.farmer-avatar {
+  flex-shrink: 0;
+  width: 100px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.farmer-speech {
+  flex: 1;
+}
+.farmer-role-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(2, 132, 199, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.6rem;
+}
+.farmer-quote {
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+.farmer-quote strong {
+  color: var(--green-lite);
+}
+.farmer-quote em {
+  color: #38bdf8;
+  font-style: normal;
+}
+@keyframes charFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes armWaveContinuous {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-16deg); }
+  50% { transform: rotate(5deg); }
+  75% { transform: rotate(-12deg); }
+}
+@keyframes handWaveContinuous {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-26deg); }
+  40% { transform: rotate(18deg); }
+  60% { transform: rotate(-22deg); }
+  80% { transform: rotate(14deg); }
+}
+@keyframes anushkaBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  94%, 98% { transform: scaleY(0.08); }
+}
+.animate-char-float {
+  animation: charFloat 3.8s ease-in-out infinite;
+}
+.animate-arm-wave-continuous {
+  animation: armWaveContinuous 3.2s ease-in-out infinite;
+}
+.animate-hand-wave-continuous {
+  animation: handWaveContinuous 1.8s ease-in-out infinite;
+}
+.anushka-blink-l {
+  transform-origin: 91px 98px;
+  animation: anushkaBlink 4.4s infinite;
+}
+.anushka-blink-r {
+  transform-origin: 109px 98px;
+  animation: anushkaBlink 4.4s 0.2s infinite;
+}
+
+/* Hero Canvas & Sagar Cameo Badge */
+.hero-canvas-col {
+  position: relative;
+  width: 100%;
+}
+#sagar-hero-cameo {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 8px 16px 8px 10px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: sagarFloat 4.2s ease-in-out infinite;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+#sagar-hero-cameo:hover {
+  transform: translateY(-4px) scale(1.03);
+  border-color: var(--green);
+  box-shadow: 0 12px 30px var(--green-glow);
+}
+.sagar-cameo-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(82, 183, 136, 0.12);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.sagar-cameo-info {
+  display: flex;
+  flex-direction: column;
+}
+.sagar-cameo-title {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.2;
+}
+.sagar-cameo-subtitle {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sagar-cameo-live {
+  color: var(--green);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pulse-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.8s infinite;
+}
+
 </style>
 </head>
 <body>
@@ -1404,15 +1712,45 @@ footer{
     </div>
   </div>
 
-  <!-- 3D Plant -->
-  <div id="canvas-wrap">
-    <div id="canvas-fallback">
-      <div class="big-tomato">🍅</div>
-      <p style="color:var(--green);font-weight:700;font-size:1.1rem;">Tomato Disease Intelligence</p>
-      <p style="color:var(--text-muted);font-size:0.85rem;">3D scene unavailable — WebGL may not be supported</p>
+  <!-- 3D Plant & Field Scout Cameo -->
+  <div class="hero-canvas-col">
+    <div id="canvas-wrap">
+      <div id="canvas-fallback">
+        <div class="big-tomato">🍅</div>
+        <p style="color:var(--green);font-weight:700;font-size:1.1rem;">Tomato Disease Intelligence</p>
+        <p style="color:var(--text-muted);font-size:0.85rem;">3D scene unavailable — WebGL may not be supported</p>
+      </div>
+      <div class="canvas-border"></div>
+      <div class="canvas-tag">🌱 Drag to rotate</div>
     </div>
-    <div class="canvas-border"></div>
-    <div class="canvas-tag">🌱 Drag to rotate</div>
+    <!-- Interactive Farmer Sagar Hero Persona Card -->
+    <div id="sagar-hero-cameo" onclick="document.getElementById('detect').scrollIntoView({behavior:'smooth'})" title="Farmer Sagar — Click to jump to diagnostic scanner">
+      <div class="sagar-cameo-avatar">
+        <svg width="44" height="44" viewBox="0 0 120 120" fill="none" overflow="visible">
+          <!-- Head, Turban & animated face -->
+          <circle cx="60" cy="74" r="22" fill="#FBBF24"/>
+          <ellipse cx="38" cy="74" rx="4.5" ry="6" fill="#F5A623"/>
+          <ellipse cx="82" cy="74" rx="4.5" ry="6" fill="#F5A623"/>
+          <g class="sg-turban">
+            <path d="M38 68 C38 48 82 48 82 68 Z" fill="#1565C0"/>
+            <path d="M40 62 C40 50 80 50 80 62" stroke="#1976D2" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M42 56 C42 46 78 46 78 56" stroke="#42A5F5" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M44 50 C44 42 76 42 76 50" stroke="#1565C0" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="60" cy="42" r="6" fill="#1976D2"/>
+            <circle cx="60" cy="55" r="3.5" fill="#FFD700" stroke="#FF8C42" stroke-width="1"/>
+          </g>
+          <path d="M50 84 C54 80 58 82 60 82 C62 82 66 80 70 84" stroke="#5D4037" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M50 84 C52 87 56 87 60 86 C64 87 68 87 70 84" fill="#5D4037"/>
+          <g class="sg-blink-l"><ellipse cx="50" cy="72" rx="4" ry="4.5" fill="#2C1810"/><circle cx="51.5" cy="70.5" r="1.3" fill="#fff"/></g>
+          <g class="sg-blink-r"><ellipse cx="70" cy="72" rx="4" ry="4.5" fill="#2C1810"/><circle cx="71.5" cy="70.5" r="1.3" fill="#fff"/></g>
+          <path d="M53 80 Q60 86 67 80" stroke="#2C1810" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="sagar-cameo-info">
+        <div class="sagar-cameo-title">🧑‍🌾 Farmer Sagar</div>
+        <div class="sagar-cameo-subtitle">Field Agronomy Advisor · <span class="sagar-cameo-live"><span class="pulse-dot"></span>Ready</span></div>
+      </div>
+    </div>
   </div>
 
   <div class="scroll-arrow" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">
@@ -1805,10 +2143,14 @@ footer{
 
           <!-- Smiling Eyes & Blush -->
           <g>
-            <ellipse cx="91" cy="98" rx="2.8" ry="3.2" fill="#0F2F1F" />
-            <circle cx="92" cy="97" r="1" fill="#FFFFFF" />
-            <ellipse cx="109" cy="98" rx="2.8" ry="3.2" fill="#0F2F1F" />
-            <circle cx="110" cy="97" r="1" fill="#FFFFFF" />
+            <g class="anushka-blink-l">
+              <ellipse cx="91" cy="98" rx="2.8" ry="3.2" fill="#0F2F1F" />
+              <circle cx="92" cy="97" r="1" fill="#FFFFFF" />
+            </g>
+            <g class="anushka-blink-r">
+              <ellipse cx="109" cy="98" rx="2.8" ry="3.2" fill="#0F2F1F" />
+              <circle cx="110" cy="97" r="1" fill="#FFFFFF" />
+            </g>
             <path d="M87 92 Q91 89 95 91" stroke="#8C6D46" stroke-width="1.8" stroke-linecap="round" />
             <path d="M105 91 Q109 89 113 92" stroke="#8C6D46" stroke-width="1.8" stroke-linecap="round" />
           </g>
@@ -2198,6 +2540,9 @@ function setFile(file){
   uploadZone.style.display='none';
   previewZone.style.display='block';
   analyzeBtn.disabled=false;
+  if(typeof sagarShowMessage === 'function') {
+    sagarShowMessage("Leaf photo loaded! Click 'Analyse Leaf' to run the attention network.", 'normal', 6000);
+  }
 }
 
 function clearFile(){
@@ -2215,6 +2560,9 @@ function clearFile(){
   if(bottomGrid) bottomGrid.classList.remove('show');
   const videoIframe = document.getElementById('video-iframe');
   if(videoIframe) videoIframe.src = '';
+  if(typeof sagarShowMessage === 'function') {
+    sagarShowMessage("Ready for your next specimen! Upload a leaf or pick a 1-click test specimen. 🌿", 'normal', 6000);
+  }
 }
 
 fileInput.addEventListener('change',()=>setFile(fileInput.files[0]));
@@ -2248,6 +2596,11 @@ analyzeBtn.addEventListener('click',async()=>{
   if(!selectedFile)return;
   analyzeBtn.classList.add('loading');
   analyzeBtn.disabled=true;
+
+  if(typeof sagarShowMessage === 'function') {
+    const anMsgs = SAGAR_MESSAGES.analyzing;
+    sagarShowMessage(anMsgs[Math.floor(Math.random() * anMsgs.length)], 'thinking');
+  }
 
   const fd=new FormData();
   fd.append('file',selectedFile);
@@ -2425,6 +2778,11 @@ function renderResults(data){
   renderDiseaseInfo(data.class_name);
   const bottomGrid = document.getElementById('detectBottomGrid');
   if(bottomGrid) setTimeout(() => bottomGrid.classList.add('show'), 100);
+
+  // Farmer Sagar reacts to the result
+  const isOOD = data.is_valid === false;
+  const isHealthy2 = data.class_name === 'Tomato___healthy' && !isOOD;
+  sagarReactToResult(data.class_name, data.friendly_name, isHealthy2, isOOD);
 }
 
 function renderDiseaseInfo(className){
@@ -3037,6 +3395,298 @@ window.addEventListener('resize', hideArchPopup, { passive: true });
     })();
   }
 })();
+
+/* ============================================================
+   FARMER SAGAR — Floating Assistant Logic
+   ============================================================ */
+const SAGAR_MESSAGES = {
+  idle: [
+    "Namaste! I'm Sagar, your field advisor. Upload a tomato leaf and I'll guide you! 🌿",
+    "Healthy crops start with early detection! Let me help you scan that leaf. 👨‍🌾",
+    "Over 18,000 real field images trained this model — I've seen a lot of leaves! 🍅",
+    "Try one of the quick test specimens on the panel below to see me in action! ⚡"
+  ],
+  analyzing: [
+    "Analysing your leaf now... The neural network is reading every cell! 🧠",
+    "Running CBAM attention maps... spotting the exact lesion zones... 🔬",
+    "EfficientNet-B0 is working hard. This usually takes under 2 seconds! ⏱️"
+  ],
+  healthy: [
+    "Excellent news — your plant is HEALTHY! Keep up the great care, farmer! 🎉",
+    "No disease detected! Your crop management is top-notch. 🌱✅",
+    "Clean bill of health! Continue your regular monitoring schedule. 💪"
+  ],
+  disease: {
+    'Tomato___Late_blight':        "Alert! Late Blight detected — act FAST. This destroyed the Irish potato harvest. Remove infected material NOW. 🚨",
+    'Tomato___Early_blight':       "Early Blight found. Apply chlorothalonil and remove lower infected leaves immediately. Don't delay! 🍂",
+    'Tomato___Bacterial_spot':     "Bacterial Spot confirmed. Switch to drip irrigation and apply copper-based bactericide. 💧",
+    'Tomato___Leaf_Mold':          "Leaf Mold spotted — high humidity issue. Improve airflow and reduce watering overhead. 🌬️",
+    'Tomato___Septoria_leaf_spot': "Septoria Leaf Spot found. Mulch the soil base and spray chlorothalonil every 7 days. 🍃",
+    'Tomato___Spider_mites Two-spotted_spider_mite': "Spider Mites! Spray undersides of leaves with insecticidal soap. Release predatory mites if possible. 🕷️",
+    'Tomato___Target_Spot':        "Target Spot detected. Apply azoxystrobin and improve plant spacing for airflow. 🎯",
+    'Tomato___Tomato_Yellow_Leaf_Curl_Virus': "TYLCV detected! No cure — control whiteflies immediately with reflective mulch. Remove infected plants. 🟡",
+    'Tomato___Tomato_mosaic_virus': "Mosaic Virus found. Sanitize all tools with bleach. Remove infected plants and control aphids. 🦠",
+    '_default':                    "Disease detected! Check the Clinical Dossier below for full treatment protocols. 🌡️"
+  },
+  ood: "That doesn't look like a tomato leaf to me! I know tomatoes — and that's not one! 🤔"
+};
+
+let sagarBubbleOpen = false;
+let sagarIdleTimer = null;
+let sagarMsgIndex = 0;
+
+function sagarToggleBubble() {
+  const bubble = document.getElementById('sagar-bubble');
+  sagarBubbleOpen = !sagarBubbleOpen;
+  if (sagarBubbleOpen) {
+    bubble.classList.add('visible');
+    document.getElementById('sagar-notify-dot').classList.remove('show');
+  } else {
+    bubble.classList.remove('visible');
+  }
+}
+
+function sagarSetExpression(expr) {
+  const svg = document.getElementById('sagar-svg');
+  if (!svg) return;
+  svg.classList.remove('happy','worry','thinking');
+  if (expr && expr !== 'normal') svg.classList.add(expr);
+}
+
+function sagarShowMessage(text, expr, autoDismiss) {
+  const bubble = document.getElementById('sagar-bubble');
+  const msg = document.getElementById('sagar-msg');
+  const dot = document.getElementById('sagar-notify-dot');
+  if (!bubble || !msg) return;
+  msg.textContent = text;
+  sagarSetExpression(expr || 'normal');
+  bubble.classList.add('visible');
+  sagarBubbleOpen = true;
+  dot.classList.remove('show');
+  if (autoDismiss) {
+    clearTimeout(sagarIdleTimer);
+    sagarIdleTimer = setTimeout(() => {
+      bubble.classList.remove('visible');
+      sagarBubbleOpen = false;
+      sagarSetExpression('normal');
+    }, autoDismiss);
+  }
+}
+
+function sagarNotify(text) {
+  const dot = document.getElementById('sagar-notify-dot');
+  const msg = document.getElementById('sagar-msg');
+  if (msg) msg.textContent = text;
+  if (dot && !sagarBubbleOpen) dot.classList.add('show');
+}
+
+function sagarReactToResult(classKey, friendly, isHealthy, isOOD) {
+  if (isOOD) {
+    sagarShowMessage(SAGAR_MESSAGES.ood, 'thinking', 8000);
+    return;
+  }
+  if (isHealthy) {
+    const msgs = SAGAR_MESSAGES.healthy;
+    sagarShowMessage(msgs[Math.floor(Math.random()*msgs.length)], 'happy', 10000);
+    return;
+  }
+  const specific = SAGAR_MESSAGES.disease[classKey] || SAGAR_MESSAGES.disease['_default'];
+  sagarShowMessage('⚠️ ' + specific, 'worry', 12000);
+}
+
+function sagarStartIdleCycle() {
+  const msgs = SAGAR_MESSAGES.idle;
+  function nextMsg() {
+    if (!sagarBubbleOpen) {
+      sagarNotify(msgs[sagarMsgIndex % msgs.length]);
+      sagarMsgIndex++;
+    }
+    sagarIdleTimer = setTimeout(nextMsg, 18000 + Math.random()*8000);
+  }
+  sagarIdleTimer = setTimeout(nextMsg, 3500);
+}
+
+// Show greeting bubble on page load
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    sagarShowMessage(SAGAR_MESSAGES.idle[0], 'normal', 7000);
+    setTimeout(sagarStartIdleCycle, 8500);
+  }, 1800);
+});
 </script>
+
+<!-- ============================================================
+     FARMER SAGAR — Floating Field Assistant Widget
+     ============================================================ -->
+<div id="sagar-widget">
+  <div id="sagar-bubble">
+    <div class="bubble-name">🧑‍🌾 Farmer Sagar</div>
+    <span id="sagar-msg">Namaste! I'm Sagar, your field advisor. Upload a tomato leaf and I'll guide you through the diagnosis! 🌿</span>
+  </div>
+  <div id="sagar-avatar-btn" onclick="sagarToggleBubble()" title="Farmer Sagar — Click to toggle advice">
+    <svg id="sagar-svg" width="120" height="160" viewBox="0 0 120 200" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+  <!-- Ground shadow -->
+  <ellipse cx="60" cy="196" rx="40" ry="5" fill="#0a2010" fill-opacity="0.4"/>
+
+  <!-- ===== LEGS ===== -->
+  <g class="sg-legs">
+    <!-- Left dhoti leg -->
+    <path d="M48 145 C46 162 44 178 42 196 L52 196 C53 180 55 164 57 148 Z" fill="#F5F0E8"/>
+    <!-- Right dhoti leg -->
+    <path d="M72 145 C74 162 76 178 78 196 L68 196 C67 180 65 164 63 148 Z" fill="#F5F0E8"/>
+    <!-- Sandal left -->
+    <ellipse cx="46" cy="196" rx="8" ry="3" fill="#8B5E3C"/>
+    <!-- Sandal right -->
+    <ellipse cx="74" cy="196" rx="8" ry="3" fill="#8B5E3C"/>
+  </g>
+
+  <!-- ===== BODY / DHOTI / KURTA ===== -->
+  <g class="sg-body">
+    <!-- Dhoti lower -->
+    <path d="M42 130 C40 138 40 148 42 156 L78 156 C80 148 80 138 78 130 Z" fill="#F5F0E8"/>
+    <!-- Dhoti fold crease -->
+    <path d="M48 130 C52 140 68 140 72 130" stroke="#D4C9B0" stroke-width="1.5" fill="none"/>
+    <!-- Kurta / shirt -->
+    <path d="M38 100 C34 112 35 128 42 134 L78 134 C85 128 86 112 82 100 Z" fill="#FF8C42"/>
+    <!-- Kurta collar -->
+    <path d="M54 100 L60 112 L66 100" stroke="#CC6020" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Kurta button line -->
+    <line x1="60" y1="104" x2="60" y2="126" stroke="#CC6020" stroke-width="1.2" stroke-dasharray="3,3"/>
+    <!-- Front pocket + leaf icon -->
+    <rect x="42" y="110" width="13" height="10" rx="2" fill="#E07030" stroke="#CC6020" stroke-width="1"/>
+    <text x="44" y="119" font-size="7" fill="#fff">🌿</text>
+  </g>
+
+  <!-- ===== LEFT ARM — holds spray pump ===== -->
+  <g class="sg-hold">
+    <path d="M38 102 C28 110 22 122 22 136 C22 140 26 142 30 140 C32 136 34 128 38 118 Z" fill="#FF8C42"/>
+    <!-- Pump sprayer body -->
+    <rect x="10" y="128" width="20" height="28" rx="4" fill="#1B5E20" stroke="#2E7D32" stroke-width="1.5"/>
+    <rect x="14" y="132" width="12" height="6" rx="2" fill="#43A047"/>
+    <!-- Nozzle -->
+    <path d="M30 134 L42 126" stroke="#1B5E20" stroke-width="2.5" stroke-linecap="round"/>
+    <ellipse cx="43" cy="125" rx="3" ry="2" fill="#388E3C"/>
+    <!-- Spray drops -->
+    <circle cx="47" cy="121" r="1.2" fill="#81C784" opacity="0.7"/>
+    <circle cx="50" cy="118" r="0.9" fill="#81C784" opacity="0.5"/>
+    <circle cx="48" cy="116" r="0.7" fill="#81C784" opacity="0.4"/>
+    <!-- Hand -->
+    <circle cx="28" cy="140" r="6" fill="#FBBF24"/>
+  </g>
+
+  <!-- ===== RIGHT ARM — waving ===== -->
+  <g class="sg-wave">
+    <path d="M82 102 C92 108 100 118 104 130 C106 136 102 140 98 138 C94 134 90 122 84 112 Z" fill="#FF8C42"/>
+    <!-- Hand + waving fingers -->
+    <circle cx="100" cy="134" r="7" fill="#FBBF24"/>
+    <rect x="94"  y="126" width="3.5" height="9" rx="1.75" fill="#FBBF24"/>
+    <rect x="98.5" y="124" width="3.5" height="10.5" rx="1.75" fill="#FBBF24"/>
+    <rect x="103" y="125" width="3.5" height="10" rx="1.75" fill="#FBBF24"/>
+    <rect x="107" y="127" width="3" height="8" rx="1.5" fill="#FBBF24"/>
+  </g>
+
+  <!-- ===== NECK ===== -->
+  <rect x="54" y="88" width="12" height="14" rx="4" fill="#FBBF24"/>
+
+  <!-- ===== HEAD ===== -->
+  <circle cx="60" cy="74" r="22" fill="#FBBF24"/>
+  <!-- Ears -->
+  <ellipse cx="38" cy="74" rx="4.5" ry="6" fill="#F5A623"/>
+  <ellipse cx="82" cy="74" rx="4.5" ry="6" fill="#F5A623"/>
+
+  <!-- ===== TURBAN ===== -->
+  <g class="sg-turban">
+    <!-- Base wrap -->
+    <path d="M38 68 C38 48 82 48 82 68 Z" fill="#1565C0"/>
+    <!-- Wrap layers -->
+    <path d="M40 62 C40 50 80 50 80 62" stroke="#1976D2" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M42 56 C42 46 78 46 78 56" stroke="#42A5F5" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M44 50 C44 42 76 42 76 50" stroke="#1565C0" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <!-- Top knot -->
+    <circle cx="60" cy="42" r="6" fill="#1976D2"/>
+    <path d="M56 42 C58 38 62 38 64 42" fill="#42A5F5"/>
+    <!-- Gold trim -->
+    <path d="M40 64 C48 60 72 60 80 64" stroke="#FFD700" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- Turban pin / brooch -->
+    <circle cx="60" cy="55" r="4" fill="#FFD700" stroke="#FF8C42" stroke-width="1"/>
+    <circle cx="60" cy="55" r="2" fill="#FF8C42"/>
+  </g>
+
+  <!-- ===== MOUSTACHE ===== -->
+  <path d="M50 84 C54 80 58 82 60 82 C62 82 66 80 70 84" stroke="#5D4037" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M50 84 C52 87 56 87 60 86 C64 87 68 87 70 84" fill="#5D4037"/>
+
+  <!-- ===== FACE EXPRESSIONS ===== -->
+  <!-- NORMAL: calm confident eyes + slight smile -->
+  <g class="sg-face-normal">
+    <g class="sg-blink-l">
+      <ellipse cx="50" cy="72" rx="4" ry="4.5" fill="#2C1810"/>
+      <circle cx="51.5" cy="70.5" r="1.3" fill="#fff"/>
+    </g>
+    <g class="sg-blink-r">
+      <ellipse cx="70" cy="72" rx="4" ry="4.5" fill="#2C1810"/>
+      <circle cx="71.5" cy="70.5" r="1.3" fill="#fff"/>
+    </g>
+    <!-- Eyebrows -->
+    <path d="M46 66 Q50 63 54 65" stroke="#5D4037" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M66 65 Q70 63 74 66" stroke="#5D4037" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Smile -->
+    <path d="M53 80 Q60 86 67 80" stroke="#2C1810" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- HAPPY: wide eyes + big smile + cheek glow -->
+  <g class="sg-face-happy">
+    <ellipse cx="50" cy="72" rx="4.5" ry="5" fill="#2C1810"/>
+    <circle cx="52" cy="70" r="1.6" fill="#fff"/>
+    <ellipse cx="70" cy="72" rx="4.5" ry="5" fill="#2C1810"/>
+    <circle cx="72" cy="70" r="1.6" fill="#fff"/>
+    <!-- Big smile -->
+    <path d="M50 79 Q60 90 70 79" stroke="#2C1810" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M53 80 Q60 87 67 80" fill="#fff"/>
+    <!-- Cheek blush -->
+    <ellipse cx="44" cy="78" rx="5" ry="3.5" fill="#FF8C42" fill-opacity="0.35"/>
+    <ellipse cx="76" cy="78" rx="5" ry="3.5" fill="#FF8C42" fill-opacity="0.35"/>
+    <!-- Raised eyebrows -->
+    <path d="M46 64 Q50 60 54 63" stroke="#5D4037" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M66 63 Q70 60 74 64" stroke="#5D4037" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- WORRY: furrowed brows + sad eyes + frown -->
+  <g class="sg-face-worry">
+    <ellipse cx="50" cy="73" rx="4" ry="4" fill="#2C1810"/>
+    <circle cx="51.5" cy="71.5" r="1.2" fill="#fff"/>
+    <ellipse cx="70" cy="73" rx="4" ry="4" fill="#2C1810"/>
+    <circle cx="71.5" cy="71.5" r="1.2" fill="#fff"/>
+    <!-- Furrowed brows (angled inward) -->
+    <path d="M46 67 Q50 64 54 67" stroke="#5D4037" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M66 67 Q70 64 74 67" stroke="#5D4037" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Frown -->
+    <path d="M53 83 Q60 79 67 83" stroke="#2C1810" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Sweat drop -->
+    <path d="M76 65 C76 61 80 62 80 65 C80 68 76 68 76 65 Z" fill="#64B5F6" fill-opacity="0.7"/>
+  </g>
+
+  <!-- THINKING: one eye squint + hand-on-chin posture suggestion + thought dot -->
+  <g class="sg-face-think">
+    <ellipse cx="50" cy="72" rx="4" ry="3" fill="#2C1810"/>
+    <circle cx="51.5" cy="70.5" r="1.2" fill="#fff"/>
+    <!-- Squinting right eye -->
+    <path d="M66 72 Q70 69 74 72" stroke="#2C1810" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <!-- Raised brow left -->
+    <path d="M46 65 Q50 61 54 64" stroke="#5D4037" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Neutral brow right -->
+    <path d="M66 66 Q70 63 74 66" stroke="#5D4037" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Hmm mouth -->
+    <path d="M54 81 Q60 84 66 81" stroke="#2C1810" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- Thought bubbles -->
+    <circle cx="86" cy="60" r="3" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+    <circle cx="92" cy="53" r="4.5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+    <circle cx="100" cy="46" r="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+    <text x="97" y="49" font-size="7" text-anchor="middle" fill="var(--green)">?</text>
+  </g>
+</svg>
+    <div id="sagar-notify-dot"></div>
+  </div>
+</div>
 </body>
 </html>
