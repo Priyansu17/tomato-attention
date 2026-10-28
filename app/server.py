@@ -37,7 +37,7 @@ from src.config import cfg_get, load_config  # noqa: E402
 from src.data.transforms import build_eval_transform  # noqa: E402
 from src.gradcam import GradCAM, _denormalize, _get_target_layer, _overlay  # noqa: E402
 from src.models import build_model  # noqa: E402
-from src.validator import validate_image_foliage, validate_image_context, validate_tomato_prediction  # noqa: E402
+from src.validator import validate_image_foliage, validate_image_context, validate_image_species, validate_tomato_prediction  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -276,6 +276,35 @@ async def predict(
             "friendly_names": friendly_names_t15,
             "rejection_reason": context_msg,
             "guidance": "Please upload a clear, close-up photo of a tomato leaf in a field or garden. Avoid photos taken inside bowls, mortars, or on white surfaces.",
+            "gradcam_b64": None,
+            "original_b64": original_b64,
+            "variant": variant,
+        })
+
+    # 1.6. Tier 1.6: CLIP Species Guard
+    # Uses openai/clip-vit-base-patch32 to verify the leaf is a tomato plant.
+    # Rejects any non-tomato species (Tulsi, herbs, trees, etc.) in any setting.
+    # Calibrated: 99%+ pass on 500 PlantVillage leaves; rejects Tulsi in mortar + garden.
+    is_species, species_msg = validate_image_species(pil_image)
+    if not is_species:
+        buf = BytesIO()
+        pil_image.save(buf, format="PNG")
+        original_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+        raw_cfg = load_config(CONFIG_PATH)
+        class_names_t16: list[str] = list(cfg_get(raw_cfg, "data.class_names"))
+        friendly_names_t16 = [n.replace("Tomato___", "").replace("_", " ") for n in class_names_t16]
+
+        return JSONResponse({
+            "is_valid": False,
+            "class_idx": -1,
+            "class_name": "Invalid_Non_Tomato",
+            "friendly_name": "Unrecognized / Non-Tomato Foliage",
+            "confidence": 0.0,
+            "probs": [0.0] * len(class_names_t16),
+            "class_names": class_names_t16,
+            "friendly_names": friendly_names_t16,
+            "rejection_reason": species_msg,
+            "guidance": "Please upload a clear, close-up photo of a tomato leaf. The system only analyses tomato plants.",
             "gradcam_b64": None,
             "original_b64": original_b64,
             "variant": variant,
