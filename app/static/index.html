@@ -948,14 +948,124 @@ section{padding:7rem 4rem;}
   border-bottom-color: var(--green);
 }
 .tab-video-badge {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  background: #e63946;
+  background: linear-gradient(135deg, #e63946, #c1121f);
   color: #fff;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 0 8px rgba(230, 57, 70, 0.45);
+  animation: videoBadgeGlow 2.4s infinite ease-in-out;
+}
+@keyframes videoBadgeGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(230, 57, 70, 0.35); transform: scale(1); }
+  50% { box-shadow: 0 0 14px rgba(230, 57, 70, 0.75); transform: scale(1.04); }
+}
+
+/* Quick Action Video Button in Header */
+.btn-action-video {
+  border-color: rgba(230, 57, 70, 0.45) !important;
+  color: #ff6b6b !important;
+  background: rgba(230, 57, 70, 0.08) !important;
+  font-weight: 700 !important;
+}
+.btn-action-video:hover {
+  border-color: var(--red) !important;
+  background: rgba(230, 57, 70, 0.2) !important;
+  color: #fff !important;
+}
+
+/* Quick Video Callout Banner inside tab-treatment */
+.video-quick-callout {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), rgba(15, 30, 18, 0.7));
+  border: 1.5px solid rgba(230, 57, 70, 0.35);
+  border-radius: 14px;
+  padding: 0.8rem 1.1rem;
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  user-select: none;
+}
+.video-quick-callout:hover {
+  transform: translateY(-2px);
+  border-color: var(--red);
+  background: linear-gradient(135deg, rgba(230, 57, 70, 0.16), rgba(15, 35, 20, 0.8));
+  box-shadow: 0 8px 24px rgba(230, 57, 70, 0.22);
+}
+.vqc-play-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), var(--red-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(230, 57, 70, 0.5);
+  transition: transform 0.25s ease;
+}
+.video-quick-callout:hover .vqc-play-icon {
+  transform: scale(1.12);
+}
+.vqc-text {
+  flex: 1;
+  min-width: 0;
+}
+.vqc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.2rem;
+}
+.vqc-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.vqb-badge-live {
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: rgba(230, 57, 70, 0.2);
+  border: 1px solid rgba(230, 57, 70, 0.4);
+  color: #ff6b6b;
+  padding: 1px 6px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+.vqc-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vqc-btn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ff858d;
+  background: rgba(230, 57, 70, 0.15);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  padding: 0.38rem 0.75rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.video-quick-callout:hover .vqc-btn {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
 }
 
 /* Tab Panels */
@@ -2172,29 +2282,89 @@ footer{
     white-space: nowrap !important;
   }
 
-  /* Dossier Tabs (Horizontal swipe container with min-width: 0) */
+  /* Dossier Tabs on Mobile: 2x2 Clean Segmented Grid (All 4 tabs visible at once, zero hidden overflow) */
   .dossier-tabs {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    gap: 0.35rem !important;
-    padding-bottom: 0.4rem !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.45rem !important;
+    overflow-x: visible !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    margin-bottom: 1.1rem !important;
+    margin-bottom: 1.15rem !important;
   }
   .dossier-tabs::-webkit-scrollbar {
     display: none !important;
   }
   .dossier-tab-btn {
-    flex-shrink: 0 !important;
-    padding: 0.48rem 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    background: var(--surface2) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 0.55rem 0.4rem !important;
     font-size: 0.75rem !important;
-    white-space: nowrap !important;
+    font-weight: 700 !important;
+    color: var(--text-muted) !important;
+    min-height: 48px !important;
+    min-width: 0 !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  }
+  .dossier-tab-btn:hover {
+    color: var(--text) !important;
+    border-color: rgba(82, 183, 136, 0.5) !important;
+  }
+  .dossier-tab-btn.active {
+    color: var(--green) !important;
+    background: rgba(82, 183, 136, 0.14) !important;
+    border-color: var(--green) !important;
+    box-shadow: 0 0 12px rgba(82, 183, 136, 0.2) !important;
+  }
+  .dossier-tab-btn.tab-video-btn,
+  .dossier-tab-btn[data-tab="tab-video"] {
+    border-color: rgba(230, 57, 70, 0.45) !important;
+    background: linear-gradient(135deg, rgba(230, 57, 70, 0.1), var(--surface2)) !important;
+    color: var(--text) !important;
+  }
+  .dossier-tab-btn.tab-video-btn.active,
+  .dossier-tab-btn[data-tab="tab-video"].active {
+    color: #ff6b6b !important;
+    border-color: var(--red) !important;
+    background: rgba(230, 57, 70, 0.18) !important;
+    box-shadow: 0 0 14px rgba(230, 57, 70, 0.3) !important;
+  }
+  .tab-word-extra {
+    display: inline;
+  }
+
+  /* Video Quick Callout on Mobile */
+  .video-quick-callout {
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.65rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .vqc-play-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .vqc-title {
+    font-size: 0.8rem !important;
+  }
+  .vqc-sub {
+    font-size: 0.7rem !important;
+  }
+  .vqc-btn {
+    display: none !important;
   }
   .dossier-panel {
     min-width: 0 !important;
@@ -2710,10 +2880,13 @@ footer{
           </div>
           <div class="clinical-actions">
             <button type="button" class="btn-action-ghost" onclick="copyPrescription()" title="Copy prescription to clipboard">
-              📋 Copy Prescription
+              📋 Copy
             </button>
             <button type="button" class="btn-action-ghost" onclick="window.print()" title="Print diagnostic report">
-              🖨️ Export PDF
+              🖨️ PDF
+            </button>
+            <button type="button" class="btn-action-ghost btn-action-video" onclick="switchDossierTab('tab-video', true)" title="Watch extension video guide">
+              🎥 Video Guide
             </button>
           </div>
         </div>
@@ -2721,24 +2894,44 @@ footer{
         <div class="info-title" id="info-title">—</div>
         <p class="info-desc" id="info-desc">—</p>
 
-        <!-- Tab Controls -->
-        <div class="dossier-tabs">
+        <!-- Tab Controls (2x2 Segmented on Mobile, Full Row on Desktop) -->
+        <div class="dossier-tabs" id="dossierTabs">
           <button type="button" class="dossier-tab-btn active" data-tab="tab-treatment" onclick="switchDossierTab('tab-treatment')">
-            💊 Treatment Prescription
+            <span class="tab-btn-icon">💊</span>
+            <span class="tab-btn-title">Treatment <span class="tab-word-extra">Prescription</span></span>
           </button>
           <button type="button" class="dossier-tab-btn" data-tab="tab-symptoms" onclick="switchDossierTab('tab-symptoms')">
-            🔍 Symptoms & Biology
+            <span class="tab-btn-icon">🔍</span>
+            <span class="tab-btn-title">Symptoms <span class="tab-word-extra">& Biology</span></span>
           </button>
           <button type="button" class="dossier-tab-btn" data-tab="tab-prevention" onclick="switchDossierTab('tab-prevention')">
-            🛡️ Cultural Prevention
+            <span class="tab-btn-icon">🛡️</span>
+            <span class="tab-btn-title">Cultural <span class="tab-word-extra">Prevention</span></span>
           </button>
-          <button type="button" class="dossier-tab-btn" data-tab="tab-video" onclick="switchDossierTab('tab-video')">
-            🎥 Video Guide <span class="tab-video-badge">Play</span>
+          <button type="button" class="dossier-tab-btn tab-video-btn" data-tab="tab-video" onclick="switchDossierTab('tab-video')">
+            <span class="tab-btn-icon">🎥</span>
+            <span class="tab-btn-title">Video Guide</span>
+            <span class="tab-video-badge">Play ▶</span>
           </button>
         </div>
 
         <!-- Tab 1: Treatment Prescription -->
         <div class="dossier-panel active" id="tab-treatment">
+          <!-- Direct Extension Video Callout Banner -->
+          <div class="video-quick-callout" onclick="switchDossierTab('tab-video', true)" title="Tap to watch extension video guide">
+            <div class="vqc-play-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="#ffffff"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+            </div>
+            <div class="vqc-text">
+              <div class="vqc-head">
+                <span class="vqc-title">Field Management Video Guide</span>
+                <span class="vqb-badge-live">🎥 Extension Demo</span>
+              </div>
+              <div class="vqc-sub" id="vqc-sub">Visual identification, pruning techniques & organic spray schedule</div>
+            </div>
+            <div class="vqc-btn">Watch Video ▶</div>
+          </div>
+
           <div id="info-chemical" class="info-section">
             <div class="info-section-title">🧪 Chemical Treatment Schedule</div>
             <ul class="info-list" id="chemical-list"></ul>
@@ -3397,13 +3590,19 @@ let lastAnalysisData = null;
 let currentGradcamB64 = null;
 let currentOriginalB64 = null;
 
-function switchDossierTab(tabId) {
+function switchDossierTab(tabId, shouldScroll = false) {
   document.querySelectorAll('.dossier-tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabId);
   });
   document.querySelectorAll('.dossier-panel').forEach(panel => {
     panel.classList.toggle('active', panel.id === tabId);
   });
+  if (shouldScroll) {
+    const el = document.getElementById(tabId) || document.getElementById('dossierTabs');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
 }
 
 function toggleSaliencyView(view) {
@@ -3582,6 +3781,11 @@ function renderDiseaseInfo(className){
     if(videoTitle) videoTitle.textContent = info.videoTitle || (info.friendly + ' Field Management Guide');
     if(videoSource) videoSource.textContent = info.videoSource || 'Extension Service';
     if(videoYtLink) videoYtLink.href = `https://www.youtube.com/watch?v=${info.videoId}`;
+
+    const vqcSub = document.getElementById('vqc-sub');
+    if(vqcSub) {
+      vqcSub.textContent = (info.videoTitle || (info.friendly + ' Field Management Guide')) + ' · Tap to watch';
+    }
   } else {
     videoIframe.src = '';
   }
@@ -4271,11 +4475,11 @@ function sagarReactToResult(classKey, friendly, isHealthy, isOOD) {
   }
   if (isHealthy) {
     const msgs = SAGAR_MESSAGES.healthy;
-    sagarShowMessage(msgs[Math.floor(Math.random()*msgs.length)], 'happy', 10000);
+    sagarShowMessage(msgs[Math.floor(Math.random()*msgs.length)] + ' 🎥 Watch our canopy care video below!', 'happy', 10000);
     return;
   }
   const specific = SAGAR_MESSAGES.disease[classKey] || SAGAR_MESSAGES.disease['_default'];
-  sagarShowMessage('⚠️ ' + specific, 'worry', 12000);
+  sagarShowMessage('⚠️ ' + specific + ' 🎥 Extension video guide available in tabs below!', 'worry', 12000);
 }
 
 function sagarStartIdleCycle() {
