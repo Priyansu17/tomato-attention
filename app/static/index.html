@@ -1383,16 +1383,37 @@ footer{
   animation:pulse 2s infinite; flex-shrink:0;
 }
 #sagar-avatar-btn {
-  width:76px; height:76px;
-  cursor:pointer; pointer-events:auto;
-  position:relative;
-  filter:drop-shadow(0 6px 20px rgba(0,0,0,0.6));
-  transition:transform 0.22s ease; flex-shrink:0;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 32%, rgba(45, 106, 79, 0.7), rgba(8, 16, 8, 0.98));
+  border: 2.5px solid rgba(82, 183, 136, 0.55);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.65), 0 0 18px rgba(82,183,136,0.3);
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: transform 0.22s ease, border-color 0.22s, box-shadow 0.22s;
+  flex-shrink: 0;
 }
-#sagar-avatar-btn:hover { transform:scale(1.1) rotate(-3deg); }
-#sagar-avatar-btn:active { transform:scale(0.96); }
+#sagar-avatar-btn:hover {
+  transform: scale(1.08) translateY(-2px);
+  border-color: var(--green);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.7), 0 0 24px rgba(82,183,136,0.45);
+}
+#sagar-avatar-btn:active {
+  transform: scale(0.96);
+}
+#sagar-avatar-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 #sagar-notify-dot {
-  position:absolute; top:2px; right:2px;
+  position:absolute; top:1px; right:1px; z-index:10;
   width:14px; height:14px;
   background:var(--red); border-radius:50%;
   border:2px solid var(--bg);
@@ -1447,13 +1468,13 @@ footer{
   0%,100% { transform:rotate(0deg); }
   50%     { transform:rotate(-7deg); }
 }
-.sg-blink-l { transform-origin:44px 64px; animation:sagarBlink 4.5s infinite; }
-.sg-blink-r { transform-origin:56px 64px; animation:sagarBlink 4.5s 0.22s infinite; }
-.sg-wave    { transform-origin:30px 90px; animation:sagarWave 2.8s ease-in-out infinite; }
+.sg-blink-l { transform-origin:50px 72px; animation:sagarBlink 4.5s infinite; }
+.sg-blink-r { transform-origin:70px 72px; animation:sagarBlink 4.5s 0.22s infinite; }
+.sg-wave    { transform-origin:84px 105px; animation:sagarWave 2.8s ease-in-out infinite; }
 .sg-body    { transform-origin:60px 130px; animation:sagarBreath 3.8s ease-in-out infinite; }
-.sg-turban  { transform-origin:60px 22px; animation:sagarTurban 4s ease-in-out infinite; }
+.sg-turban  { transform-origin:60px 42px; animation:sagarTurban 4s ease-in-out infinite; }
 .sg-legs    { animation:sagarLeg 3.8s ease-in-out infinite; }
-.sg-hold    { transform-origin:84px 108px; animation:sagarHold 4s ease-in-out 0.5s infinite; }
+.sg-hold    { transform-origin:36px 105px; animation:sagarHold 4s ease-in-out 0.5s infinite; }
 
 /* Expression states */
 .sg-face-normal,.sg-face-happy,.sg-face-worry,.sg-face-think { transition:opacity 0.4s; }
@@ -2120,14 +2141,16 @@ footer{
     box-shadow: 0 10px 40px rgba(0,0,0,0.85);
   }
 
-  /* Floating Farmer Sagar Assistant */
+    /* Floating Farmer Sagar Assistant (Framed circular badge, perfectly positioned) */
   #sagar-widget {
-    bottom: 14px;
-    right: 14px;
+    bottom: 18px;
+    right: 18px;
+    z-index: 9999;
   }
   #sagar-avatar-btn {
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
   }
   #sagar-bubble {
     max-width: min(280px, calc(100vw - 36px));
@@ -4075,7 +4098,7 @@ window.addEventListener('load', () => {
     <span id="sagar-msg">Namaste! I'm Sagar, your field advisor. Upload a tomato leaf and I'll guide you through the diagnosis! 🌿</span>
   </div>
   <div id="sagar-avatar-btn" onclick="sagarToggleBubble()" title="Farmer Sagar — Click to toggle advice">
-    <svg id="sagar-svg" width="120" height="160" viewBox="0 0 120 200" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+    <svg id="sagar-svg" viewBox="8 34 104 104" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Ground shadow -->
   <ellipse cx="60" cy="196" rx="40" ry="5" fill="#0a2010" fill-opacity="0.4"/>
 
