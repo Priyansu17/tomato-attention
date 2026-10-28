@@ -680,118 +680,417 @@ section{padding:7rem 4rem;}
 @keyframes arrowPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
 
 /* ============================================================
-   FARMER CHARACTERS & ANIMATIONS
+   ENTERPRISE AGTECH TELEMETRY & SPECIMEN SELECTOR
    ============================================================ */
-@keyframes continuousArmWave {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(16deg); }
-  40% { transform: rotate(-12deg); }
-  60% { transform: rotate(14deg); }
-  80% { transform: rotate(-10deg); }
+.telemetry-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.2rem 1.6rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
-@keyframes continuousHandWave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(26deg); }
-  50% { transform: rotate(-20deg); }
-  75% { transform: rotate(22deg); }
+.telemetry-bar:hover {
+  border-color: rgba(82, 183, 136, 0.35);
+  box-shadow: var(--glow);
 }
-@keyframes charFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-7px); }
+.telemetry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border);
 }
-.animate-arm-wave-continuous {
-  animation: continuousArmWave 1.6s ease-in-out infinite;
-  transform-origin: 142px 145px;
+.telemetry-status {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
 }
-.animate-hand-wave-continuous {
-  animation: continuousHandWave 0.8s ease-in-out infinite;
-  transform-origin: 174px 114px;
+.status-pulse-dot {
+  width: 9px;
+  height: 9px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #10b981;
+  animation: pulseGreen 2s infinite;
 }
-.animate-char-float {
-  animation: charFloat 5s ease-in-out infinite;
+@keyframes pulseGreen {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
 }
-
-/* Character Badge & Speech Bubble */
-.farmer-banner{
-  display:flex;
-  align-items:center;
-  gap:1.8rem;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:24px;
-  padding:1.4rem 2rem;
-  margin-bottom:2.2rem;
-  box-shadow:var(--shadow);
-  transition:transform 0.3s, box-shadow 0.3s;
+.status-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
 }
-.farmer-banner:hover{
-  box-shadow:var(--glow);
+.telemetry-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
-.farmer-avatar{
-  flex-shrink:0;
-  cursor:pointer;
-  transition:transform 0.3s;
+.telemetry-badge.cuda {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
-.farmer-avatar:hover{
-  transform:scale(1.06);
+.telemetry-badge.guard {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.25);
 }
-.farmer-speech{
-  flex:1;
-  background:var(--surface2);
-  border:1.5px solid var(--border);
-  border-radius:18px;
-  padding:1.1rem 1.4rem;
-  position:relative;
+.telemetry-badge.model {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
-.farmer-speech::before{
-  content:'';
-  position:absolute;
-  left:-8px;
-  top:50%;
-  transform:translateY(-50%) rotate(45deg);
-  width:14px;
-  height:14px;
-  background:var(--surface2);
-  border-left:1.5px solid var(--border);
-  border-bottom:1.5px solid var(--border);
-}
-.farmer-role-tag{
-  font-size:0.72rem;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:0.09em;
-  color:var(--green);
-  display:flex;
-  align-items:center;
-  gap:0.4rem;
-  margin-bottom:0.3rem;
-}
-.farmer-quote{
-  font-size:0.92rem;
-  color:var(--text);
-  line-height:1.6;
-}
-.farmer-quote strong{
-  color:var(--green-lite);
+.telemetry-meta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-@media(max-width:768px){
-  .farmer-banner{
-    flex-direction:column;
-    text-align:center;
-    padding:1.4rem 1.2rem;
-    gap:1.2rem;
+/* Sample Specimens Row */
+.sample-specimens-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+.sample-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.sample-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.sample-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.sample-btn:hover {
+  border-color: var(--green);
+  background: rgba(82, 183, 136, 0.12);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(82, 183, 136, 0.15);
+}
+.sample-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.sample-dot.red { background: #ef4444; }
+.sample-dot.orange { background: #f97316; }
+.sample-dot.amber { background: #f59e0b; }
+.sample-dot.green { background: #10b981; }
+.sample-dot.purple { background: #a855f7; }
+
+/* ============================================================
+   CLINICAL PATHOLOGY REPORT & TABS
+   ============================================================ */
+.clinical-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.clinical-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.taxonomy-badge {
+  font-size: 0.72rem;
+  font-style: italic;
+  font-family: serif;
+  color: var(--green-lite);
+  background: rgba(82, 183, 136, 0.1);
+  border: 1px solid rgba(82, 183, 136, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+.clinical-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-action-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s;
+}
+.btn-action-ghost:hover {
+  color: var(--text);
+  border-color: var(--green);
+  background: rgba(82, 183, 136, 0.08);
+}
+
+/* Dossier Navigation Tabs */
+.dossier-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border);
+}
+.dossier-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.dossier-tab-btn:hover {
+  color: var(--text);
+}
+.dossier-tab-btn.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+.tab-video-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  background: #e63946;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Tab Panels */
+.dossier-panel {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+.dossier-panel.active {
+  display: block;
+}
+
+/* ============================================================
+   EMBEDDED VIDEO PLAYER COMPONENT
+   ============================================================ */
+.video-guide-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  margin-top: 0.5rem;
+}
+.video-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.1rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.video-meta-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.video-meta-source {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(82, 183, 136, 0.08);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.video-frame-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  background: #000;
+}
+.video-frame-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.video-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1.1rem;
+  background: var(--surface2);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+.video-yt-btn {
+  color: var(--red);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.2s;
+}
+.video-yt-btn:hover {
+  color: #ff6b6b;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   GRAD-CAM SALIENCY TOGGLE & LEGEND
+   ============================================================ */
+.saliency-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+.view-toggles {
+  display: inline-flex;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2px;
+}
+.view-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-toggle-btn.active {
+  background: rgba(82, 183, 136, 0.15);
+  color: var(--green);
+  border: 1px solid rgba(82, 183, 136, 0.3);
+}
+.saliency-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.legend-bar {
+  width: 80px;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #1e3a8a, #06b6d4, #10b981, #f59e0b, #ef4444);
+}
+
+/* Toast Notification */
+.toast-notice {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--surface2);
+  border: 1.5px solid var(--green);
+  color: var(--text);
+  padding: 0.75rem 1.3rem;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 999999;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.toast-notice.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Print Stylesheet */
+@media print {
+  nav, #hero, #how, #about, .telemetry-bar, #analyze-btn, .variants, .preview-actions, .saliency-controls, .dossier-tabs {
+    display: none !important;
   }
-  .farmer-speech::before{
-    left:50%;
-    top:-7px;
-    transform:translateX(-50%) rotate(45deg);
-    border-left:none;
-    border-bottom:none;
-    border-top:1.5px solid var(--border);
-    border-right:1.5px solid var(--border);
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .detect-bottom-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .dossier-panel {
+    display: block !important;
+  }
+  .result-card, .disease-info-card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
   }
 }
+
 
 /* ============================================================
    ARCHITECTURE PIPELINE FLOATING HOVER POPUP CARD
@@ -1171,92 +1470,38 @@ footer{
     Choose your model variant, upload a leaf image, and let the AI do the rest.
   </p>
 
-  <!-- Farmer Sagar Assistant Banner -->
-  <div class="farmer-banner reveal from-bottom" style="transition-delay:0.12s">
-    <div class="farmer-avatar animate-char-float" title="Farmer Sagar is waving 'Namaste!'">
-      <svg width="110" height="130" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" class="overflow-visible filter drop-shadow-md">
-        <!-- Ground Shadow -->
-        <ellipse cx="100" cy="232" rx="65" ry="8" fill="#143D28" fill-opacity="0.25" />
-        <g style="transform-origin: 100px 180px">
-          <!-- Sagar: Overalls & Plaid Shirt -->
-          <path d="M70 145 C65 170 65 210 68 230 L132 230 C135 210 135 170 130 145 Z" fill="#235D23" />
-          <path d="M62 135 C60 150 72 170 100 170 C128 170 140 150 138 135 Z" fill="#EBE2D5" />
-          <path d="M75 140 L100 165 L125 140" stroke="#8C6D46" stroke-width="2.5" stroke-linecap="round" />
-          <path d="M78 145 L82 195" stroke="#1B4A1B" stroke-width="9" stroke-linecap="round" />
-          <path d="M122 145 L118 195" stroke="#1B4A1B" stroke-width="9" stroke-linecap="round" />
-          <circle cx="82" cy="180" r="3.5" fill="#F59E0B" />
-          <circle cx="118" cy="180" r="3.5" fill="#F59E0B" />
-          <rect x="88" y="185" width="24" height="20" rx="3" fill="#1B4A1B" fill-opacity="0.8" />
-          <path d="M93 182 L100 188 L107 182 Z" fill="#FDE68A" />
-
-          <!-- Left Arm Base + Sprouting Seedling in Clay Pot -->
-          <g>
-            <path d="M66 142 C50 155 45 180 52 198 C56 206 65 208 72 200 C74 196 68 185 68 170" fill="#235D23" />
-            <circle cx="56" cy="202" r="8" fill="#FCD34D" />
-            <g>
-              <path d="M48 200 L64 200 L61 214 L51 214 Z" fill="#5A4226" />
-              <path d="M56 200 Q56 186 52 180" stroke="#3D933D" stroke-width="2.5" stroke-linecap="round" />
-              <path d="M52 180 Q42 178 46 187 Q50 188 52 180 Z" fill="#22C55E" />
-              <path d="M52 183 Q62 178 60 188 Q55 189 52 183 Z" fill="#4ADE80" />
-            </g>
-          </g>
-
-          <!-- Right Arm: Continuous "Hi" Waving Gesture -->
-          <g class="animate-arm-wave-continuous" style="transform-origin: 142px 145px">
-            <path d="M134 142 C150 146 164 135 174 116 C177 110 171 105 164 109 C154 122 145 132 135 152" fill="#235D23" />
-            <g class="animate-hand-wave-continuous" style="transform-origin: 174px 114px">
-              <circle cx="174" cy="114" r="9" fill="#FCD34D" />
-              <rect x="165" y="112" width="4" height="6" rx="2" fill="#FCD34D" transform="rotate(-30 165 112)" />
-              <rect x="170" y="100" width="3.2" height="8" rx="1.6" fill="#FCD34D" />
-              <rect x="175" y="98" width="3.4" height="9.5" rx="1.7" fill="#FCD34D" />
-              <rect x="180" y="100" width="3.2" height="8.5" rx="1.6" fill="#FCD34D" />
-              <rect x="185" y="103" width="3" height="6.5" rx="1.5" fill="#FCD34D" />
-              <path d="M192 100 Q196 106 193 112" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.8" />
-              <path d="M196 96 Q201 106 197 116" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.6" />
-            </g>
-          </g>
-
-          <!-- Neck & Head -->
-          <rect x="94" y="118" width="12" height="14" rx="3" fill="#FBBF24" />
-          <circle cx="100" cy="100" r="24" fill="#FCD34D" />
-          <circle cx="76" cy="100" r="5" fill="#FBBF24" />
-          <circle cx="124" cy="100" r="5" fill="#FBBF24" />
-
-          <!-- Traditional Straw Hat -->
-          <g>
-            <path d="M80 84 C80 62 120 62 120 84 Z" fill="#FDE68A" stroke="#D97706" stroke-width="1.5" />
-            <path d="M80 81 Q100 84 120 81 L120 85 Q100 88 80 85 Z" fill="#16A34A" />
-            <path d="M115 80 Q122 72 124 77 Q120 83 115 80 Z" fill="#4ADE80" />
-            <ellipse cx="100" cy="85" rx="42" ry="9" fill="#FCD34D" stroke="#B45309" stroke-width="1.8" />
-          </g>
-
-          <!-- Smiling Eyes -->
-          <g>
-            <ellipse cx="91" cy="98" rx="2.8" ry="3.2" fill="#0F2F1F" />
-            <circle cx="92" cy="97" r="1" fill="#FFFFFF" />
-            <ellipse cx="109" cy="98" rx="2.8" ry="3.2" fill="#0F2F1F" />
-            <circle cx="110" cy="97" r="1" fill="#FFFFFF" />
-            <path d="M87 92 Q91 89 95 91" stroke="#8C6D46" stroke-width="1.8" stroke-linecap="round" />
-            <path d="M105 91 Q109 89 113 92" stroke="#8C6D46" stroke-width="1.8" stroke-linecap="round" />
-          </g>
-
-          <!-- Rosy Cheeks & Cheerful Smile -->
-          <circle cx="86" cy="104" r="4" fill="#F87171" fill-opacity="0.45" />
-          <circle cx="114" cy="104" r="4" fill="#F87171" fill-opacity="0.45" />
-          <path d="M93 107 Q100 115 107 107" stroke="#0F2F1F" stroke-width="2.2" stroke-linecap="round" fill="none" />
-          <path d="M96 108 Q100 111 104 108" fill="#FFFFFF" />
-
-          <!-- Red Scarf -->
-          <path d="M92 122 L100 134 L108 122 Q100 126 92 122 Z" fill="#EF4444" stroke="#B91C1C" stroke-width="1" />
-        </g>
-      </svg>
-    </div>
-    <div class="farmer-speech">
-      <div class="farmer-role-tag">
-        <span>👨‍🌾</span> Farmer Sagar · Lead Agronomist & Field Expert
+    <!-- Enterprise AgTech Telemetry & Fast Specimen Selector -->
+  <div class="telemetry-bar reveal from-bottom" style="transition-delay:0.12s">
+    <div class="telemetry-header">
+      <div class="telemetry-status">
+        <span class="status-pulse-dot"></span>
+        <span class="status-title">Diagnostic Intelligence Console v2.4</span>
+        <span class="telemetry-badge cuda">CUDA GPU Active</span>
+        <span class="telemetry-badge guard">Tier 1.6 CLIP ViT-B/32 Guard</span>
+        <span class="telemetry-badge model">CBAM Dual Attention</span>
       </div>
-      <div class="farmer-quote">
-        "Namaste! Upload a clear photo of your tomato leaf below. Our <strong>CBAM Attention AI</strong> will diagnose fungal, bacterial, or viral infections in seconds and give you exact chemical and organic remedies to save your harvest!"
+      <div class="telemetry-meta">
+        <span>EPPO / ISO Plant Pathology Protocol</span>
+      </div>
+    </div>
+    <div class="sample-specimens-row">
+      <span class="sample-label">⚡ 1-Click Test Specimen:</span>
+      <div class="sample-pills">
+        <button type="button" class="sample-btn" onclick="loadSample('late_blight', 'Late Blight')">
+          <span class="sample-dot red"></span> Late Blight
+        </button>
+        <button type="button" class="sample-btn" onclick="loadSample('early_blight', 'Early Blight')">
+          <span class="sample-dot orange"></span> Early Blight
+        </button>
+        <button type="button" class="sample-btn" onclick="loadSample('bacterial_spot', 'Bacterial Spot')">
+          <span class="sample-dot amber"></span> Bacterial Spot
+        </button>
+        <button type="button" class="sample-btn" onclick="loadSample('healthy', 'Healthy Leaf')">
+          <span class="sample-dot green"></span> Healthy Leaf
+        </button>
+        <button type="button" class="sample-btn" onclick="loadSample('non_tomato_tulsi', 'Tulsi (Non-Tomato)')">
+          <span class="sample-dot purple"></span> Tulsi (OOD Guard Test)
+        </button>
       </div>
     </div>
   </div>
@@ -1345,29 +1590,92 @@ footer{
     </div>
   </div><!-- end detect-grid -->
 
-  <!-- ROW 2: Remedy (LEFT) + Grad-CAM Heatmap (RIGHT) side by side -->
+    <!-- ROW 2: Clinical Dossier (LEFT) + Grad-CAM Heatmap (RIGHT) -->
   <div class="detect-bottom-grid" id="detectBottomGrid">
-    <!-- LEFT: Remedial Solution Card -->
+    <!-- LEFT: Clinical Agronomy Dossier with Tabs -->
     <div id="disease-info">
       <div class="disease-info-card">
-        <div id="severity-badge" class="severity-badge">—</div>
+        <div class="clinical-card-header">
+          <div class="clinical-tags">
+            <span id="severity-badge" class="severity-badge">—</span>
+            <span id="taxonomy-chip" class="taxonomy-badge">—</span>
+          </div>
+          <div class="clinical-actions">
+            <button type="button" class="btn-action-ghost" onclick="copyPrescription()" title="Copy prescription to clipboard">
+              📋 Copy Prescription
+            </button>
+            <button type="button" class="btn-action-ghost" onclick="window.print()" title="Print diagnostic report">
+              🖨️ Export PDF
+            </button>
+          </div>
+        </div>
+
         <div class="info-title" id="info-title">—</div>
         <p class="info-desc" id="info-desc">—</p>
-        <div id="info-symptoms" class="info-section" style="display:none">
-          <div class="info-section-title">🔍 Symptoms</div>
-          <ul class="info-list" id="symptoms-list"></ul>
+
+        <!-- Tab Controls -->
+        <div class="dossier-tabs">
+          <button type="button" class="dossier-tab-btn active" data-tab="tab-treatment" onclick="switchDossierTab('tab-treatment')">
+            💊 Treatment Prescription
+          </button>
+          <button type="button" class="dossier-tab-btn" data-tab="tab-symptoms" onclick="switchDossierTab('tab-symptoms')">
+            🔍 Symptoms & Biology
+          </button>
+          <button type="button" class="dossier-tab-btn" data-tab="tab-prevention" onclick="switchDossierTab('tab-prevention')">
+            🛡️ Cultural Prevention
+          </button>
+          <button type="button" class="dossier-tab-btn" data-tab="tab-video" onclick="switchDossierTab('tab-video')">
+            🎥 Video Guide <span class="tab-video-badge">Play</span>
+          </button>
         </div>
-        <div id="info-chemical" class="info-section" style="display:none">
-          <div class="info-section-title">🧪 Chemical Treatment</div>
-          <ul class="info-list" id="chemical-list"></ul>
+
+        <!-- Tab 1: Treatment Prescription -->
+        <div class="dossier-panel active" id="tab-treatment">
+          <div id="info-chemical" class="info-section">
+            <div class="info-section-title">🧪 Chemical Treatment Schedule</div>
+            <ul class="info-list" id="chemical-list"></ul>
+          </div>
+          <div id="info-organic" class="info-section">
+            <div class="info-section-title">🌿 Biological & Organic IPM Protocol</div>
+            <ul class="info-list" id="organic-list"></ul>
+          </div>
         </div>
-        <div id="info-organic" class="info-section" style="display:none">
-          <div class="info-section-title">🌿 Organic / Bio Treatment</div>
-          <ul class="info-list" id="organic-list"></ul>
+
+        <!-- Tab 2: Symptoms -->
+        <div class="dossier-panel" id="tab-symptoms">
+          <div id="info-symptoms" class="info-section">
+            <div class="info-section-title">🔬 Diagnostic Symptoms & Visual Markers</div>
+            <ul class="info-list" id="symptoms-list"></ul>
+          </div>
         </div>
-        <div id="info-prevention" class="info-section" style="display:none">
-          <div class="info-section-title">🛡️ Prevention & Care</div>
-          <ul class="info-list" id="prevention-list"></ul>
+
+        <!-- Tab 3: Prevention -->
+        <div class="dossier-panel" id="tab-prevention">
+          <div id="info-prevention" class="info-section">
+            <div class="info-section-title">🛡️ Sanitation & Preventive Agronomy</div>
+            <ul class="info-list" id="prevention-list"></ul>
+          </div>
+        </div>
+
+        <!-- Tab 4: Video Masterclass -->
+        <div class="dossier-panel" id="tab-video">
+          <div class="video-guide-card" id="videoGuideWrap">
+            <div class="video-meta-top">
+              <div class="video-meta-title">
+                <span>📹</span> <span id="video-guide-title">Field Management Video Guide</span>
+              </div>
+              <span class="video-meta-source" id="video-guide-source">Extension Service</span>
+            </div>
+            <div class="video-frame-container">
+              <iframe id="video-iframe" src="" title="Disease Identification and Management Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="video-footer-bar">
+              <span>Full screen playback enabled</span>
+              <a href="#" id="video-yt-link" target="_blank" rel="noopener noreferrer" class="video-yt-btn">
+                Open in YouTube ↗
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1375,16 +1683,32 @@ footer{
     <!-- RIGHT: Grad-CAM Attention Heatmap Card -->
     <div id="gradcam-card">
       <div class="result-card">
-        <div style="font-size:0.85rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem;">
-          🔥 Grad-CAM Attention Heatmap
+        <div class="saliency-controls">
+          <div style="font-size:0.85rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:0.4rem;">
+            🔥 Attention Saliency Map
+          </div>
+          <div class="view-toggles">
+            <button type="button" class="view-toggle-btn active" id="viewBtnGradcam" onclick="toggleSaliencyView('gradcam')">Heatmap</button>
+            <button type="button" class="view-toggle-btn" id="viewBtnOriginal" onclick="toggleSaliencyView('original')">Original Leaf</button>
+          </div>
         </div>
-        <img id="gradcam-img" src="" alt="Grad-CAM" />
-        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.8rem;line-height:1.5;">
-          Warmer colours (red / yellow) indicate the exact regions on the leaf that the model's spatial attention gates focused on to make this diagnosis.
-        </p>
+        <img id="gradcam-img" src="" alt="Grad-CAM Attention Map" />
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.8rem;gap:1rem;flex-wrap:wrap;">
+          <p style="font-size:0.76rem;color:var(--text-muted);line-height:1.4;flex:1;">
+            Warmer colors (red/yellow) isolate discriminative lesion pathology through CBAM spatial attention gates.
+          </p>
+          <div class="saliency-legend">
+            <span>Low</span>
+            <div class="legend-bar"></div>
+            <span>High</span>
+          </div>
+        </div>
       </div>
     </div>
   </div><!-- end detect-bottom-grid -->
+
+  <!-- Toast Notification -->
+  <div id="toastNotice" class="toast-notice">📋 Copied prescription to clipboard!</div>
 </section>
 
 
@@ -1640,99 +1964,121 @@ footer{
 const DISEASE_DB = {
   'Tomato___Bacterial_spot': {
     friendly:'Bacterial Spot',severity:'High',
-    description:'Bacterial spot is caused by Xanthomonas species and thrives in warm, wet weather. It is one of the most common and destructive tomato diseases, causing leaf, stem, and fruit damage.',
-    symptoms:['Small water-soaked spots on leaves','Spots turn brown with yellow halos','Severe defoliation in advanced stages','Dark raised scabs on fruits'],
-    chemical:['Apply copper-based bactericides (copper hydroxide)','Streptomycin sulfate sprays','Mancozeb + copper combination'],
-    organic:['Neem oil solution (2%) weekly','Copper soap (potassium bicarbonate)','Compost tea to boost plant immunity'],
-    prevention:['Use certified disease-free seeds','Avoid overhead irrigation','Rotate crops every 2–3 years','Remove and destroy infected plant debris']
+    taxonomy:'Xanthomonas perforans / euvesicatoria',
+    videoId:'q76y11bOBSs',videoTitle:'Bacterial Spot of Tomato: Symptoms & Copper Spray Guide',videoSource:'Agricultural Extension IPM',
+    description:'Bacterial spot is caused by Xanthomonas species and is one of the most destructive warm-season tomato diseases. It produces necrotic foliar lesions and fruit scabs, flourishing during high humidity and driving rain.',
+    symptoms:['Small dark water-soaked spots (1-3mm) with distinct yellow halos','Lesions coalesce causing severe marginal blight and premature defoliation','Raised scab-like circular blisters on developing tomato fruits','Spread rapidly via wind-driven rain and overhead sprinkler irrigation'],
+    chemical:['Apply copper hydroxide tank-mixed with mancozeb for synergistic bacterial control','Streptomycin sulfate or oxytetracycline sprays on greenhouse transplants','Actigard (acibenzolar-S-methyl) systemic acquired resistance inducer'],
+    organic:['Spray 2% neem oil (azadirachtin) preventively on 7-day intervals','Bacillus subtilis (Serenade ASO) or Bacillus amyloliquefaciens bio-fungicide','Potassium bicarbonate or fixed copper soap (OMRI approved)'],
+    prevention:['Use hot-water treated, certified pathogen-free certified seed','Avoid overhead sprinkler irrigation; always use ground drip lines','Rotate crops with non-solanaceous crops for minimum 2-3 years','Disinfect stakes, trellis wires, and pruning shears between rows']
   },
   'Tomato___Early_blight': {
     friendly:'Early Blight',severity:'Medium',
-    description:'Early blight is caused by the fungus Alternaria solani, typically appearing first on older lower leaves. It can cause significant yield losses if unmanaged, characterised by its distinctive target-ring lesions.',
-    symptoms:['Dark brown spots with concentric rings (target pattern)','Yellow halo around spots','Lower leaves affected first','Stem lesions near soil line'],
-    chemical:['Chlorothalonil fungicide','Mancozeb or azoxystrobin','Copper-based fungicides every 7–10 days'],
-    organic:['Baking soda spray (1 tbsp per litre)','Neem oil application bi-weekly','Trichoderma-based biocontrol agents'],
-    prevention:['Mulch around plants to prevent soil splash','Space plants adequately for airflow','Remove infected lower leaves promptly','Water at base, avoid wetting foliage']
+    taxonomy:'Alternaria solani (Ascomycota)',
+    videoId:'KF3ILZGiLf8',videoTitle:'Early Blight on Tomatoes: Prevention & Treatment',videoSource:'Plant Pathology Extension',
+    description:'Early blight is caused by the fungus Alternaria solani, typically appearing first on older lower leaves. It can cause significant yield losses if unmanaged, characterised by its distinctive concentric target-ring lesions.',
+    symptoms:['Dark brown spots with concentric target-board rings on older foliage','Prominent chlorotic yellow halos surrounding expanding lesions','Lower leaf yellowing, collapse, and upward disease progression','Sunken collar-rot lesions at stem base and dark leathery stem-end fruit rot'],
+    chemical:['Chlorothalonil (Bravo/Daconil) preventive spray every 7–10 days','Azoxystrobin (Quadris) or pyraclostrobin strobilurin fungicide','Difenoconazole + azoxystrobin combination or mancozeb protective sprays'],
+    organic:['Organic copper octanoate (copper soap) applied at first symptom detection','Baking soda spray (1 tbsp sodium bicarbonate + 1 tsp horticultural oil per litre)','Trichoderma harzianum soil and foliage bio-inoculants'],
+    prevention:['Apply thick straw or plastic mulch around plant bases to prevent soil splash','Prune bottom 12 inches of foliage to maximise air circulation','Remove infected lower leaves promptly at first sight; do not compost','Avoid working in the field when foliage is wet from dew or rain']
   },
   'Tomato___Late_blight': {
     friendly:'Late Blight',severity:'High',
-    description:'Late blight caused by Phytophthora infestans is the devastating pathogen responsible for the Irish Potato Famine. It spreads explosively in cool, moist conditions and can destroy an entire crop within days.',
-    symptoms:['Large irregularly shaped water-soaked lesions','White fuzzy growth on leaf undersides','Brown to black lesions spreading rapidly','Infected fruits show firm brown rot'],
-    chemical:['Metalaxyl or mefenoxam immediately','Chlorothalonil as protective spray','Cymoxanil + mancozeb combination'],
-    organic:['Copper hydroxide spray preventively','Remove and bag all infected material','Potassium bicarbonate solution'],
-    prevention:['Plant resistant varieties','Avoid planting near potatoes','Monitor forecasts (cool + wet = high risk)','Destroy volunteer plants and crop debris']
+    taxonomy:'Phytophthora infestans (Oomycota)',
+    videoId:'FHY6SGRDE4Q',videoTitle:'Managing Tomato Late Blight: Field Identification & Urgent Response',videoSource:'Penn State & Cornell Extension',
+    description:'Late blight caused by Phytophthora infestans is the devastating pathogen responsible for the Irish Potato Famine. It spreads explosively in cool, moist conditions (15-22°C with high humidity) and can destroy an entire crop within days.',
+    symptoms:['Large irregularly shaped pale-green water-soaked lesions expanding rapidly','White cottony fungal sporulation visible on leaf undersides in humid mornings','Entire leaflets turning dark brown to purplish-black, collapsing rapidly','Firm, greasy, golden-brown rot on green and ripe tomato fruits'],
+    chemical:['Mandipropamid (Revus) or cymoxanil (Curzate) immediately upon local blight warning','Mefenoxam + chlorothalonil preventive fungicide program','Fluopicolide (Presidio) or dimethomorph rotational spray'],
+    organic:['Fixed copper hydroxide or copper sulfate preventive sprays every 5-7 days','Promptly bag and remove all infected plants; bury deeply or dispose off-site','Hydrogen dioxide (OxiDate) sanitizing spray to reduce surface inoculum'],
+    prevention:['Select resistant varieties bearing Ph-2 and Ph-3 genes (e.g. Mountain Magic, Defiant)','Never plant tomatoes adjacent to or following potato crops','Track regional late blight forecasting networks (USABlight / BlightCast)','Eliminate volunteer tomato and potato cull piles before planting season']
   },
   'Tomato___Leaf_Mold': {
     friendly:'Leaf Mold',severity:'Medium',
-    description:'Leaf mold is caused by the fungus Passalora fulva (formerly Cladosporium fulvum). Most common in greenhouse and tunnel-grown tomatoes where humidity exceeds 85%, it rarely affects fruits but can cause complete defoliation.',
-    symptoms:['Pale greenish-yellow spots on upper leaf surface','Olive-green to brown velvety mold on undersides','Affected leaves curl and dry out','Rarely affects fruits directly'],
-    chemical:['Chlorothalonil or mancozeb','Myclobutanil or difenoconazole','Rotate fungicide classes to prevent resistance'],
-    organic:['Improve greenhouse ventilation significantly','Sulfur-based fungicides','Bacillus subtilis biocontrol sprays'],
-    prevention:['Maintain relative humidity below 85%','Increase plant spacing','Remove infected leaves immediately','Avoid wetting leaves during irrigation']
+    taxonomy:'Passalora fulva (Cladosporium fulvum)',
+    videoId:'Ux6jmp9X_fc',videoTitle:'Leaf Mold Identification and Greenhouse Management',videoSource:'Univ of Florida IFAS Extension',
+    description:'Leaf mold is caused by the fungus Passalora fulva. Most prevalent in high tunnels, greenhouses, and covered structures where relative humidity exceeds 85%, it rarely affects fruits directly but can cause complete defoliation.',
+    symptoms:['Pale greenish-yellow chlorotic spots with diffuse margins on upper leaf surfaces','Olive-green to velvety brown spore growth on leaf undersides directly below spots','Infected leaves curl upward, wither, turn necrotic, and drop prematurely','Starts on lower canopy and advances upward rapidly in enclosed structures'],
+    chemical:['Chlorothalonil or mancozeb protective sprays early in vegetative stage','Difenoconazole, cyprodinil + fludioxonil (Switch), or myclobutanil','Rotate fungicide chemical groups (FRAC 3, 9, 11) to avert resistance'],
+    organic:['Aggressively ventilate greenhouses to maintain relative humidity below 80%','Sulfur vaporizers or wettable sulfur sprays (do not apply within 30 days of oil)','Bacillus amyloliquefaciens (Double Nickel) bio-fungicide sprays'],
+    prevention:['Increase inter-row and in-row plant spacing to optimize cross-ventilation','Install horizontal airflow (HAF) circulating fans in tunnels and greenhouses','Prune lower suckers and foliage to avoid stagnant microclimates','Water exclusively via soil drip lines early in the morning']
   },
   'Tomato___Septoria_leaf_spot': {
     friendly:'Septoria Leaf Spot',severity:'Medium',
-    description:'Septoria leaf spot, caused by Septoria lycopersici, is a widespread fungal disease that primarily attacks foliage and rarely affects fruits. Heavy defoliation weakens plants, reducing fruit quality and yield.',
-    symptoms:['Circular spots with dark brown borders and light centres','Tiny black pycnidia (spore bodies) in spot centres','Lower leaves affected first, spreading upward','Heavy defoliation weakens plants'],
-    chemical:['Chlorothalonil every 7–10 days','Mancozeb or maneb sprays','Copper-based fungicides'],
-    organic:['Neem oil spray weekly','Bacillus subtilis (Serenade) application','Remove infected leaves and dispose properly'],
-    prevention:['Mulch soil to reduce splash dispersal','Stake plants for better air circulation','Avoid working in wet plants','Use drip irrigation instead of overhead']
+    taxonomy:'Septoria lycopersici (Ascomycota)',
+    videoId:'gjMIh19zH7k',videoTitle:'How to Identify & Control Septoria Leaf Spot',videoSource:'Diagnostic Plant Pathology Lab',
+    description:'Septoria leaf spot is a widespread fungal disease attacking foliage from the ground up. Heavy defoliation weakens plants, exposing fruits to solar sunscald and drastically reducing total harvest.',
+    symptoms:['Numerous circular spots (2-3mm) with dark brown margins and sunken ash-grey centers','Tiny black speck-like pycnidia (fruiting bodies) clearly visible inside grey spot centers','Lower leaves turn completely yellow and wither away, working progressively upward','Fruits remain unblemished but suffer severe sunscald due to canopy defoliation'],
+    chemical:['Chlorothalonil every 7–10 days beginning at first crown cluster set','Mancozeb or metiram protective fungicide programs','Azoxystrobin or pyraclostrobin alternated with contact fungicides'],
+    organic:['Liquid copper soap (copper octanoate) applied at initial spot detection','Bacillus subtilis bio-fungicide spray program applied weekly','Neem oil sprays to suppress sporulation and spore adhesion'],
+    prevention:['Mulch soil heavily to eliminate fungal spore splash from topsoil','Stake or trellis tomato vines to keep all foliage elevated off the ground','Rotate tomato crops out of solanaceous fields for a minimum of 3 full years','Clean up and burn or destroy all dead leaf litter at autumn end-of-season']
   },
   'Tomato___Spider_mites Two-spotted_spider_mite': {
     friendly:'Spider Mites',severity:'Medium',
-    description:'Two-spotted spider mites (Tetranychus urticae) are tiny arachnids that suck plant cell contents. They thrive in hot, dry conditions and build pesticide resistance quickly, making rotation of control measures essential.',
-    symptoms:['Fine stippling / bronzing on upper leaf surface','Fine webbing on undersides of leaves','Leaves become yellow, bronze, then die','Tiny moving dots visible with hand lens'],
-    chemical:['Abamectin or bifenazate miticide','Spiromesifen or hexythiazox','Rotate miticide classes every application'],
-    organic:['Insecticidal soap (potassium soap)','Neem oil (azadirachtin) weekly','Release predatory mites (Phytoseiulus persimilis)','Strong water sprays to dislodge mites'],
-    prevention:['Maintain adequate irrigation (dry stress worsens mites)','Monitor undersides of leaves regularly','Control dusty conditions around plants','Avoid broad-spectrum pesticides that kill natural enemies']
+    taxonomy:'Tetranychus urticae (Acari: Tetranychidae)',
+    videoId:'4wVFsEJHYUU',videoTitle:'Two-Spotted Spider Mite Scouting & Management',videoSource:'Integrated Pest Management (IPM)',
+    description:'Two-spotted spider mites are microscopic arachnids that puncture plant cells and suck out chlorophyll. They reproduce explosively in hot, dry, dusty conditions (over 30°C) and develop acaricide resistance rapidly.',
+    symptoms:['Fine stippling, chlorotic speckling, and bronzing on upper leaf blades','Delicate silk webbing draping over undersides of leaves, shoots, and fruit clusters','Leaves become bleached, bronze, desiccate, and drop prematurely','Microscopic translucent/amber mites and round pearl-like eggs under 10x lens'],
+    chemical:['Abamectin (Agri-Mek) or bifenazate (Acramite) targeted miticide','Spiromesifen (Oberon) or hexythiazox (Savey) ovicide against mite eggs','Rotate acaricide modes of action (IRAC 6, 20D, 23) on every single spray'],
+    organic:['Insecticidal potassium soap (M-Pede) sprayed thoroughly on leaf undersides','Pure cold-pressed neem oil (azadirachtin) weekly in the cool evening','Release predatory mites (Phytoseiulus persimilis or Neoseiulus californicus)','High-pressure water jet washdown to physically knock mites off canopies'],
+    prevention:['Prevent water stress through regular irrigation; dry drought stress attracts mites','Keep field perimeter roads damp or vegetated to suppress blowing dust','Avoid using broad-spectrum synthetic pyrethroids that exterminate predatory beneficials','Scout underside of leaves weekly with a 10x botanical hand lens']
   },
   'Tomato___Target_Spot': {
     friendly:'Target Spot',severity:'Medium',
-    description:'Target spot is caused by the fungus Corynespora cassiicola. While less common than early blight, it can cause significant defoliation and fruit lesions in warm, humid environments throughout the growing season.',
-    symptoms:['Concentric ring lesions (target-like appearance)','Brown to tan spots up to 1 cm diameter','Affects leaves, stems, and fruits','Lesions on fruits appear sunken and dark'],
-    chemical:['Azoxystrobin or pyraclostrobin','Boscalid + pyraclostrobin combination','Chlorothalonil as protective spray'],
-    organic:['Copper octanoate (copper soap) sprays','Trichoderma harzianum biocontrol','Improve air circulation around plants'],
-    prevention:['Remove and destroy crop residues after harvest','Practice 2-year crop rotation','Choose resistant varieties when available','Apply mulch to reduce soil splash']
+    taxonomy:'Corynespora cassiicola (Ascomycota)',
+    videoId:'QoyPVzjE88o',videoTitle:'Target Spot on Tomato: Diagnosis and Fungicides',videoSource:'Commercial Vegetable Production Lab',
+    description:'Target spot is caused by Corynespora cassiicola. Prevalent in warm, humid tropical and sub-tropical tomato regions, it attacks leaves, stems, and fruits, causing deep circular lesions that reduce marketability.',
+    symptoms:['Circular brown to tan lesions with faint concentric rings and pinpoint centers','Lesions expand up to 10-15mm diameter, often delimited by leaf veins','Leaves turn chlorotic and shed, causing significant interior canopy defoliation','Fruit lesions appear dark, crater-like, sunken, and crack open as fruits mature'],
+    chemical:['Boscalid + pyraclostrobin (Pristine) or fluopyram + trifloxystrobin (Luna Sensation)','Azoxystrobin or difenoconazole + azoxystrobin combination','Chlorothalonil protective baseline applications on 7-day intervals'],
+    organic:['Copper octanoate (OMRI certified copper soap) spray program','Bio-control with Trichoderma harzianum or Streptomyces lydicus','Improve row aeration and reduce plant density to shorten leaf wetness duration'],
+    prevention:['Strict 2-year crop rotation with non-host crops (corn, brassicas, grasses)','Plow under or destroy crop residues immediately following final harvest','Select tolerant cultivars when cultivating in high-humidity seasons','Avoid overhead sprinklers; irrigate via sub-surface drip exclusively']
   },
   'Tomato___Tomato_Yellow_Leaf_Curl_Virus': {
-    friendly:'Yellow Leaf Curl Virus',severity:'High',
-    description:'Tomato Yellow Leaf Curl Virus (TYLCV) is transmitted by the silverleaf whitefly (Bemisia tabaci). There is no cure once infected — management focuses entirely on preventing transmission through vectors and resistant varieties.',
-    symptoms:['Upward curling and yellowing of leaves','Stunted plant growth','Small, cupped leaves','Flower drop and severely reduced fruit set'],
-    chemical:['Imidacloprid soil drench at transplanting','Thiamethoxam or acetamiprid for adult whiteflies','Mineral oil to reduce virus spread'],
-    organic:['Reflective silver mulch to repel whiteflies','Yellow sticky traps for monitoring','Neem oil sprays targeting whitefly nymphs','Remove and destroy infected plants immediately'],
-    prevention:['Plant TYLCV-resistant varieties (most important)','Use fine mesh insect screens in nurseries','Transplant only healthy seedlings','Control weeds that harbour whiteflies']
+    friendly:'Yellow Leaf Curl Virus (TYLCV)',severity:'High',
+    taxonomy:'Tomato Yellow Leaf Curl Begomovirus (Geminiviridae)',
+    videoId:'2EVWMkJ7xT4',videoTitle:'Yellow Leaf Curl Virus (TYLCV) & Vector Management',videoSource:'Crop Science & Virology Extension',
+    description:'Tomato Yellow Leaf Curl Virus (TYLCV) is an incurable viral disease transmitted by the silverleaf whitefly (Bemisia tabaci). It stunts growth, deforms leaves into tight cupped rosettes, and halts fruit set entirely.',
+    symptoms:['Pronounced upward curling and yellow chlorosis along leaflet margins','Extreme plant stunting; terminal shoots become compact and bushy rosettes','Flower blossoms drop before setting fruit; infected plants yield zero marketable crop','Symptoms appear 2–3 weeks following whitefly feeding and transmission'],
+    chemical:['No chemical cure exists for viral plant infections — control the whitefly vector','Soil drench with systemic neonicotinoid (imidacloprid/thiamethoxam) at transplanting','Foliar rotation of cyantraniliprole, spiromesifen, or flupyradifurone for adults'],
+    organic:['Install UV-reflective silver metalized plastic mulch to disorient incoming whiteflies','Yellow sticky monitoring and mass-trapping cards placed just above canopy height','Target nymphs with insecticidal soap or horticultural mineral oil sprays','Rogue out and incinerate/bag infected plants immediately to stop field spread'],
+    prevention:['Plant TYLCV-resistant hybrids containing Ty-1, Ty-3, or Ty-5 genes (crucial)','Screen greenhouse and nursery intake vents with 50-mesh anti-insect netting','Transplant only certified virus-free seedlings grown in protected nurseries','Eradicate alternative weed hosts (nightshades, mallows, spurges) near tomato fields']
   },
   'Tomato___Tomato_mosaic_virus': {
-    friendly:'Tomato Mosaic Virus',severity:'Medium',
-    description:'Tomato Mosaic Virus (ToMV) is extremely stable and easily transmitted through mechanical contact, infected seeds, and contaminated tools. It can persist in dry plant debris for years and has no chemical cure.',
-    symptoms:['Mosaic pattern of light and dark green on leaves','Leaves may be distorted, fern-like, or blistered','Fruits may show internal browning','Stunted growth in severe infections'],
-    chemical:['No chemical cure — control aphid vectors with imidacloprid','Pyrethroids for aphid management','Disinfect tools with 10% bleach solution'],
-    organic:['Milk spray (whole milk diluted 1:10) as prophylactic','Remove and bag infected plants immediately','Wash hands before handling plants','Use virus-free certified seeds'],
-    prevention:['Plant ToMV-resistant varieties (Tm-2 gene)','Sanitise all tools between plants','Control aphid populations early','Do not use tobacco products near tomatoes']
+    friendly:'Tomato Mosaic Virus (ToMV)',severity:'Medium',
+    taxonomy:'Tomato Mosaic Tobamovirus (Virgaviridae)',
+    videoId:'1DVw0vv_5ro',videoTitle:'Tomato Mosaic Virus: Identification & Hygiene',videoSource:'Plant Virology & Hygiene Guide',
+    description:'Tomato Mosaic Virus (ToMV) is an extraordinarily stable, mechanically transmitted virus. It survives for years in dry crop debris, on stakes, tools, and tobacco products, spreading through simple physical contact.',
+    symptoms:['Mottled mosaic patterns of alternating dark and light green on foliage','Leaf distortion, blistering, shoestringing, and fern-like narrow leaf blades','Internal browning (vascular necrosis) and uneven ripening of tomato fruits','Moderate to severe plant stunting with brittle, easily snapped foliage'],
+    chemical:['No chemical viricide exists; sanitize all pruning shears in 10-20% household bleach','Disinfect greenhouse benches, irrigation lines, and stakes with Virkon S or TSP','Control secondary aphid vectors with systemic insecticide applications'],
+    organic:['Prophylactic whole milk or skim milk spray (1:10 dilution in water) before pruning','Immediately bag and remove all infected plants without touching neighboring vines','Wash hands vigorously with soapy warm water before handling crop foliage','Purchase certified virus-free seeds tested for Tobamovirus contamination'],
+    prevention:['Select cultivars bred with the Tm-2 or Tm-2^2 genetic resistance factors','Strictly prohibit tobacco smoking or chewing inside or near tomato greenhouses','Clean and heat-sterilize seed trays and plant supports between production cycles','Avoid unnecessary pruning or handling of plants when foliage is moist']
   },
   'Tomato___healthy': {
-    friendly:'Healthy',severity:'None',
-    description:'Your tomato plant appears perfectly healthy! The leaves show no signs of disease, pest damage, or nutrient deficiency. Continue your current care routine to maintain this excellent condition.',
-    symptoms:['Deep green, firm leaves','No spots, lesions, or discoloration','Vigorous growth','Good fruit set'],
-    chemical:[],
-    organic:['Continue regular fertilisation schedule','Maintain consistent watering'],
-    prevention:['Monitor weekly for early signs','Maintain good air circulation','Practice crop rotation annually','Keep area free of weeds and debris']
+    friendly:'Healthy Canopy',severity:'None',
+    taxonomy:'Solanum lycopersicum (Healthy Foliage)',
+    videoId:'7Ht2QTkqyTY',videoTitle:'Healthy Tomato Canopy Management, Pruning & Peak Yield Nutrition',videoSource:'Agronomy Field Extension',
+    description:'Your tomato plant displays optimal vegetative health! Leaf margins are smooth, chlorophyll concentration is uniform, and no cellular lesion pathology or vector damage was detected by the CBAM attention gates.',
+    symptoms:['Vigorous dark green foliage with balanced leaf turgor and healthy veining','Clean leaf margins without necrotic spots, chlorotic halos, or curling','Uniform flower cluster development and healthy fruit set without blemishes','Sturdy stem growth with balanced vegetative-to-reproductive growth ratio'],
+    chemical:['No chemical intervention required; preserve natural predatory ecosystem','Maintain balanced fertigation with soluble calcium and potassium at fruit swell'],
+    organic:['Apply compost tea or mycorrhizal inoculants to fortify root immunity','Continue balanced organic nitrogen, phosphorus, and potassium feeding regimen'],
+    prevention:['Conduct weekly visual scouting for early signs of fungal or pest pressure','Maintain proper trellis tension and bottom-leaf sucker pruning for airflow','Mulch well to conserve soil moisture and prevent splash contamination','Rotate crops annually to break any dormant soil-borne fungal spore cycles']
   },
   'Invalid_Non_Plant': {
     friendly:'Non-Plant Object Detected',severity:'Rejected',
+    taxonomy:'Non-Vegetative Object / Artificial Surface',
+    videoId:'FHY6SGRDE4Q',videoTitle:'Diagnostic Guide: Photographing Tomato Leaves for AI Analysis',videoSource:'AI AgTech Diagnostic Lab',
     description:'The uploaded photo does not contain organic plant foliage. Our deep learning model is specialized for plant pathology and requires an image containing leaf tissue.',
     symptoms:['Surface appears flat, artificial, synthetic, or non-vegetative','No chlorophyll absorption pigments or cellular leaf tissue detected'],
-    chemical:[],
-    organic:[],
+    chemical:[],organic:[],
     prevention:['Upload a clear, focused photograph of an actual plant leaf','Position the leaf against a natural or neutral background','Ensure adequate lighting without heavy glare or deep shadows']
   },
   'Invalid_Non_Tomato': {
     friendly:'Unrecognized / Non-Tomato Foliage',severity:'Uncertain',
-    description:'The foliage in this photograph does not match recognized tomato (Solanum lycopersicum) leaf pathology patterns. Model feature activations are below reliable diagnosis thresholds.',
-    symptoms:['The leaf likely belongs to another plant species (e.g. potato, pepper, corn, apple)','Or the photograph is blurred, shadowed, or cropped too closely to reveal tomato leaf characteristics'],
-    chemical:[],
-    organic:[],
-    prevention:['Verify that the photographed leaf is from a tomato plant','Capture the complete leaf blade showing vein structures and margins','Ensure good natural daylight for accurate attention network feature extraction']
+    taxonomy:'Out-of-Distribution Species (Zero-Shot Guard)',
+    videoId:'FHY6SGRDE4Q',videoTitle:'Diagnostic Guide: Photographing Tomato Leaves for AI Analysis',videoSource:'AI AgTech Diagnostic Lab',
+    description:'The foliage in this photograph does not match recognized tomato (Solanum lycopersicum) leaf pathology patterns. Tier 1.6 CLIP species guard identified the specimen as belonging to another plant family.',
+    symptoms:['The leaf belongs to another plant species (e.g. tulsi, holy basil, mint, rose, neem, potato)','Or the photograph is blurred, shadowed, or cropped too closely to reveal tomato leaf characteristics'],
+    chemical:[],organic:[],
+    prevention:['Verify that the photographed leaf is from a tomato plant specifically','Capture the complete leaf blade showing vein structures and serrated margins','Ensure natural daylight for accurate attention network feature extraction']
   }
 };
 
@@ -1867,6 +2213,8 @@ function clearFile(){
   panel.style.display='none';
   const bottomGrid=document.getElementById('detectBottomGrid');
   if(bottomGrid) bottomGrid.classList.remove('show');
+  const videoIframe = document.getElementById('video-iframe');
+  if(videoIframe) videoIframe.src = '';
 }
 
 fileInput.addEventListener('change',()=>setFile(fileInput.files[0]));
@@ -1917,6 +2265,98 @@ analyzeBtn.addEventListener('click',async()=>{
     analyzeBtn.disabled=false;
   }
 });
+
+
+/* ============================================================
+   ACTIVE STATE & CLINICAL DOSSIER HELPERS
+   ============================================================ */
+let lastAnalysisData = null;
+let currentGradcamB64 = null;
+let currentOriginalB64 = null;
+
+function switchDossierTab(tabId) {
+  document.querySelectorAll('.dossier-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabId);
+  });
+  document.querySelectorAll('.dossier-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === tabId);
+  });
+}
+
+function toggleSaliencyView(view) {
+  const imgEl = document.getElementById('gradcam-img');
+  const btnGrad = document.getElementById('viewBtnGradcam');
+  const btnOrig = document.getElementById('viewBtnOriginal');
+
+  if (view === 'gradcam') {
+    if (currentGradcamB64) imgEl.src = 'data:image/png;base64,' + currentGradcamB64;
+    btnGrad.classList.add('active');
+    btnOrig.classList.remove('active');
+  } else {
+    if (currentOriginalB64) imgEl.src = 'data:image/png;base64,' + currentOriginalB64;
+    btnOrig.classList.add('active');
+    btnGrad.classList.remove('active');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toastNotice');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function copyPrescription() {
+  if (!lastAnalysisData) return;
+  const info = DISEASE_DB[lastAnalysisData.class_name];
+  if (!info) return;
+
+  const text = `🍅 TOMATO LEAF CLINICAL DIAGNOSIS REPORT
+--------------------------------------------------
+Diagnosis: ${info.friendly}
+Taxonomy: ${info.taxonomy || lastAnalysisData.class_name}
+Confidence: ${Math.round((lastAnalysisData.confidence || 0) * 100)}%
+Severity: ${info.severity}
+Status: ${lastAnalysisData.is_valid !== false ? 'CONFIRMED' : 'REJECTED / OUT-OF-DISTRIBUTION'}
+
+SYMPTOMS:
+${(info.symptoms || []).map(s => '• ' + s).join('\n')}
+
+CHEMICAL TREATMENT:
+${(info.chemical || []).map(c => '• ' + c).join('\n')}
+
+ORGANIC / BIOLOGICAL IPM:
+${(info.organic || []).map(o => '• ' + o).join('\n')}
+
+CULTURAL SANITATION & CARE:
+${(info.prevention || []).map(p => '• ' + p).join('\n')}
+
+Video Field Guide: https://www.youtube.com/watch?v=${info.videoId || ''}
+Generated via TomatoAI CBAM Attention Intelligence Engine`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 Copied prescription to clipboard!');
+  }).catch(() => {
+    showToast('Failed to copy to clipboard.');
+  });
+}
+
+async function loadSample(sampleName, displayName) {
+  try {
+    showToast('Loading ' + displayName + ' sample...');
+    const resp = await fetch(`/static/samples/${sampleName}.jpg`);
+    if (!resp.ok) throw new Error('Sample not found');
+    const blob = await resp.blob();
+    const file = new File([blob], `${sampleName}.jpg`, { type: 'image/jpeg' });
+    setFile(file);
+    setTimeout(() => {
+      document.getElementById('analyze-btn').click();
+    }, 200);
+  } catch (err) {
+    showToast('Failed to load sample: ' + err.message);
+  }
+}
 
 function renderResults(data){
   document.getElementById('empty-state').style.display='none';
@@ -1973,21 +2413,50 @@ function renderResults(data){
     gradCamImg.src='data:image/png;base64,'+data.original_b64;
   }
 
-  // Populate disease info + show the bottom grid
+  // Store globally for saliency toggling & prescription export
+  lastAnalysisData = data;
+  currentGradcamB64 = data.gradcam_b64;
+  currentOriginalB64 = data.original_b64;
+
+  // Set initial Saliency view
+  toggleSaliencyView('gradcam');
+
+  // Populate disease info + taxonomy + video guide + show the bottom grid
   renderDiseaseInfo(data.class_name);
-  const bottomGrid=document.getElementById('detectBottomGrid');
-  if(bottomGrid) setTimeout(()=>bottomGrid.classList.add('show'),100);
+  const bottomGrid = document.getElementById('detectBottomGrid');
+  if(bottomGrid) setTimeout(() => bottomGrid.classList.add('show'), 100);
 }
 
 function renderDiseaseInfo(className){
-  const info=DISEASE_DB[className];
-  if(!info)return;
+  const info = DISEASE_DB[className];
+  if(!info) return;
 
-  const badge=document.getElementById('severity-badge');
-  badge.textContent='Severity: '+info.severity;
-  badge.className='severity-badge '+info.severity;
-  document.getElementById('info-title').textContent=info.friendly;
-  document.getElementById('info-desc').textContent=info.description;
+  const badge = document.getElementById('severity-badge');
+  badge.textContent = 'Severity: ' + info.severity;
+  badge.className = 'severity-badge ' + info.severity;
+
+  const taxChip = document.getElementById('taxonomy-chip');
+  if(taxChip) {
+    taxChip.textContent = info.taxonomy || 'Solanum lycopersicum';
+  }
+
+  document.getElementById('info-title').textContent = info.friendly;
+  document.getElementById('info-desc').textContent = info.description;
+
+  // Video guide setup
+  const videoIframe = document.getElementById('video-iframe');
+  const videoTitle = document.getElementById('video-guide-title');
+  const videoSource = document.getElementById('video-guide-source');
+  const videoYtLink = document.getElementById('video-yt-link');
+
+  if(info.videoId) {
+    videoIframe.src = `https://www.youtube-nocookie.com/embed/${info.videoId}?rel=0&modestbranding=1`;
+    if(videoTitle) videoTitle.textContent = info.videoTitle || (info.friendly + ' Field Management Guide');
+    if(videoSource) videoSource.textContent = info.videoSource || 'Extension Service';
+    if(videoYtLink) videoYtLink.href = `https://www.youtube.com/watch?v=${info.videoId}`;
+  } else {
+    videoIframe.src = '';
+  }
 
   function populateList(sectionId,listId,items){
     const sec=document.getElementById(sectionId);
