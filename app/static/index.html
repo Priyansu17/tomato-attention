@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>Tomato Disease Intelligence — CBAM Attention Network</title>
 <!-- Three.js: try local first, fall back to CDN -->
 <script>
@@ -64,12 +64,23 @@
    RESET & BASE
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{
-  font-family:'Inter',system-ui,-apple-system,sans-serif;
-  background:var(--bg);color:var(--text);
-  overflow-x:hidden;line-height:1.65;
-  transition:background 0.45s,color 0.45s;
+html {
+  scroll-behavior: smooth;
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  line-height: 1.65;
+  position: relative;
+  transition: background 0.45s, color 0.45s;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -151,9 +162,14 @@ nav.scrolled{padding:0.65rem 3rem;box-shadow:var(--shadow);}
 }
 
 /* Decorative orbs */
-.orb{
-  position:absolute;border-radius:50%;pointer-events:none;
-  filter:blur(90px);animation:orbDrift 12s ease-in-out infinite alternate;
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  animation: orbDrift 12s ease-in-out infinite alternate;
+  max-width: 90vw !important;
+  overflow: hidden !important;
 }
 .orb1{
   width:600px;height:600px;right:-100px;top:-150px;
@@ -1334,14 +1350,39 @@ footer{
    ============================================================ */
 #sagar-widget {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
+  bottom: max(22px, calc(16px + env(safe-area-inset-bottom, 0px)));
+  right: max(20px, calc(16px + env(safe-area-inset-right, 0px)));
   z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   pointer-events: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+#sagar-widget.minimized #sagar-bubble,
+#sagar-widget.minimized #sagar-avatar-btn {
+  display: none;
+}
+#sagar-widget.minimized #sagar-pill-restore {
+  display: flex !important;
+}
+#sagar-pill-restore {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1.5px solid var(--green);
+  border-radius: 999px;
+  padding: 6px 14px 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 #sagar-bubble {
   background: var(--surface2);
@@ -1383,12 +1424,12 @@ footer{
   animation:pulse 2s infinite; flex-shrink:0;
 }
 #sagar-avatar-btn {
-  width: 66px;
-  height: 66px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 32%, rgba(45, 106, 79, 0.7), rgba(8, 16, 8, 0.98));
-  border: 2.5px solid rgba(82, 183, 136, 0.55);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.65), 0 0 18px rgba(82,183,136,0.3);
+  background: radial-gradient(circle at 50% 30%, rgba(45, 106, 79, 0.85), rgba(8, 16, 8, 0.98));
+  border: 2px solid rgba(82, 183, 136, 0.6);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 16px rgba(82,183,136,0.3);
   cursor: pointer;
   pointer-events: auto;
   position: relative;
@@ -1398,6 +1439,14 @@ footer{
   overflow: hidden;
   transition: transform 0.22s ease, border-color 0.22s, box-shadow 0.22s;
   flex-shrink: 0;
+}
+#sagar-avatar-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  pointer-events: none;
 }
 #sagar-avatar-btn:hover {
   transform: scale(1.08) translateY(-2px);
@@ -1691,6 +1740,10 @@ footer{
 
 /* Comprehensive Phone Layout (<600px) */
 @media (max-width: 600px) {
+  /* Bottom clearance so floating widgets never overlap cards or text */
+  #detect, #about, footer {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
   /* Global Spacing */
   section {
     padding: 3rem 1.1rem;
@@ -4009,6 +4062,20 @@ let sagarBubbleOpen = false;
 let sagarIdleTimer = null;
 let sagarMsgIndex = 0;
 
+
+function sagarMinimize() {
+  const widget = document.getElementById('sagar-widget');
+  if (widget) widget.classList.add('minimized');
+}
+
+function sagarRestore() {
+  const widget = document.getElementById('sagar-widget');
+  if (widget) {
+    widget.classList.remove('minimized');
+    sagarToggleBubble();
+  }
+}
+
 function sagarToggleBubble() {
   const bubble = document.getElementById('sagar-bubble');
   sagarBubbleOpen = !sagarBubbleOpen;
@@ -4094,11 +4161,20 @@ window.addEventListener('load', () => {
      ============================================================ -->
 <div id="sagar-widget">
   <div id="sagar-bubble">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div class="bubble-name" style="margin-bottom:0;">🧑‍🌾 Farmer Sagar</div><span onclick="event.stopPropagation();sagarToggleBubble();" style="cursor:pointer;opacity:0.6;font-size:14px;padding:0 4px;" title="Dismiss">&times;</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="bubble-name" style="margin-bottom:0;">🧑‍🌾 Farmer Sagar</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span onclick="event.stopPropagation();sagarMinimize();" style="cursor:pointer;opacity:0.6;font-size:11px;padding:0 3px;color:var(--text-muted);" title="Minimize assistant">Hide</span>
+        <span onclick="event.stopPropagation();sagarToggleBubble();" style="cursor:pointer;opacity:0.75;font-size:16px;padding:0 3px;line-height:1;" title="Close bubble">&times;</span>
+      </div>
+    </div>
     <span id="sagar-msg">Namaste! I'm Sagar, your field advisor. Upload a tomato leaf and I'll guide you through the diagnosis! 🌿</span>
   </div>
+    <div id="sagar-pill-restore" onclick="sagarRestore()" title="Click to open Farmer Sagar assistant">
+    <span>🧑‍🌾</span> <span>Farmer Sagar</span>
+  </div>
   <div id="sagar-avatar-btn" onclick="sagarToggleBubble()" title="Farmer Sagar — Click to toggle advice">
-    <svg id="sagar-svg" viewBox="8 34 104 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg id="sagar-svg" viewBox="10 32 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Ground shadow -->
   <ellipse cx="60" cy="196" rx="40" ry="5" fill="#0a2010" fill-opacity="0.4"/>
 
