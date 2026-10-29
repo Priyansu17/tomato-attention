@@ -100,9 +100,8 @@ tomato-attention/
 ├── notebooks/
 │   ├── tomato_disease_attention_study.ipynb        # Evaluation & Grad-CAM analysis
 │   └── data_preprocessing_and_model_training.ipynb # Full pipeline & training records
-├── Dockerfile              # Container build (for future cloud deployment)
-├── requirements.txt        # Local environment dependencies
-└── requirements_hf.txt     # Minimal inference-only dependencies
+├── START.bat               # One-click launcher for Windows (FastAPI + Cloudflare)
+└── requirements.txt        # Python dependencies
 ```
 
 ---

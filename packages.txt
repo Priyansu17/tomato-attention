@@ -1,5 +1,0 @@
-# System-level packages for Hugging Face Spaces (Ubuntu-based)
-# These are installed via apt-get before pip packages.
-# libGL is needed by OpenCV/Pillow on headless Linux environments.
-libgl1
-libglib2.0-0
