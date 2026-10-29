@@ -1,33 +1,30 @@
 # =============================================================================
-# requirements_hf.txt — Hugging Face Spaces deployment dependencies
+# requirements_hf.txt — Hugging Face Spaces Docker deployment
 #
-# CPU-only PyTorch build is used (no CUDA needed on HF free tier).
-# Gradio is the HF Spaces native app framework.
-#
-# Install order on HF:
-#   1. torch + torchvision (CPU build via --index-url below; handled in packages.txt)
-#   2. pip install -r requirements_hf.txt
+# CPU-only PyTorch is installed FIRST in the Dockerfile via --index-url.
+# This file installs everything else needed for the FastAPI app.
+# DO NOT add torch/torchvision here — handled by Dockerfile.
 # =============================================================================
 
-# --- HF Spaces app framework -------------------------------------------------
-gradio>=6.0,<7.0
+# --- Web framework -----------------------------------------------------------
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.28,<1.0
+python-multipart>=0.0.9,<1.0
 
-# --- Deep learning (CPU build — HF installs via torch index) -----------------
-torch>=2.2,<3.0
-torchvision>=0.17,<1.0
+# --- CLIP (4-tier species validation) ----------------------------------------
+transformers>=4.38,<5.0
+# torch and torchvision are pre-installed via Dockerfile (CPU build)
 
-# --- Scientific / data handling ----------------------------------------------
-numpy>=1.26,<3.0
-pandas>=2.1,<3.0
-scikit-learn>=1.4,<2.0
+# --- Image handling ----------------------------------------------------------
 Pillow>=10.2,<13.0
+numpy>=1.26,<3.0
 
-# --- Configuration -----------------------------------------------------------
+# --- Config ------------------------------------------------------------------
 PyYAML>=6.0,<7.0
 
-# --- Visualization -----------------------------------------------------------
+# --- Visualization (Grad-CAM overlays) ---------------------------------------
 matplotlib>=3.8,<4.0
-seaborn>=0.13,<1.0
 
-# --- Progress reporting ------------------------------------------------------
+# --- Misc --------------------------------------------------------------------
+scikit-learn>=1.4,<2.0
 tqdm>=4.66,<5.0

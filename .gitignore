@@ -16,7 +16,10 @@
 /data/
 
 # --- Model checkpoints / training artifacts ----------------------------------
-/checkpoints/
+# best_model_*.pt are committed so HF Spaces can load the models at runtime.
+# Smoke-test and last_model checkpoints are excluded (large, not needed for inference).
+/checkpoints/smoke/
+/checkpoints/last_model_*.pt
 
 # --- Python ------------------------------------------------------------------
 __pycache__/
