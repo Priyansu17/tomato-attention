@@ -107,40 +107,164 @@ tomato-attention/
 
 ---
 
-## ⚙️ Local Setup
+## ⚙️ Setup & Run — Complete Tutorial
+
+### Prerequisites
+
+Make sure you have these installed before starting:
+
+| Tool | Version | Download |
+|------|---------|---------|
+| **Python** | 3.11 recommended | [python.org](https://www.python.org/downloads/) |
+| **Git** | Any recent version | [git-scm.com](https://git-scm.com/) |
+| **RAM** | 4 GB minimum | — |
+
+> **GPU is NOT required.** The app runs on CPU. A GPU will speed up inference but is optional.
+
+---
+
+### Step 1 — Clone the Repository
 
 ```bash
-# Clone
 git clone https://github.com/Priyansu17/tomato-attention.git
 cd tomato-attention
+```
 
-# Create virtual environment
+---
+
+### Step 2 — Create a Virtual Environment
+
+**Windows (PowerShell):**
+```powershell
 python -m venv venv
-.\venv\Scripts\activate       # Windows
-# source venv/bin/activate    # Linux/Mac
+.\venv\Scripts\activate
+```
 
-# Install CPU PyTorch
+**Linux / Mac:**
+```bash
+python3.11 -m venv venv
+source venv/bin/activate
+```
+
+You should see `(venv)` appear at the start of your terminal prompt.
+
+---
+
+### Step 3 — Install Dependencies
+
+**CPU only (recommended for most users):**
+```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 ```
 
-> **Dataset:** Download the PlantVillage tomato subset and place in `data/raw/` with 10 class folders.
-> **Checkpoints:** Model weights (`best_model_*.pt`) are included in this repo under `checkpoints/`.
+**GPU (CUDA 12.6, optional):**
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+pip install -r requirements.txt
+```
+
+> ⏳ PyTorch is large (~200 MB for CPU build). This step may take 3–5 minutes depending on your internet speed.
 
 ---
 
-## 🚀 Running the App
+### Step 4 — Verify Checkpoints Exist
 
+The trained model weights are included in this repo. Verify they're present:
+
+```bash
+# You should see 3 files listed
+ls checkpoints/best_model_*.pt          # Linux/Mac
+dir checkpoints\best_model_*.pt         # Windows
+```
+
+Expected output:
+```
+best_model_baseline.pt   (~50 MB)
+best_model_cbam.pt       (~52 MB)
+best_model_se.pt         (~52 MB)
+```
+
+> If they are missing, re-clone the repo. These files are committed directly to git.
+
+---
+
+### Step 5 — Run the App
+
+**Windows:**
 ```powershell
 .\venv\python.exe -m uvicorn app.server:app --host 0.0.0.0 --port 8000
 ```
 
-Open `http://localhost:8000` — full 3D web interface with:
-- 🎯 CBAM/SE/Baseline variant selector
-- 🗺️ Grad-CAM attention saliency maps
-- 📋 Clinical Agronomy Dossier (4 tabs: Overview, Symptoms, Treatment, Video)
+**Linux / Mac:**
+```bash
+python -m uvicorn app.server:app --host 0.0.0.0 --port 8000
+```
+
+You should see:
+```
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+
+---
+
+### Step 6 — Open the App
+
+Open your browser and go to:
+```
+http://localhost:8000
+```
+
+You'll see the full 3D web interface with:
+- 🎯 CBAM / SE / Baseline attention variant selector
+- 🗺️ Grad-CAM attention saliency heatmaps
+- 📋 Clinical Agronomy Dossier (4 tabs: Overview, Symptoms, Treatment, Video Guide)
 - 🤖 Farmer Sagar AI assistant
-- 📱 Fully mobile-responsive
+- 📱 Fully mobile-responsive layout
+
+Upload any tomato leaf photo and click **Analyze** to get a diagnosis!
+
+---
+
+### (Optional) Share Publicly via Cloudflare Tunnel
+
+To generate a public URL anyone can access (no deployment needed):
+
+**Windows:**
+```powershell
+# Download cloudflared (one-time)
+Invoke-WebRequest -Uri "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe" -OutFile "cloudflared.exe"
+
+# Run tunnel (keep app running in another terminal)
+.\cloudflared.exe tunnel --url http://localhost:8000
+```
+
+**Linux / Mac:**
+```bash
+# Install cloudflared
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+chmod +x cloudflared
+
+# Run tunnel
+./cloudflared tunnel --url http://localhost:8000
+```
+
+Copy the `https://xxxx.trycloudflare.com` URL from the output and share it. ✅
+
+> ⚠️ The tunnel URL expires after ~24 hours. Just re-run the command to get a new one.
+
+---
+
+### Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `ModuleNotFoundError: No module named 'torch'` | Run `pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu` |
+| `ModuleNotFoundError: No module named 'fastapi'` | Run `pip install -r requirements.txt` |
+| `FileNotFoundError: checkpoints/best_model_cbam.pt` | Re-clone the repo — checkpoints must be downloaded |
+| Port 8000 already in use | Change port: `--port 8080` and open `http://localhost:8080` |
+| App loads but prediction fails | Check terminal for error messages; ensure venv is activated |
+| Slow inference (~3-5 seconds) | Normal on CPU — use GPU build for faster results |
 
 ---
 
