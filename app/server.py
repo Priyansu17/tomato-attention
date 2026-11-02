@@ -179,15 +179,6 @@ async def serve_index():
     return FileResponse(str(index_path), media_type="text/html")
 
 
-@app.get("/presentation", include_in_schema=False)
-async def serve_presentation():
-    """Serve the animated presentation deck."""
-    pres_path = STATIC_DIR / "presentation.html"
-    if not pres_path.exists():
-        raise HTTPException(status_code=404, detail="Presentation not found. Check app/static/presentation.html.")
-    return FileResponse(str(pres_path), media_type="text/html")
-
-
 @app.get("/api/health")
 async def health():
     """Health check endpoint."""
