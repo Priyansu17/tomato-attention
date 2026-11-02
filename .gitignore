@@ -82,5 +82,7 @@ desktop.ini
 *.pptx
 *Presentation*
 *presentation*
-build_official_deck.py
+build_*.py
+notebook_images/
 OPEN_PRESENTATION.bat
+
