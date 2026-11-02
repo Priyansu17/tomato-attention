@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TomatoAI — Attention Networks Presentation</title>
+  <style>
+    /* ============================================================
+       TOMATOAI ANIMATED PRESENTATION STYLES
+       ============================================================ */
+    :root {
+      --bg-dark: #081409;
+      --bg-card: rgba(16, 36, 20, 0.72);
+      --border-card: rgba(82, 183, 136, 0.28);
+      --border-glow: rgba(82, 183, 136, 0.65);
+      --green-primary: #52b788;
+      --green-light: #74c69d;
+      --green-dark: #1b4332;
+      --tomato-red: #e63946;
+      --tomato-glow: rgba(230, 57, 70, 0.35);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --gold: #f59e0b;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(45, 106, 79, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(230, 57, 70, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(10, 26, 12, 0.95) 0%, #050d06 100%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Progress Bar */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green-primary), #40916c, var(--tomato-red));
+      box-shadow: 0 0 12px var(--green-primary);
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Presentation Header Bar */
+    .deck-header {
+      position: fixed;
+      top: 4px;
+      left: 0;
+      right: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(8, 20, 9, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(82, 183, 136, 0.15);
+      z-index: 900;
+    }
+    .deck-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+    }
+    .deck-brand .logo-icon {
+      font-size: 1.3rem;
+      filter: drop-shadow(0 0 8px rgba(230, 57, 70, 0.4));
+    }
+    .deck-brand .badge-tag {
+      background: rgba(82, 183, 136, 0.15);
+      color: var(--green-primary);
+      border: 1px solid rgba(82, 183, 136, 0.35);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .deck-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .slide-badge-counter {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    /* Slide Viewport */
+    #deck-stage {
+      position: absolute;
+      top: 56px;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 3rem;
+    }
+
+    /* Individual Slide Card */
+    .slide {
+      position: absolute;
+      width: min(1120px, 92vw);
+      height: min(640px, 80vh);
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 2.8rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.94) translateY(30px);
+      transition: opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+    .slide.prev {
+      opacity: 0;
+      transform: scale(1.04) translateY(-30px);
+    }
+
+    /* Slide Header */
+    .slide-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--green-primary);
+      margin-bottom: 0.6rem;
+    }
+    .slide-eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green-primary);
+    }
+    .slide-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.6rem;
+      background: linear-gradient(135deg, #ffffff 40%, var(--green-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .slide-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 1.8rem;
+    }
+
+    /* Animated Bullets Container */
+    .bullets-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* Individual Animated Bullet Item */
+    .bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.1rem;
+      padding: 0.85rem 1.15rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(82, 183, 136, 0.12);
+      border-radius: 12px;
+      opacity: 0.15;
+      transform: translateX(-24px);
+      transition: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+      position: relative;
+    }
+    .bullet-item.revealed {
+      opacity: 1;
+      transform: translateX(0);
+      background: rgba(82, 183, 136, 0.06);
+      border-color: rgba(82, 183, 136, 0.3);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+    .bullet-item.active-focus {
+      border-color: var(--green-primary);
+      background: rgba(82, 183, 136, 0.14);
+      box-shadow: 0 0 24px rgba(82, 183, 136, 0.25), inset 0 0 10px rgba(82, 183, 136, 0.1);
+      transform: translateX(6px) scale(1.015);
+    }
+    .bullet-icon {
+      font-size: 1.35rem;
+      line-height: 1.2;
+      flex-shrink: 0;
+      transition: transform 0.3s;
+    }
+    .bullet-item.active-focus .bullet-icon {
+      transform: scale(1.2);
+    }
+    .bullet-content {
+      flex: 1;
+      font-size: 0.96rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+    .bullet-content strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .bullet-item.active-focus .bullet-content {
+      color: #ffffff;
+    }
+
+    /* Key Metric Highlight Pills in Bullets */
+    .pill-stat {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 4px;
+      margin: 0 3px;
+      vertical-align: middle;
+    }
+    .pill-green {
+      background: rgba(82, 183, 136, 0.2);
+      color: #74c69d;
+      border: 1px solid rgba(82, 183, 136, 0.4);
+    }
+    .pill-red {
+      background: rgba(230, 57, 70, 0.2);
+      color: #ff8fa3;
+      border: 1px solid rgba(230, 57, 70, 0.4);
+    }
+    .pill-gold {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fde047;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    /* Formula & Code Callouts in Slides */
+    .formula-box {
+      font-family: var(--font-mono);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px dashed rgba(82, 183, 136, 0.35);
+      border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      margin-top: 0.35rem;
+      font-size: 0.85rem;
+      color: #a7f3d0;
+      display: inline-block;
+    }
+
+    /* Grid Layout for Comparison Slides */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      height: 100%;
+      align-items: center;
+    }
+    .card-comparison {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .card-comparison.highlight {
+      border-color: var(--green-primary);
+      background: rgba(82, 183, 136, 0.08);
+      box-shadow: 0 0 20px rgba(82, 183, 136, 0.2);
+    }
+
+    /* Title Slide Specific Styling */
+    .slide-title-hero {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 4rem;
+    }
+    .hero-badge-row {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+    }
+    .hero-main-title {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 30%, #52b788 80%, #e63946 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-tagline {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 780px;
+      margin: 0 auto 2.2rem;
+      line-height: 1.5;
+    }
+    .hero-author-box {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(82, 183, 136, 0.2);
+      border-radius: 14px;
+      padding: 0.8rem 1.6rem;
+      font-size: 0.88rem;
+    }
+
+    /* Comparison Metric Table */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .results-table th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 2px solid rgba(82, 183, 136, 0.4);
+      color: var(--green-light);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+    .results-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+    }
+    .results-table tr.winner-row {
+      background: rgba(82, 183, 136, 0.12);
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .results-table tr.winner-row td:first-child {
+      border-left: 3px solid var(--green-primary);
+    }
+
+    /* Bottom Control Bar */
+    .deck-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(8, 20, 9, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(82, 183, 136, 0.18);
+      z-index: 900;
+    }
+    .deck-controls-left, .deck-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-deck {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(82, 183, 136, 0.25);
+      color: #cbd5e1;
+      padding: 0.5rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-deck:hover {
+      background: rgba(82, 183, 136, 0.18);
+      border-color: var(--green-primary);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .btn-deck.primary {
+      background: linear-gradient(135deg, var(--green-primary), #2d6a4f);
+      border: none;
+      color: #ffffff;
+      box-shadow: 0 3px 12px rgba(45, 106, 79, 0.4);
+    }
+    .btn-deck.primary:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 4px 18px rgba(82, 183, 136, 0.5);
+    }
+    .bullet-counter-pill {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .key-shortcuts-hint {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .kbd-key {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+
+    /* Overview Modal Grid */
+    #overview-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(4, 10, 5, 0.94);
+      backdrop-filter: blur(14px);
+      z-index: 2000;
+      overflow-y: auto;
+      padding: 3rem 2rem;
+    }
+    #overview-modal.active {
+      display: block;
+    }
+    .overview-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .overview-card {
+      background: rgba(16, 36, 20, 0.85);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .overview-card:hover {
+      border-color: var(--green-primary);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(82, 183, 136, 0.2);
+    }
+    .overview-card.current {
+      border-color: var(--tomato-red);
+      box-shadow: 0 0 20px var(--tomato-glow);
+    }
+    .overview-num {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--green-primary);
+      margin-bottom: 0.35rem;
+    }
+    .overview-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        overflow: visible !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      #progress-container, .deck-header, .deck-footer, #overview-modal {
+        display: none !important;
+      }
+      #deck-stage {
+        position: static !important;
+        padding: 0 !important;
+        display: block !important;
+      }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always !important;
+        width: 100% !important;
+        height: auto !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        margin-bottom: 2rem !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .bullet-item {
+        opacity: 1 !important;
+        transform: none !important;
+        border-color: #ddd !important;
+        background: #f8fafc !important;
+        color: #000 !important;
+      }
+      .slide-title {
+        background: none !important;
+        -webkit-text-fill-color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Real-time Progress Bar -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <!-- Header Navigation & Status Bar -->
+  <header class="deck-header">
+    <div class="deck-brand">
+      <span class="logo-icon">🍅</span>
+      <span>TomatoAI Presentation Deck</span>
+      <span class="badge-tag">CBAM Dual-Attention</span>
+    </div>
+    <div class="deck-meta">
+      <span class="slide-badge-counter" id="slide-indicator">Slide 1 / 12</span>
+      <span class="bullet-counter-pill" id="bullet-indicator">Bullets 0/0</span>
+      <button type="button" class="btn-deck" onclick="toggleOverview()" title="View all slides (Shortcut: O or Esc)">
+        <span>🗂️</span> Overview
+      </button>
+      <button type="button" class="btn-deck" onclick="toggleFullscreen()" title="Fullscreen (Shortcut: F)">
+        <span>⛶</span> Fullscreen
+      </button>
+    </div>
+  </header>
+
+  <!-- Slide Stage Viewport -->
+  <main id="deck-stage">
+
+    <!-- ==========================================
+         SLIDE 1: Title Slide (Hero)
+         ========================================== -->
+    <div class="slide slide-title-hero active" data-slide="1">
+      <div class="hero-badge-row">
+        <span class="pill-stat pill-green">Research Defense</span>
+        <span class="pill-stat pill-gold">EfficientNet-B0 + CBAM</span>
+        <span class="pill-stat pill-red">99.38% Accuracy</span>
+      </div>
+      <h1 class="hero-main-title">Tomato Leaf Disease Intelligence<br>with Attention Networks</h1>
+      <p class="hero-tagline">
+        Autonomous pathological classification, dual-attention spatial explainability, and multi-tier edge reliability in Solanaceae crop protection.
+      </p>
+
+      <div class="bullets-container" style="max-width: 820px; margin: 0 auto; width: 100%;">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">🍅</span>
+          <div class="bullet-content">
+            <strong>Target Agricultural Domain:</strong> Early, localized detection of 9 devastating foliar pathogens affecting tomato farming globally.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🧠</span>
+          <div class="bullet-content">
+            <strong>Architectural Innovation:</strong> Integrating the <em>Convolutional Block Attention Module</em> (CBAM) to adaptively refine channel features and spatial lesion regions.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🏆</span>
+          <div class="bullet-content">
+            <strong>Verified Benchmark:</strong> Surpassing baseline and SE architectures with <span class="pill-stat pill-green">99.38% Test Accuracy</span> and zero cross-split data leakage.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">👨‍🌾</span>
+          <div class="bullet-content">
+            <strong>End-to-End Decision Support:</strong> Explainable Grad-CAM heatmaps coupled with clinical agronomy prescriptions and official pathology lab certification.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 2: Problem Statement
+         ========================================== -->
+    <div class="slide" data-slide="2">
+      <div class="slide-eyebrow"><span class="dot"></span> Challenge & Motivation</div>
+      <h2 class="slide-title">The Agricultural Crisis: Foliar Pathogens</h2>
+      <p class="slide-subtitle">Tomato crops suffer massive economic and food-security losses due to rapid disease propagation.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">📉</span>
+          <div class="bullet-content">
+            <strong>Devastating Yield Destruction:</strong> Pathogens such as <em>Late Blight (Phytophthora infestans)</em> and <em>Bacterial Spot</em> can eradicate entire open-field yields within 48 to 72 hours under warm, humid conditions.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🔍</span>
+          <div class="bullet-content">
+            <strong>Limitations of Manual Scouting:</strong> Visual inspection is labor-intensive, subject to human subjectivity, and practically inaccessible to smallholder farmers lacking on-site agronomists.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🛑</span>
+          <div class="bullet-content">
+            <strong>The "Black-Box" Neural Network Trap:</strong> Standard deep CNNs frequently focus on background soil, greenhouse pipes, or lighting artifacts instead of the actual lesion pathology, triggering dangerous false positives.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">💡</span>
+          <div class="bullet-content">
+            <strong>Our Paradigm:</strong> An explainable, attention-augmented vision network that explicitly validates leaf anatomy, focuses on necrotic tissue, and generates immediate actionable remediation.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 3: PlantVillage Dataset & Data Engineering
+         ========================================== -->
+    <div class="slide" data-slide="3">
+      <div class="slide-eyebrow"><span class="dot"></span> Data Pipeline</div>
+      <h2 class="slide-title">Dataset Integrity & Zero-Leakage Pipeline</h2>
+      <p class="slide-subtitle">Rigorous data curation eliminating hidden data leakage and duplicate contamination.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">📊</span>
+          <div class="bullet-content">
+            <strong>18,160 Foliage Images:</strong> PlantVillage repository spanning 9 diseased categories (Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria, Spider Mites, Target Spot, Yellow Leaf Curl, Mosaic Virus) + 1 Healthy class.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🔐</span>
+          <div class="bullet-content">
+            <strong>Cryptographic SHA-256 Deduplication:</strong> Identified and isolated <span class="pill-stat pill-gold">1,357 duplicate clusters</span> (16,012 unique content hashes) in the public benchmark that skew reported accuracy if unhandled.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🛡️</span>
+          <div class="bullet-content">
+            <strong>Cluster-Bound Stratified Splitting:</strong> Enforced a strict <span class="pill-stat pill-green">70% Train / 15% Val / 15% Test</span> split where entire duplicate clusters are restricted to a single partition — guaranteeing zero evaluation leakage.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🔄</span>
+          <div class="bullet-content">
+            <strong>Physiologically Grounded Augmentations:</strong> Subtle Color Jitter (±0.2 brightness, contrast, saturation), Random Rotations (±15°), and horizontal mirroring without altering pathological chlorosis signatures.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 4: EfficientNet-B0 Backbone
+         ========================================== -->
+    <div class="slide" data-slide="4">
+      <div class="slide-eyebrow"><span class="dot"></span> Backbone Architecture</div>
+      <h2 class="slide-title">Foundation: Pretrained EfficientNet-B0</h2>
+      <p class="slide-subtitle">Compound coefficient scaling achieving state-of-the-art representation with mobile-ready parameters.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">📐</span>
+          <div class="bullet-content">
+            <strong>Principled Compound Scaling:</strong> Balances network depth ($d=\alpha^\phi$), channel width ($w=\beta^\phi$), and input resolution ($r=\gamma^\phi$) uniformly under a constant computational budget $\phi$.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">⚡</span>
+          <div class="bullet-content">
+            <strong>Mobile Inverted Bottleneck (MBConv):</strong> Utilizes depthwise separable convolutions with inverted residual shortcuts and internal squeeze-and-excitation blocks for minimal FLOP overhead.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🪶</span>
+          <div class="bullet-content">
+            <strong>Extreme Parameter Efficiency:</strong> Only <span class="pill-stat pill-green">5.3 Million Parameters</span> — roughly 5× smaller than ResNet-50 (25.6M) and 26× lighter than VGG-16 (138M) with superior top-1 feature extraction.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🎯</span>
+          <div class="bullet-content">
+            <strong>Pretrained Transfer Weights:</strong> Pretrained on ImageNet-1K, providing generalized multi-scale edge, texture, and chlorosis filters prior to task-specific agronomy fine-tuning.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 5: CBAM Attention Deep Dive
+         ========================================== -->
+    <div class="slide" data-slide="5">
+      <div class="slide-eyebrow"><span class="dot"></span> Core Innovation</div>
+      <h2 class="slide-title">CBAM: Dual Channel & Spatial Attention</h2>
+      <p class="slide-subtitle">Sequential decomposition: learning "what" features to emphasize and "where" lesions are located.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">📡</span>
+          <div class="bullet-content">
+            <strong>Channel Attention Module (What to focus on):</strong> Exploits both Global Average Pooling (GAP) and Global Max Pooling (GMP) through a shared two-layer MLP with reduction ratio $r=16$:
+            <div class="formula-box">M_c(F) = σ( MLP(AvgPool(F)) + MLP(MaxPool(F)) )</div>
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🗺️</span>
+          <div class="bullet-content">
+            <strong>Spatial Attention Module (Where to look):</strong> Pools channel activations across space and passes the concatenated maps through a large $7\times 7$ convolution:
+            <div class="formula-box">M_s(F') = σ( f^{7×7}( [AvgPool(F'); MaxPool(F')] ) )</div>
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🔬</span>
+          <div class="bullet-content">
+            <strong>Feature Recalibration:</strong> Intermediate feature maps $\mathbf{F} \in \mathbb{R}^{C \times H \times W}$ are sequentially scaled: $\mathbf{F}' = \mathbf{M}_c(\mathbf{F}) \otimes \mathbf{F}$, followed by $\mathbf{F}'' = \mathbf{M}_s(\mathbf{F}') \otimes \mathbf{F}'$.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🎯</span>
+          <div class="bullet-content">
+            <strong>Noise Suppression:</strong> Irrelevant spatial noise (background trays, specular leaf glare, soil) is systematically dampened while concentric target-rings and necrotic margins are highlighted.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 6: Comparative Architectural Ablation
+         ========================================== -->
+    <div class="slide" data-slide="6">
+      <div class="slide-eyebrow"><span class="dot"></span> Ablation Study</div>
+      <h2 class="slide-title">Architectural Variants Compared</h2>
+      <p class="slide-subtitle">Rigorous benchmark comparing Baseline, Squeeze-and-Excitation (SE), and Dual CBAM.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">⚪</span>
+          <div class="bullet-content">
+            <strong>Variant A: Baseline EfficientNet-B0:</strong> Raw backbone with standard Global Average Pooling directly into the Dense classifier. Good baseline, but lacks selective spatial lesion weighting.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🟡</span>
+          <div class="bullet-content">
+            <strong>Variant B: Squeeze-and-Excitation (SE):</strong> Adds 1D channel attention recalibration. Models cross-channel interdependencies, but remains spatially agnostic across the $7\times 7$ grid.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🟢</span>
+          <div class="bullet-content">
+            <strong>Variant C: Dual CBAM (Our Champion):</strong> Cascades channel recalibration with spatial convolution. Accurately pinpoints isolated fungal spots and multi-focal bacterial lesions simultaneously.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">⚡</span>
+          <div class="bullet-content">
+            <strong>Parameter Efficiency:</strong> CBAM introduces <span class="pill-stat pill-green">&lt;0.2% Additional Parameters</span> over baseline, maintaining real-time inference latency (42ms on GPU, 1.2s on CPU).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 7: Training & Optimization Engine
+         ========================================== -->
+    <div class="slide" data-slide="7">
+      <div class="slide-eyebrow"><span class="dot"></span> Training Protocol</div>
+      <h2 class="slide-title">Two-Phase Training & Optimization</h2>
+      <p class="slide-subtitle">Differential learning rates, warmup, and modern regularization preventing catastrophic forgetting.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">❄️</span>
+          <div class="bullet-content">
+            <strong>Phase A: Frozen Backbone Warmup (2 Epochs):</strong> Pretrained ImageNet weights are frozen; only the newly added CBAM module and dense classification head are trained at $\text{LR} = 10^{-4}$ to stabilize random gradients.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🔥</span>
+          <div class="bullet-content">
+            <strong>Phase B: Differential Fine-Tuning (38 Epochs):</strong> The entire backbone is unfrozen with differential learning rates: backbone at conservative $\text{LR} = 10^{-5}$ and classifier head at $\text{LR} = 10^{-4}$.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">📉</span>
+          <div class="bullet-content">
+            <strong>Cosine Annealing Schedule:</strong> Dynamic decay down to $\eta_{\text{min}} = 10^{-6}$ with 3-epoch linear warmup, guiding the optimizer toward flat, generalized minima.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🛡️</span>
+          <div class="bullet-content">
+            <strong>Label Smoothing & Mixed Precision:</strong> Applied Label Smoothing ($\lambda = 0.1$) to prevent overconfident boundary over-fitting, alongside AMP FP16 acceleration and AdamW weight decay ($10^{-4}$).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 8: Grad-CAM Explainability
+         ========================================== -->
+    <div class="slide" data-slide="8">
+      <div class="slide-eyebrow"><span class="dot"></span> Interpretability</div>
+      <h2 class="slide-title">Explainable AI via Grad-CAM Saliency</h2>
+      <p class="slide-subtitle">Validating that neural predictions are driven by authentic pathological evidence.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">🗺️</span>
+          <div class="bullet-content">
+            <strong>Gradient-Weighted Class Activation Maps:</strong> Calculates gradients of the predicted class score $y^c$ with respect to the final convolutional feature maps $A^k$, deriving importance weights $\alpha_k^c$:
+            <div class="formula-box">L^c_{\text{Grad-CAM}} = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)</div>
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">📍</span>
+          <div class="bullet-content">
+            <strong>Post-Attention Hooking:</strong> Hooks directly into the CBAM output layer, visualizing how spatial attention dynamically concentrates gradient mass on diseased leaf tissues.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🔬</span>
+          <div class="bullet-content">
+            <strong>Pathological Correlation:</strong> Confirmed that high saliency (red/amber heat) precisely overlaps physical fungal spore centers, bacterial water-soaked lesions, and viral chlorotic curling.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🤝</span>
+          <div class="bullet-content">
+            <strong>Building Agronomist Trust:</strong> Eliminates the "black-box" skepticism by giving field farmers and plant pathologists verifiable visual proof for every diagnosis.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 9: 4-Tier Out-of-Distribution Guardrails
+         ========================================== -->
+    <div class="slide" data-slide="9">
+      <div class="slide-eyebrow"><span class="dot"></span> Production Safety</div>
+      <h2 class="slide-title">4-Tier Out-of-Distribution Guardrails</h2>
+      <p class="slide-subtitle">Multi-layer computer vision shielding against non-plant, non-tomato, and out-of-context uploads.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">🌿</span>
+          <div class="bullet-content">
+            <strong>Tier 1 — Foliage & Chlorophyll Guard:</strong> Analyzes HSV green-chrominance spectrum and leaf contour area. Instantly rejects arbitrary images (faces, cars, documents, animals, blank frames).
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🏛️</span>
+          <div class="bullet-content">
+            <strong>Tier 1.5 — Studio & Mortar Context Guard:</strong> Rejects samples photographed inside lab mortars, bowls, or high-contrast reflective tables that induce distribution shift.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🤖</span>
+          <div class="bullet-content">
+            <strong>Tier 1.6 — Zero-Shot CLIP Species Guard:</strong> Employs OpenAI's CLIP ViT-B/32 vision-language embeddings to verify species identity — rejecting non-tomato leaves (potato, apple, grapevine, weeds).
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">📊</span>
+          <div class="bullet-content">
+            <strong>Tier 2 — Softmax Entropy & Confidence Filter:</strong> Computes Shannon entropy on output logits; flags ambiguous samples ($H &gt; 1.8$ or $\text{conf} &lt; 0.60$) for manual extension inspection.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 10: Quantitative Experimental Results
+         ========================================== -->
+    <div class="slide" data-slide="10">
+      <div class="slide-eyebrow"><span class="dot"></span> Experimental Results</div>
+      <h2 class="slide-title">Benchmark Results & Model Evaluation</h2>
+      <p class="slide-subtitle">Quantitative comparison confirming the statistical superiority of CBAM attention.</p>
+
+      <div style="margin-bottom: 1rem;">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Architecture Variant</th>
+              <th>Attention Mechanism</th>
+              <th>Test Accuracy</th>
+              <th>Validation Loss</th>
+              <th>Macro F1-Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="winner-row">
+              <td><strong>EfficientNet-B0 + CBAM (Ours)</strong></td>
+              <td><strong>Dual (Channel + Spatial)</strong></td>
+              <td><span class="pill-stat pill-green">99.38%</span></td>
+              <td><span class="pill-stat pill-green">0.0163</span></td>
+              <td><span class="pill-stat pill-green">0.9937</span></td>
+            </tr>
+            <tr>
+              <td>EfficientNet-B0 + SE</td>
+              <td>Channel Only</td>
+              <td>99.07%</td>
+              <td>0.0221</td>
+              <td>0.9905</td>
+            </tr>
+            <tr>
+              <td>EfficientNet-B0 Baseline</td>
+              <td>None (Standard CNN)</td>
+              <td>98.15%</td>
+              <td>0.0418</td>
+              <td>0.9812</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">📈</span>
+          <div class="bullet-content">
+            <strong>Substantial Error Reduction:</strong> CBAM slashed the baseline test error rate by over <span class="pill-stat pill-green">66%</span>, driving validation loss from 0.0418 down to 0.0163.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">🎯</span>
+          <div class="bullet-content">
+            <strong>Perfect Recall on Critical Blights:</strong> Achieved 100% precision and recall on Late Blight, Septoria, and Healthy specimens, preventing false-negative crop failure scenarios.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 11: Production System & Agronomy Dossier
+         ========================================== -->
+    <div class="slide" data-slide="11">
+      <div class="slide-eyebrow"><span class="dot"></span> Software Implementation</div>
+      <h2 class="slide-title">Clinical Agronomy Dossier & Web Deployment</h2>
+      <p class="slide-subtitle">Translating machine learning diagnostics into practical, field-ready farm management.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">⚡</span>
+          <div class="bullet-content">
+            <strong>High-Performance FastAPI Backend:</strong> Async ASGI Python service with lazy model loading, cached checkpoints, and sub-100ms request throughput.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">📋</span>
+          <div class="bullet-content">
+            <strong>4-Tab Integrated Pest Management (IPM) Dossier:</strong> Delivers instant targeted chemical spray schedules (fungicides/bactericides), biological organic recipes (neem, *Bacillus*), cultural hygiene, and video guides.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">🖨️</span>
+          <div class="bullet-content">
+            <strong>Official PDF Lab Pathology Certificate:</strong> On-demand printable lab report featuring formal letterhead, dual-plate macroscopic and Grad-CAM imagery, probability distribution, and digital stamp/signatures.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🚀</span>
+          <div class="bullet-content">
+            <strong>One-Click Launcher (`START.bat`):</strong> Automated single-click launcher that boots localhost and exposes a secure global HTTPS Cloudflare tunnel simultaneously.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SLIDE 12: Conclusion & Future Scope
+         ========================================== -->
+    <div class="slide" data-slide="12">
+      <div class="slide-eyebrow"><span class="dot"></span> Conclusion & Outlook</div>
+      <h2 class="slide-title">Key Takeaways & Future Directions</h2>
+      <p class="slide-subtitle">Summary of academic and practical contributions, and the roadmap ahead.</p>
+
+      <div class="bullets-container">
+        <div class="bullet-item" data-bullet="1">
+          <span class="bullet-icon">✅</span>
+          <div class="bullet-content">
+            <strong>Dual-Attention Efficacy Proven:</strong> CBAM establishes a new benchmark for foliar disease classification by jointly optimizing spectral channel importance and lesion spatial localization.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="2">
+          <span class="bullet-icon">✅</span>
+          <div class="bullet-content">
+            <strong>Production-Grade Reliability:</strong> Multi-tier validation shields prevent out-of-distribution failure, creating a trustworthy, explainable clinical agronomy tool.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="3">
+          <span class="bullet-icon">📱</span>
+          <div class="bullet-content">
+            <strong>Roadmap 1 — Edge INT8 / ONNX Quantization:</strong> Exporting the trained CBAM network to 8-bit quantized ONNX Runtime for offline, sub-200MB execution on agricultural smartphones.
+          </div>
+        </div>
+        <div class="bullet-item" data-bullet="4">
+          <span class="bullet-icon">🛸</span>
+          <div class="bullet-content">
+            <strong>Roadmap 2 — Drone Payload Aerial Scouting:</strong> Integrating the attention engine into low-altitude multispectral drone cameras for automated, hectare-scale orchard monitoring.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Deck Footer Controls -->
+  <footer class="deck-footer">
+    <div class="deck-controls-left">
+      <button type="button" class="btn-deck" onclick="prevStep()" title="Previous Bullet or Slide (Shortcut: Left Arrow)">
+        <span>◀</span> Previous
+      </button>
+      <button type="button" class="btn-deck primary" onclick="nextStep()" title="Next Bullet or Slide (Shortcut: Space or Right Arrow)">
+        Next Bullet / Slide <span>▶</span>
+      </button>
+      <button type="button" class="btn-deck" id="btn-reveal-all" onclick="toggleRevealAll()" title="Reveal all bullets on current slide (Shortcut: R)">
+        <span>👁️</span> Reveal All
+      </button>
+      <button type="button" class="btn-deck" id="btn-autoplay" onclick="toggleAutoplay()" title="Toggle auto-play timer (Shortcut: A)">
+        <span>▶</span> Auto-Play
+      </button>
+    </div>
+
+    <div class="deck-controls-right">
+      <div class="key-shortcuts-hint">
+        <span>Controls:</span>
+        <span class="kbd-key">Space / →</span> Next
+        <span class="kbd-key">←</span> Prev
+        <span class="kbd-key">F</span> Fullscreen
+        <span class="kbd-key">O</span> Overview
+      </div>
+    </div>
+  </footer>
+
+  <!-- Slide Overview Modal -->
+  <div id="overview-modal" onclick="closeOverview(event)">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <h2 style="font-size:1.8rem;color:#ffffff;">Slide Overview Deck</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;">Click any slide to jump immediately (or press Esc to close)</p>
+    </div>
+    <div class="overview-grid" id="overview-grid">
+      <!-- Injected dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- Audio elements for subtle presentation interaction feedback -->
+  <script>
+    /* ============================================================
+       DECK STATE & INTERACTIVE CONTROLLER
+       ============================================================ */
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const totalSlides = slides.length;
+    let currentSlideIndex = 0;
+    let currentBulletIndex = 0;
+    let autoplayInterval = null;
+    let isAutoplayActive = false;
+
+    // Web Audio API for subtle slide transition sounds (optional & synthetic)
+    let audioCtx = null;
+    function playBeep(freq = 440, type = 'sine', duration = 0.05) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // Initialize Deck
+    function initDeck() {
+      buildOverviewGrid();
+      goToSlide(0, false);
+    }
+
+    // Update Progress & Indicators
+    function updateIndicators() {
+      const currentSlide = slides[currentSlideIndex];
+      const bullets = Array.from(currentSlide.querySelectorAll('.bullet-item'));
+      
+      // Slide indicator
+      document.getElementById('slide-indicator').textContent = `Slide ${currentSlideIndex + 1} / ${totalSlides}`;
+      
+      // Bullet indicator
+      const totalBullets = bullets.length;
+      document.getElementById('bullet-indicator').textContent = totalBullets > 0 
+        ? `Bullet ${currentBulletIndex} / ${totalBullets}`
+        : `Ready`;
+      
+      // Top progress bar
+      const progressPct = ((currentSlideIndex + (totalBullets ? currentBulletIndex / totalBullets : 0)) / totalSlides) * 100;
+      document.getElementById('progress-bar').style.width = `${Math.min(100, Math.max(0, progressPct))}%`;
+    }
+
+    // Go to Specific Slide
+    function goToSlide(index, animateBullets = true) {
+      if (index < 0 || index >= totalSlides) return;
+
+      slides.forEach((s, idx) => {
+        s.classList.remove('active', 'prev');
+        if (idx < index) s.classList.add('prev');
+        else if (idx === index) s.classList.add('active');
+      });
+
+      currentSlideIndex = index;
+      currentBulletIndex = 0;
+
+      // Reset bullets for this slide
+      const currentSlide = slides[currentSlideIndex];
+      const bullets = Array.from(currentSlide.querySelectorAll('.bullet-item'));
+      bullets.forEach(b => {
+        b.classList.remove('revealed', 'active-focus');
+      });
+
+      // Highlight in overview grid
+      document.querySelectorAll('.overview-card').forEach((c, idx) => {
+        c.classList.toggle('current', idx === currentSlideIndex);
+      });
+
+      playBeep(320, 'triangle', 0.08);
+      updateIndicators();
+    }
+
+    // Step Forward (Next Bullet or Next Slide)
+    function nextStep() {
+      const currentSlide = slides[currentSlideIndex];
+      const bullets = Array.from(currentSlide.querySelectorAll('.bullet-item'));
+
+      if (currentBulletIndex < bullets.length) {
+        // Reveal next bullet
+        bullets.forEach((b, idx) => {
+          b.classList.remove('active-focus');
+          if (idx <= currentBulletIndex) {
+            b.classList.add('revealed');
+          }
+        });
+        bullets[currentBulletIndex].classList.add('active-focus');
+        currentBulletIndex++;
+        playBeep(520 + currentBulletIndex * 40, 'sine', 0.06);
+        updateIndicators();
+      } else {
+        // Move to next slide
+        if (currentSlideIndex < totalSlides - 1) {
+          goToSlide(currentSlideIndex + 1);
+        } else {
+          // Reached end of deck
+          if (isAutoplayActive) toggleAutoplay();
+        }
+      }
+    }
+
+    // Step Backward (Previous Bullet or Previous Slide)
+    function prevStep() {
+      const currentSlide = slides[currentSlideIndex];
+      const bullets = Array.from(currentSlide.querySelectorAll('.bullet-item'));
+
+      if (currentBulletIndex > 1) {
+        // Un-reveal the last bullet
+        currentBulletIndex--;
+        bullets.forEach((b, idx) => {
+          b.classList.remove('active-focus');
+          if (idx >= currentBulletIndex) {
+            b.classList.remove('revealed');
+          }
+        });
+        bullets[currentBulletIndex - 1].classList.add('active-focus');
+        playBeep(420, 'sine', 0.05);
+        updateIndicators();
+      } else if (currentBulletIndex === 1) {
+        currentBulletIndex = 0;
+        bullets.forEach(b => b.classList.remove('revealed', 'active-focus'));
+        playBeep(380, 'sine', 0.05);
+        updateIndicators();
+      } else {
+        // Move to previous slide
+        if (currentSlideIndex > 0) {
+          goToSlide(currentSlideIndex - 1);
+          // Auto reveal all bullets on the previous slide so it doesn't show blank
+          const prevBullets = slides[currentSlideIndex].querySelectorAll('.bullet-item');
+          prevBullets.forEach(b => b.classList.add('revealed'));
+          currentBulletIndex = prevBullets.length;
+          updateIndicators();
+        }
+      }
+    }
+
+    // Toggle Reveal All Bullets on Current Slide
+    function toggleRevealAll() {
+      const currentSlide = slides[currentSlideIndex];
+      const bullets = Array.from(currentSlide.querySelectorAll('.bullet-item'));
+      const allRevealed = bullets.every(b => b.classList.contains('revealed'));
+
+      if (allRevealed) {
+        bullets.forEach(b => b.classList.remove('revealed', 'active-focus'));
+        currentBulletIndex = 0;
+      } else {
+        bullets.forEach(b => b.classList.add('revealed'));
+        if (bullets.length) bullets[bullets.length - 1].classList.add('active-focus');
+        currentBulletIndex = bullets.length;
+      }
+      playBeep(650, 'sine', 0.08);
+      updateIndicators();
+    }
+
+    // Autoplay Timer
+    function toggleAutoplay() {
+      isAutoplayActive = !isAutoplayActive;
+      const btn = document.getElementById('btn-autoplay');
+      if (isAutoplayActive) {
+        btn.innerHTML = '<span>⏸</span> Pause';
+        btn.classList.add('primary');
+        autoplayInterval = setInterval(nextStep, 3500);
+      } else {
+        btn.innerHTML = '<span>▶</span> Auto-Play';
+        btn.classList.remove('primary');
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+    }
+
+    // Fullscreen Toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Build Slide Overview Grid
+    function buildOverviewGrid() {
+      const grid = document.getElementById('overview-grid');
+      grid.innerHTML = '';
+      slides.forEach((s, idx) => {
+        const title = s.querySelector('.slide-title, .hero-main-title')?.innerText || `Slide ${idx + 1}`;
+        const card = document.createElement('div');
+        card.className = `overview-card ${idx === currentSlideIndex ? 'current' : ''}`;
+        card.innerHTML = `
+          <div class="overview-num">SLIDE ${String(idx + 1).padStart(2, '0')}</div>
+          <div class="overview-title">${title.replace(/<br>/g, ' ')}</div>
+        `;
+        card.onclick = () => {
+          goToSlide(idx);
+          closeOverview();
+        };
+        grid.appendChild(card);
+      });
+    }
+
+    function toggleOverview() {
+      const modal = document.getElementById('overview-modal');
+      modal.classList.toggle('active');
+    }
+
+    function closeOverview(e) {
+      if (e && e.target.closest('.overview-card')) return;
+      document.getElementById('overview-modal').classList.remove('active');
+    }
+
+    // Keyboard Shortcuts Navigation
+    window.addEventListener('keydown', (e) => {
+      // Don't intercept if an input is focused
+      if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return;
+
+      switch(e.key) {
+        case ' ':
+        case 'ArrowRight':
+        case 'PageDown':
+          e.preventDefault();
+          nextStep();
+          break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          e.preventDefault();
+          prevStep();
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'o':
+        case 'O':
+          e.preventDefault();
+          toggleOverview();
+          break;
+        case 'Escape':
+          document.getElementById('overview-modal').classList.remove('active');
+          break;
+        case 'r':
+        case 'R':
+          e.preventDefault();
+          toggleRevealAll();
+          break;
+        case 'a':
+        case 'A':
+          e.preventDefault();
+          toggleAutoplay();
+          break;
+        case 'Home':
+          e.preventDefault();
+          goToSlide(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          goToSlide(totalSlides - 1);
+          break;
+      }
+    });
+
+    // Touch / Swipe Navigation for Mobile / Tablets
+    let touchStartX = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffX = touchEndX - touchStartX;
+      if (diffX < -50) nextStep();
+      else if (diffX > 50) prevStep();
+    }, { passive: true });
+
+    // Click anywhere on slide to advance
+    document.getElementById('deck-stage').addEventListener('click', (e) => {
+      if (!e.target.closest('button') && !e.target.closest('a')) {
+        nextStep();
+      }
+    });
+
+    // Run on Load
+    window.addEventListener('DOMContentLoaded', initDeck);
+  </script>
+</body>
+</html>
