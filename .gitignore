@@ -80,5 +80,7 @@ desktop.ini
 
 # --- Presentation decks (kept local for presentation) -----------------------
 *.pptx
+*Presentation*
+*presentation*
 build_official_deck.py
 OPEN_PRESENTATION.bat
